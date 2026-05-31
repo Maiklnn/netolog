@@ -1,0 +1,43 @@
+---
+- name: Install Nginx on web servers
+  gather_facts: yes
+  hosts: webservers
+  vars:
+    ansible_ssh_user: user
+    ansible_ssh_private_key_file: /home/vagrant/.ssh/id_ed25519_cloud
+    ansible_ssh_common_args: '-o ProxyCommand="ssh -i /home/vagrant/.ssh/id_ed25519_cloud -W %h:%p user@46.21.244.227"'
+  become: yes
+
+  tasks:
+    - name: Update apt and install nginx
+      apt:
+        name: nginx
+        update_cache: yes
+        state: present
+
+    - name: Start and enable nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Create index.html for web-a (10.0.1.12)
+      copy:
+        dest: /var/www/html/index.html
+        content: "<h1>Nginx on web-a (10.0.1.12)</h1>"
+      when: inventory_hostname == "10.0.1.12"
+
+    - name: Create index.html for web-b (10.0.2.29)
+      copy:
+        dest: /var/www/html/index.html
+        content: "<h1>Nginx on web-b (10.0.2.29)</h1>"
+      when: inventory_hostname == "10.0.2.29"
+
+    - name: Verify nginx installation
+      command: nginx -v
+      register: nginx_version
+      failed_when: false
+
+    - name: Show nginx version
+      debug:
+        msg: "{{ nginx_version.stderr }}"

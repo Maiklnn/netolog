@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    container_name: gitlab
+    restart: always
+    hostname: '192.168.56.10'            # IP вашей ВМ
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://192.168.56.10:8080'   # Доступ по IP
+        nginx['listen_port'] = 80
+        gitlab_rails['gitlab_shell_ssh_port'] = 2222
+    ports:
+      - "8080:80"      # Веб-интерфейс на 8080
+      - "2222:22"      # SSH на 2222
+    volumes:
+      - ./config:/etc/gitlab
+      - ./logs:/var/log/gitlab
+      - ./data:/var/opt/gitlab
+

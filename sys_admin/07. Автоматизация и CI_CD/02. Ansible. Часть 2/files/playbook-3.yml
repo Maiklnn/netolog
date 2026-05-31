@@ -1,0 +1,15 @@
+---
+- name: Change MOTD using variable
+  hosts: all
+  become: yes
+  vars:
+    motd_message: "Welcome to Ansible-managed system!\nAll actions are logged."
+
+  tasks:
+    - name: Set custom MOTD
+      copy:
+        content: "{{ motd_message }}\n"
+        dest: /etc/motd
+        owner: root
+        group: root
+        mode: '0644'

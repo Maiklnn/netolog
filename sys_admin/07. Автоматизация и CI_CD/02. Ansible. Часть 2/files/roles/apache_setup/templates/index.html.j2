@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Информация о сервере</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            color: #333;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+        }
+        .info-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .info-item {
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 4px solid #667eea;
+            background: #fff;
+        }
+        .info-label {
+            font-weight: bold;
+            color: #667eea;
+        }
+        .server-name {
+            font-size: 1.2em;
+            color: #764ba2;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Информация о сервере</h1>
+        <div class="info-card">
+            <div class="info-item">
+                <span class="info-label">🖥️ Имя хоста:</span> {{ ansible_hostname }}
+            </div>
+            <div class="info-item">
+                <span class="info-label">💻 Операционная система:</span> {{ ansible_distribution }} {{ ansible_distribution_version }}
+            </div>
+            <div class="info-item">
+                <span class="info-label">🧠 CPU:</span> {{ ansible_processor[1] if ansible_processor|length > 1 else ansible_processor[0] }}
+            </div>
+            <div class="info-item">
+                <span class="info-label">🔢 Количество ядер CPU:</span> {{ ansible_processor_cores }}
+            </div>
+            <div class="info-item">
+                <span class="info-label">💾 RAM (всего):</span> {{ (ansible_memtotal_mb / 1024) | round(1) }} GB
+            </div>
+            <div class="info-item">
+                <span class="info-label">💾 RAM (свободно):</span> {{ (ansible_memfree_mb / 1024) | round(1) }} GB
+            </div>
+            <div class="info-item">
+                <span class="info-label">💽 Первый HDD (размер):</span>
+                {% set first_disk = ansible_devices | select('match', '^[sv]d[a-z]$') | list | first %}
+                {% if first_disk %}
+                    {{ (ansible_devices[first_disk].size | replace('GB', '') | float) | round(1) }} GB
+                {% else %}
+                    Не определен
+                {% endif %}
+            </div>
+            <div class="info-item">
+                <span class="info-label">🌐 IP-адрес:</span> {{ ansible_default_ipv4.address }}
+            </div>
+            <div class="info-item">
+                <span class="info-label">🌐 MAC-адрес:</span> {{ ansible_default_ipv4.macaddress }}
+            </div>
+        </div>
+        <div class="server-name">
+            🚀 Веб-сервер Apache • {{ ansible_date_time.date }}
+        </div>
+    </div>
+</body>
+</html>

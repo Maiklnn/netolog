@@ -1,0 +1,59 @@
+---
+- name: Установка Apache
+  apt:
+    name: "{{ apache_package }}"
+    state: present
+    update_cache: yes
+  notify: restart apache
+
+- name: Создание директории для веб-сайта
+  file:
+    path: "{{ document_root }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+  notify: restart apache
+
+- name: Копирование файла index.html из шаблона
+  template:
+    src: index.html.j2
+    dest: "{{ document_root }}/index.html"
+    owner: www-data
+    group: www-data
+    mode: '0644'
+  notify: restart apache
+
+- name: Проверка и открытие порта 80 в UFW (если используется)
+  ufw:
+    rule: allow
+    port: '80'
+    proto: tcp
+  when: ansible_facts.ufw.active == True
+  ignore_errors: yes
+
+- name: Запуск Apache и добавление в автозагрузку
+  service:
+    name: "{{ apache_service }}"
+    state: started
+    enabled: yes
+
+- name: Ожидание запуска веб-сервера
+  wait_for:
+    port: 80
+    timeout: 30
+    delay: 5
+
+- name: Проверка доступности веб-сайта
+  uri:
+    url: "http://{{ ansible_default_ipv4.address }}"
+    return_content: yes
+    status_code: 200
+  register: webpage
+  until: webpage.status == 200
+  retries: 5
+  delay: 3
+
+- name: Вывод успешного результата проверки
+  debug:
+    msg: "✅ Веб-сайт доступен! HTTP статус: {{ webpage.status }}"

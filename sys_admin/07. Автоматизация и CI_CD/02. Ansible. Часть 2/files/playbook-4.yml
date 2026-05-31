@@ -1,0 +1,24 @@
+---
+- name: Change MOTD with IP, hostname and greeting
+  hosts: all
+  become: yes
+  vars:
+    good_day_message: "Have a great day, System Administrator!"
+
+  tasks:
+    - name: Get hostname and IP address facts
+      setup:
+        filter:
+          - "ansible_hostname"
+          - "ansible_default_ipv4"
+
+    - name: Set custom MOTD
+      copy:
+        content: |
+          Welcome to {{ ansible_hostname }}
+          IP address: {{ ansible_default_ipv4.address }}
+          {{ good_day_message }}
+        dest: /etc/motd
+        owner: root
+        group: root
+        mode: '0644'

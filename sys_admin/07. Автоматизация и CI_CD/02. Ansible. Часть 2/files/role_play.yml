@@ -1,0 +1,8 @@
+---
+- name: Установка и настройка веб-сервера Apache
+  hosts: my
+  become: yes
+  gather_facts: yes
+
+  roles:
+    - apache_setup
