@@ -91,6 +91,6 @@ get_shop_list_by_dishes(['Запеченный картофель', 'Омлет'
  **Ответ**
 \files\task3\task3.py
 
-[task3.py](files\task3\task3.py)
+[task3.py](files/task3/task3.py)
 -----------------------------------------------------------------------------------
 
