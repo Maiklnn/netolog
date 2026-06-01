@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="1882fd7d-2e13-4091-be1f-f55b4bef0abf" name="Default Changelist" comment="" />
+    <list default="true" id="1882fd7d-2e13-4091-be1f-f55b4bef0abf" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -9,6 +11,9 @@
   </component>
   <component name="ComposerSettings">
     <execution />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="3EPyfpElFemFCLAz6SdDOsQMsim" />
   <component name="ProjectViewState">
@@ -23,21 +28,22 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/sys_admin/10. Реляционные базы данных и администрирование баз данных" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/ML/03_OOP_API/04_Открытие_и_чтение_файла_запись_ в_файл/files" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Документы\Manual\Нитология\ML\03_OOP_API" />
+      <recent name="D:\Документы\Manual\Нитология\sys_admin\08. Отказоустойчивость" />
+      <recent name="D:\Документы\Manual\Нитология\ML" />
+    </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Документы\Manual\Нитология\ML\03_OOP_API\04_Открытие_и_чтение_файла_запись_ в_файл\files" />
+      <recent name="D:\Документы\Manual\Нитология\ML\04_Открытие_и_чтение_файла_запись_ в_файл" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\10. Реляционные базы данных и администрирование баз данных" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\09. Системы хранения и передачи данных" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\08. Отказоустойчивость\02. Кластеризация и балансировка нагрузки" />
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\07. Автоматизация и CI_CD\05. GitLab" />
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\07. Автоматизация и CI_CD\04. Подъем инфраструктуры в облаке" />
-    </key>
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\08. Отказоустойчивость" />
-      <recent name="D:\Документы\Manual\Нитология\ML" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -48,11 +54,23 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1780094604512</updated>
-      <workItem from="1780094605542" duration="8029000" />
+      <workItem from="1780094605542" duration="8937000" />
+      <workItem from="1780262692712" duration="1780000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
