@@ -20,15 +20,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="1882fd7d-2e13-4091-be1f-f55b4bef0abf" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ML/03_OOP_API/04_Открытие_и_чтение_файла_запись_ в_файл/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ML/03_OOP_API/04_Открытие_и_чтение_файла_запись_ в_файл/files/recipes.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ML/03_OOP_API/04_Открытие_и_чтение_файла_запись_ в_файл/files/task1.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ML/03_OOP_API/04_Открытие_и_чтение_файла_запись_ в_файл/files/task2.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ML/03_OOP_API/04_Открытие_и_чтение_файла_запись_ в_файл/files/task3/1.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ML/03_OOP_API/04_Открытие_и_чтение_файла_запись_ в_файл/files/task3/2.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ML/03_OOP_API/04_Открытие_и_чтение_файла_запись_ в_файл/files/task3/result.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ML/03_OOP_API/04_Открытие_и_чтение_файла_запись_ в_файл/files/task3/task3.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -82,7 +73,8 @@
       <option name="presentableId" value="Default" />
       <updated>1780094604512</updated>
       <workItem from="1780094605542" duration="8937000" />
-      <workItem from="1780262692712" duration="2114000" />
+      <workItem from="1780262692712" duration="4353000" />
+      <workItem from="1780884566753" duration="2398000" />
     </task>
     <servers />
   </component>
@@ -99,5 +91,6 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
 </project>

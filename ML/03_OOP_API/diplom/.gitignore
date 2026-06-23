@@ -1,0 +1,7 @@
+.env
+*.pyc
+pycache/
+backup_info.json
+venv/
+.idea/
+.vscode/
