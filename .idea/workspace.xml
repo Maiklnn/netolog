@@ -46,22 +46,22 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/ML/03_OOP_API/04_Открытие_и_чтение_файла_запись_ в_файл/files" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/sys_admin/10. Реляционные базы данных и администрирование баз данных/02. Введение в SQL/img" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Документы\Manual\Нитология\sys_admin\10. Реляционные базы данных и администрирование баз данных\02. Введение в SQL\img" />
+      <recent name="D:\Документы\Manual\Нитология\sys_admin\10. Реляционные базы данных и администрирование баз данных" />
+      <recent name="D:\Документы\Manual\Нитология\ML\03_OOP_API\diplom" />
+      <recent name="D:\Документы\Manual\Нитология\ML\03_OOP_API\04_Открытие_и_чтение_файла_запись_ в_файл\files" />
+      <recent name="D:\Документы\Manual\Нитология\ML\04_Открытие_и_чтение_файла_запись_ в_файл" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\Документы\Manual\Нитология\ML\03_OOP_API" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\08. Отказоустойчивость" />
       <recent name="D:\Документы\Manual\Нитология\ML" />
-    </key>
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\Документы\Manual\Нитология\ML\03_OOP_API\04_Открытие_и_чтение_файла_запись_ в_файл\files" />
-      <recent name="D:\Документы\Manual\Нитология\ML\04_Открытие_и_чтение_файла_запись_ в_файл" />
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\10. Реляционные базы данных и администрирование баз данных" />
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\09. Системы хранения и передачи данных" />
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\08. Отказоустойчивость\02. Кластеризация и балансировка нагрузки" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -75,6 +75,7 @@
       <workItem from="1780094605542" duration="8937000" />
       <workItem from="1780262692712" duration="4353000" />
       <workItem from="1780884566753" duration="2398000" />
+      <workItem from="1782244357478" duration="6305000" />
     </task>
     <servers />
   </component>
