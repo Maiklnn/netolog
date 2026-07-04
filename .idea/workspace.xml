@@ -21,7 +21,6 @@
   <component name="ChangeListManager">
     <list default="true" id="1882fd7d-2e13-4091-be1f-f55b4bef0abf" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sys_admin/10. Реляционные базы данных и администрирование баз данных/03. SQL. Часть 1/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/sys_admin/10. Реляционные базы данных и администрирование баз данных/03. Операции с данными в SQL/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,7 +78,7 @@
       <workItem from="1782244357478" duration="9214000" />
       <workItem from="1783017713340" duration="7298000" />
       <workItem from="1783088157175" duration="6395000" />
-      <workItem from="1783196532500" duration="1258000" />
+      <workItem from="1783196532500" duration="2588000" />
     </task>
     <servers />
   </component>
