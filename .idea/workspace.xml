@@ -21,6 +21,8 @@
   <component name="ChangeListManager">
     <list default="true" id="1882fd7d-2e13-4091-be1f-f55b4bef0abf" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sys_admin/09. Системы хранения и передачи данных/03. ELK/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/sys_admin/09. Системы хранения и передачи данных/03. ELK/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sys_admin/09. Системы хранения и передачи данных/03. ELK/files/docker" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,22 +48,23 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/sys_admin/10. Реляционные базы данных и администрирование баз данных" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/sys_admin/09. Системы хранения и передачи данных/03. ELK/files" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="D:\Документы\Manual\Нитология\ML\03_OOP_API" />
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\08. Отказоустойчивость" />
-      <recent name="D:\Документы\Manual\Нитология\ML" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Документы\Manual\Нитология\sys_admin\09. Системы хранения и передачи данных\03. ELK\files" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\10. Реляционные базы данных и администрирование баз данных" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\09. Системы хранения и передачи данных\03. ELK" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\10. Реляционные базы данных и администрирование баз данных\02. Введение в SQL\img" />
       <recent name="D:\Документы\Manual\Нитология\ML\03_OOP_API\diplom" />
-      <recent name="D:\Документы\Manual\Нитология\ML\03_OOP_API\04_Открытие_и_чтение_файла_запись_ в_файл\files" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Документы\Manual\Нитология\sys_admin\09. Системы хранения и передачи данных\03. ELK\img" />
+      <recent name="D:\Документы\Manual\Нитология\ML\03_OOP_API" />
+      <recent name="D:\Документы\Manual\Нитология\sys_admin\08. Отказоустойчивость" />
+      <recent name="D:\Документы\Manual\Нитология\ML" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -78,7 +81,9 @@
       <workItem from="1782244357478" duration="9214000" />
       <workItem from="1783017713340" duration="7298000" />
       <workItem from="1783088157175" duration="6395000" />
-      <workItem from="1783196532500" duration="2588000" />
+      <workItem from="1783196532500" duration="3864000" />
+      <workItem from="1783261435304" duration="2441000" />
+      <workItem from="1783502398524" duration="968000" />
     </task>
     <servers />
   </component>
@@ -106,9 +111,10 @@
       <screen x="-1920" y="0" width="1776" height="1080" />
     </state>
     <state x="-1456" y="185" key="#SSH_Configurations/1920.0.1920.1040/0.0.1920.1040/-1920.0.1776.1080@-1920.0.1776.1080" timestamp="1783027004762" />
-    <state x="707" y="322" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1783020821445">
+    <state x="707" y="322" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1783634250912">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="707" y="322" key="#com.intellij.fileTypes.FileTypeChooser/1920.0.1920.1040/0.0.1920.1040/-1920.0.1776.1080@0.0.1920.1040" timestamp="1783020821445" />
+    <state x="707" y="322" key="#com.intellij.fileTypes.FileTypeChooser/1920.0.1920.1040/0.0.1920.1040/-1920.0.1920.1040@0.0.1920.1040" timestamp="1783634250912" />
   </component>
 </project>
