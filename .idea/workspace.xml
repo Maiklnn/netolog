@@ -21,8 +21,6 @@
   <component name="ChangeListManager">
     <list default="true" id="1882fd7d-2e13-4091-be1f-f55b4bef0abf" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sys_admin/09. Системы хранения и передачи данных/03. ELK/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/sys_admin/09. Системы хранения и передачи данных/03. ELK/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sys_admin/09. Системы хранения и передачи данных/03. ELK/files/docker" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,17 +46,17 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/sys_admin/09. Системы хранения и передачи данных/03. ELK/files" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/sys_admin/10. Реляционные базы данных и администрирование баз данных/06. Репликация и масштабирование. Часть 1" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\09. Системы хранения и передачи данных\03. ELK\files" />
+      <recent name="D:\Документы\Manual\Нитология\sys_admin\10. Реляционные базы данных и администрирование баз данных\06. Репликация и масштабирование. Часть 1" />
+      <recent name="D:\Документы\Manual\Нитология\sys_admin\10. Реляционные базы данных и администрирование баз данных\06. Репликация и масштабирование. Часть 1\img" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\10. Реляционные базы данных и администрирование баз данных" />
+      <recent name="D:\Документы\Manual\Нитология\sys_admin\09. Системы хранения и передачи данных\03. ELK\files" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\09. Системы хранения и передачи данных\03. ELK" />
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\10. Реляционные базы данных и администрирование баз данных\02. Введение в SQL\img" />
-      <recent name="D:\Документы\Manual\Нитология\ML\03_OOP_API\diplom" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\Документы\Manual\Нитология\sys_admin\09. Системы хранения и передачи данных\03. ELK\img" />
@@ -83,7 +81,7 @@
       <workItem from="1783088157175" duration="6395000" />
       <workItem from="1783196532500" duration="3864000" />
       <workItem from="1783261435304" duration="2441000" />
-      <workItem from="1783502398524" duration="968000" />
+      <workItem from="1783502398524" duration="3954000" />
     </task>
     <servers />
   </component>
