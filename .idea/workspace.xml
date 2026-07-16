@@ -46,7 +46,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/sys_admin/10. Реляционные базы данных и администрирование баз данных" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/sys_admin/06. Виртуализация/04. Docker. Часть 2 docker-compouse" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
@@ -58,11 +58,11 @@
       <recent name="D:\Документы\Manual\Нитология\ML" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Документы\Manual\Нитология\sys_admin\06. Виртуализация\04. Docker. Часть 2 docker-compouse" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\10. Реляционные базы данных и администрирование баз данных" />
+      <recent name="D:\Документы\Manual\Нитология\sys_admin\10. Реляционные базы данных и администрирование баз данных\07. Репликация и масштабирование. Часть 2\img" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\10. Реляционные базы данных и администрирование баз данных\06. Репликация и масштабирование. Часть 1" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\10. Реляционные базы данных и администрирование баз данных\06. Репликация и масштабирование. Часть 1\img" />
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\09. Системы хранения и передачи данных\03. ELK\files" />
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\09. Системы хранения и передачи данных\03. ELK" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -82,7 +82,8 @@
       <workItem from="1783196532500" duration="3864000" />
       <workItem from="1783261435304" duration="2441000" />
       <workItem from="1783502398524" duration="3954000" />
-      <workItem from="1783680992594" duration="1611000" />
+      <workItem from="1783680992594" duration="10357000" />
+      <workItem from="1784178114253" duration="2279000" />
     </task>
     <servers />
   </component>
