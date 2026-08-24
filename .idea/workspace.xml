@@ -19,9 +19,7 @@
     <select />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1882fd7d-2e13-4091-be1f-f55b4bef0abf" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="1882fd7d-2e13-4091-be1f-f55b4bef0abf" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -46,23 +44,23 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/sys_admin/06. Виртуализация/04. Docker. Часть 2 docker-compouse" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/sys_admin/11. Информационная безопасность/1. Уязвимости и атаки на информационные системы" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Документы\Manual\Нитология\sys_admin\11. Информационная безопасность\1. Уязвимости и атаки на информационные системы" />
+      <recent name="D:\Документы\Manual\Нитология\sys_admin\06. Виртуализация\04. Docker. Часть 2 docker-compouse" />
+      <recent name="D:\Документы\Manual\Нитология\sys_admin\10. Реляционные базы данных и администрирование баз данных" />
+      <recent name="D:\Документы\Manual\Нитология\sys_admin\10. Реляционные базы данных и администрирование баз данных\07. Репликация и масштабирование. Часть 2\img" />
+      <recent name="D:\Документы\Manual\Нитология\sys_admin\10. Реляционные базы данных и администрирование баз данных\06. Репликация и масштабирование. Часть 1" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\Документы\Manual\Нитология\sys_admin\09. Системы хранения и передачи данных\03. ELK\img" />
       <recent name="D:\Документы\Manual\Нитология\ML\03_OOP_API" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\08. Отказоустойчивость" />
       <recent name="D:\Документы\Manual\Нитология\ML" />
-    </key>
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\06. Виртуализация\04. Docker. Часть 2 docker-compouse" />
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\10. Реляционные базы данных и администрирование баз данных" />
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\10. Реляционные базы данных и администрирование баз данных\07. Репликация и масштабирование. Часть 2\img" />
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\10. Реляционные базы данных и администрирование баз данных\06. Репликация и масштабирование. Часть 1" />
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\10. Реляционные базы данных и администрирование баз данных\06. Репликация и масштабирование. Часть 1\img" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
