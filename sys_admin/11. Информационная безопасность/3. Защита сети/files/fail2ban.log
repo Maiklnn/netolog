@@ -1,0 +1,48 @@
+2026-08-26 15:06:14,191 fail2ban.server         [21776]: INFO    --------------------------------------------------
+2026-08-26 15:06:14,191 fail2ban.server         [21776]: INFO    Starting Fail2ban v1.1.0
+2026-08-26 15:06:14,191 fail2ban.observer       [21776]: INFO    Observer start...
+2026-08-26 15:06:14,192 fail2ban.database       [21776]: INFO    Connected to fail2ban persistent database '/var/lib/fail2ban/fail2ban.sqlite3'
+2026-08-26 15:06:14,192 fail2ban.database       [21776]: WARNING New database created. Version '4'
+2026-08-26 15:13:50,731 fail2ban.server         [21776]: INFO    Shutdown in progress...
+2026-08-26 15:13:50,732 fail2ban.observer       [21776]: INFO    Observer stop ... try to end queue 5 seconds
+2026-08-26 15:13:50,752 fail2ban.observer       [21776]: INFO    Observer stopped, 0 events remaining.
+2026-08-26 15:13:50,793 fail2ban.server         [21776]: INFO    Stopping all jails
+2026-08-26 15:13:50,793 fail2ban.database       [21776]: INFO    Connection to database closed.
+2026-08-26 15:13:50,793 fail2ban.server         [21776]: INFO    Exiting Fail2ban
+2026-08-26 15:13:50,858 fail2ban.server         [22186]: INFO    --------------------------------------------------
+2026-08-26 15:13:50,858 fail2ban.server         [22186]: INFO    Starting Fail2ban v1.1.0
+2026-08-26 15:13:50,858 fail2ban.observer       [22186]: INFO    Observer start...
+2026-08-26 15:13:50,861 fail2ban.database       [22186]: INFO    Connected to fail2ban persistent database '/var/lib/fail2ban/fail2ban.sqlite3'
+2026-08-26 15:13:50,861 fail2ban.jail           [22186]: INFO    Creating new jail 'sshd'
+2026-08-26 15:13:50,865 fail2ban.jail           [22186]: INFO    Jail 'sshd' uses systemd {}
+2026-08-26 15:13:50,865 fail2ban.jail           [22186]: INFO    Initiated 'systemd' backend
+2026-08-26 15:13:50,865 fail2ban.filter         [22186]: INFO      maxLines: 1
+2026-08-26 15:13:50,873 fail2ban.filtersystemd  [22186]: INFO    [sshd] Added journal match for: '_SYSTEMD_UNIT=sshd.service + _COMM=sshd + _COMM=sshd-session'
+2026-08-26 15:13:50,873 fail2ban.filter         [22186]: INFO      maxRetry: 3
+2026-08-26 15:13:50,873 fail2ban.filter         [22186]: INFO      findtime: 600
+2026-08-26 15:13:50,873 fail2ban.actions        [22186]: INFO      banTime: 600
+2026-08-26 15:13:50,873 fail2ban.filter         [22186]: INFO      encoding: UTF-8
+2026-08-26 15:13:50,874 fail2ban.jail           [22186]: INFO    Jail 'sshd' started
+2026-08-26 15:13:50,878 fail2ban.filtersystemd  [22186]: INFO    [sshd] Jail is in operation now (process new journal entries)
+2026-08-26 15:16:51,446 fail2ban.filter         [22186]: INFO    [sshd] Found 192.168.1.89 - 2026-08-26 15:16:51
+2026-08-26 15:16:51,447 fail2ban.filter         [22186]: INFO    [sshd] Found 192.168.1.89 - 2026-08-26 15:16:51
+2026-08-26 15:16:51,448 fail2ban.filter         [22186]: INFO    [sshd] Found 192.168.1.89 - 2026-08-26 15:16:51
+2026-08-26 15:16:51,449 fail2ban.filter         [22186]: INFO    [sshd] Found 192.168.1.89 - 2026-08-26 15:16:51
+2026-08-26 15:16:51,558 fail2ban.actions        [22186]: NOTICE  [sshd] Ban 192.168.1.89
+2026-08-26 15:16:52,836 fail2ban.filter         [22186]: INFO    [sshd] Found 192.168.1.89 - 2026-08-26 15:16:52
+2026-08-26 15:26:51,153 fail2ban.actions        [22186]: NOTICE  [sshd] Unban 192.168.1.89
+2026-08-26 15:40:55,685 fail2ban.filter         [22186]: INFO    [sshd] Found 192.168.1.89 - 2026-08-26 15:40:55
+2026-08-26 15:40:56,182 fail2ban.filter         [22186]: INFO    [sshd] Found 192.168.1.89 - 2026-08-26 15:40:55
+2026-08-26 15:40:56,183 fail2ban.filter         [22186]: INFO    [sshd] Found 192.168.1.89 - 2026-08-26 15:40:55
+2026-08-26 15:40:56,183 fail2ban.filter         [22186]: INFO    [sshd] Found 192.168.1.89 - 2026-08-26 15:40:55
+2026-08-26 15:40:56,184 fail2ban.filter         [22186]: INFO    [sshd] Found 192.168.1.89 - 2026-08-26 15:40:55
+2026-08-26 15:40:56,197 fail2ban.actions        [22186]: NOTICE  [sshd] Ban 192.168.1.89
+2026-08-26 15:40:58,397 fail2ban.filter         [22186]: INFO    [sshd] Found 192.168.1.89 - 2026-08-26 15:40:58
+2026-08-26 15:40:58,397 fail2ban.filter         [22186]: INFO    [sshd] Found 192.168.1.89 - 2026-08-26 15:40:58
+2026-08-26 15:40:58,398 fail2ban.filter         [22186]: INFO    [sshd] Found 192.168.1.89 - 2026-08-26 15:40:58
+2026-08-26 15:40:58,398 fail2ban.filter         [22186]: INFO    [sshd] Found 192.168.1.89 - 2026-08-26 15:40:58
+2026-08-26 15:41:02,681 fail2ban.filter         [22186]: INFO    [sshd] Found 192.168.1.89 - 2026-08-26 15:41:02
+2026-08-26 15:41:02,682 fail2ban.filter         [22186]: INFO    [sshd] Found 192.168.1.89 - 2026-08-26 15:41:02
+2026-08-26 15:41:02,682 fail2ban.filter         [22186]: INFO    [sshd] Found 192.168.1.89 - 2026-08-26 15:41:02
+2026-08-26 15:41:02,773 fail2ban.actions        [22186]: NOTICE  [sshd] 192.168.1.89 already banned
+2026-08-26 15:51:02,634 fail2ban.actions        [22186]: NOTICE  [sshd] Unban 192.168.1.89

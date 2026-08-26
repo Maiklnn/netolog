@@ -9,6 +9,13 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="calls">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="daimax-digital.ru">
         <serverdata>
           <mappings>
@@ -44,7 +51,7 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="eurotim.ru">
+      <paths name="eurotim_new">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
@@ -72,7 +79,21 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="kamtentnn">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="magicprodo.com">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="mos-bg">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
@@ -177,6 +198,27 @@
           </mappings>
         </serverdata>
       </paths>
+      <paths name="trast">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="trast-inter">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="ul-73">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="ul-73.ru">
         <serverdata>
           <mappings>
@@ -192,13 +234,6 @@
         </serverdata>
       </paths>
       <paths name="unikor-saits">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="vagrant">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
@@ -227,6 +262,13 @@
         </serverdata>
       </paths>
       <paths name="белая медведица">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="делоспорт.рф">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
