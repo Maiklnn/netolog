@@ -16,14 +16,14 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="daimax-digital.ru">
+      <paths name="calls-test">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="design.netsense.ru">
+      <paths name="daimax-digital.ru">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
@@ -198,14 +198,14 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="trast">
+      <paths name="trast-inter">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="trast-inter">
+      <paths name="trust-interior.ru">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />
@@ -226,7 +226,14 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="unikor">
+      <paths name="unikor (1)">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="unikor-52.ru">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />

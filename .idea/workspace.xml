@@ -20,6 +20,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="038fd028-92f2-4fcd-ac68-b34b3ce777e1" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -43,26 +44,27 @@
     <property name="WebServerToolWindowFactoryState" value="true" />
     <property name="WebServerToolWindowPanel.toolwindow.highlight.mappings" value="true" />
     <property name="WebServerToolWindowPanel.toolwindow.highlight.symlinks" value="true" />
-    <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
+    <property name="WebServerToolWindowPanel.toolwindow.show.date" value="true" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/sys_admin/11. Информационная безопасность/3. Защита сети/files" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/ИИ-агенты/Архитектура и сборка ИИ агента/04. Сборка первого ИИ-агента/files" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\11. Информационная безопасность\3. Защита сети\files" />
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\11. Информационная безопасность\3. Защита сети" />
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\11. Информационная безопасность\1. Уязвимости и атаки на информационные системы" />
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\06. Виртуализация\04. Docker. Часть 2 docker-compouse" />
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\10. Реляционные базы данных и администрирование баз данных" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Документы\Manual\Нитология\sys_admin\12. Диплом\project" />
+      <recent name="D:\Документы\Manual\Нитология\sys_admin\07. Автоматизация и CI_CD\04. Подъем инфраструктуры в облаке\files\Вспомогательные файлы" />
+      <recent name="D:\Документы\Manual\Нитология\sys_admin\11. Информационная безопасность\12. Диплом\1. Подготовка к дипломной работе" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\09. Системы хранения и передачи данных\03. ELK\img" />
       <recent name="D:\Документы\Manual\Нитология\ML\03_OOP_API" />
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\08. Отказоустойчивость" />
-      <recent name="D:\Документы\Manual\Нитология\ML" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\Архитектура и сборка ИИ агента\04. Сборка первого ИИ-агента\files" />
+      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\Архитектура и сборка ИИ агента\04. Сборка первого ИИ-агента" />
+      <recent name="D:\Документы\Manual\Нитология\sys_admin\12. Диплом" />
+      <recent name="D:\Документы\Manual\Нитология\sys_admin\07. Автоматизация и CI_CD\02. Ansible. Часть 2" />
+      <recent name="D:\Документы\Manual\Нитология\sys_admin\07. Автоматизация и CI_CD\04. Подъем инфраструктуры в облаке\files" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -85,7 +87,14 @@
       <workItem from="1783680992594" duration="10357000" />
       <workItem from="1784178114253" duration="2279000" />
       <workItem from="1787679437294" duration="594000" />
-      <workItem from="1787721146825" duration="2627000" />
+      <workItem from="1787721146825" duration="4740000" />
+      <workItem from="1787839208925" duration="3017000" />
+      <workItem from="1787861869876" duration="900000" />
+      <workItem from="1787943301218" duration="7971000" />
+      <workItem from="1788036964029" duration="1191000" />
+      <workItem from="1788202572965" duration="19241000" />
+      <workItem from="1788284232427" duration="1309000" />
+      <workItem from="1788368759794" duration="10401000" />
     </task>
     <servers />
   </component>
@@ -105,20 +114,30 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="-2510" y="257" key="#Deployment" timestamp="1787759452478">
-      <screen x="-3440" y="0" width="3440" height="1400" />
+    <state x="-4841" y="191" key="#Deployment" timestamp="1788424666708">
+      <screen x="-5360" y="0" width="1920" height="1040" />
     </state>
     <state x="-2510" y="257" key="#Deployment/0.0.1920.1040/-3440.0.3440.1400/-5360.0.1920.1040@-3440.0.3440.1400" timestamp="1787759452478" />
+    <state x="-2510" y="257" key="#Deployment/0.0.1920.1040/-5360.0.1920.1040/-3440.0.3440.1400@-3440.0.3440.1400" timestamp="1787863313085" />
+    <state x="-4841" y="191" key="#Deployment/0.0.1920.1040/-5360.0.1920.1040/-3440.0.3440.1400@-5360.0.1920.1040" timestamp="1788424666708" />
+    <state x="519" y="191" key="#Deployment/0.0.1920.1040/-5360.0.1920.1040/-3440.0.3440.1400@0.0.1920.1040" timestamp="1787944451319" />
     <state x="-1440" y="198" key="#Deployment/1920.0.1920.1040/0.0.1920.1040/-1920.0.1776.1080@-1920.0.1776.1080" timestamp="1783027006334" />
-    <state x="-2541" y="240" key="#SSH_Configurations" timestamp="1787759450760">
-      <screen x="-3440" y="0" width="3440" height="1400" />
+    <state x="-4858" y="178" key="#SSH_Configurations" timestamp="1788424323341">
+      <screen x="-5360" y="0" width="1920" height="1040" />
     </state>
     <state x="-2541" y="240" key="#SSH_Configurations/0.0.1920.1040/-3440.0.3440.1400/-5360.0.1920.1040@-3440.0.3440.1400" timestamp="1787759450760" />
+    <state x="-2541" y="240" key="#SSH_Configurations/0.0.1920.1040/-5360.0.1920.1040/-3440.0.3440.1400@-3440.0.3440.1400" timestamp="1787863311027" />
+    <state x="-4858" y="178" key="#SSH_Configurations/0.0.1920.1040/-5360.0.1920.1040/-3440.0.3440.1400@-5360.0.1920.1040" timestamp="1788424323341" />
     <state x="-1456" y="185" key="#SSH_Configurations/1920.0.1920.1040/0.0.1920.1040/-1920.0.1776.1080@-1920.0.1776.1080" timestamp="1783027004762" />
-    <state x="707" y="322" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1783634250912">
+    <state x="707" y="322" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1788257406440">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
+    <state x="707" y="322" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1040/-5360.0.1920.1040/-3440.0.3440.1400@0.0.1920.1040" timestamp="1788257406440" />
     <state x="707" y="322" key="#com.intellij.fileTypes.FileTypeChooser/1920.0.1920.1040/0.0.1920.1040/-1920.0.1776.1080@0.0.1920.1040" timestamp="1783020821445" />
     <state x="707" y="322" key="#com.intellij.fileTypes.FileTypeChooser/1920.0.1920.1040/0.0.1920.1040/-1920.0.1920.1040@0.0.1920.1040" timestamp="1783634250912" />
+    <state x="769" y="387" key="webDeployment.PermissionsDialog" timestamp="1787946902594">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="769" y="387" key="webDeployment.PermissionsDialog/0.0.1920.1040/-5360.0.1920.1040/-3440.0.3440.1400@0.0.1920.1040" timestamp="1787946902594" />
   </component>
 </project>

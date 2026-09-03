@@ -1,0 +1,287 @@
+{
+  "name": "Классификация сообщений с LLM (Ollama → Google Sheets)",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "/* Три тестовых сообщения для проверки всех веток */\nreturn [\n  { json: { message: \"Здравствуйте! Подскажите, сколько стоит годовая подписка на ваш сервис?\" } },\n  { json: { message: \"Добрый день! Могу ли я проконсультироваться по поводу интеграции с нашей CRM-системой?\" } },\n  { json: { message: \"Спасибо за быструю доставку, всё работает отлично!\" } }\n];"
+      },
+      "id": "b0a536ad-8b8b-4176-a6cb-40492d1928a5",
+      "name": "Test Messages",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -784,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.2.2:11434/api/chat",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'glm-5.2:cloud', stream: false, format: 'json', messages: [ { role: 'system', content: 'You are a message classifier for a business. Analyze the incoming message and return a JSON object with exactly three fields: \"category\" (must be one of: \"price\", \"consultation\", \"other\"), \"summary\" (brief summary of the message in Russian), \"reply_draft\" (a draft reply in Russian, polite and professional). Return ONLY the JSON object, no markdown, no code fences, no additional text.' }, { role: 'user', content: $json.message } ] }) }}",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "eb6d4ca7-9852-4e37-8f95-9a13c31db503",
+      "name": "Ollama LLM Analysis",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -544,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "/* Парсим ответ Ollama: убираем markdown-обёртки и извлекаем поля */\nconst items = [];\nfor (const item of $input.all()) {\n  const rawContent = item.json.message?.content || '';\n  let cleanJson = rawContent.trim().replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```$/i, '');\n  let parsed;\n  try {\n    parsed = JSON.parse(cleanJson);\n  } catch (e) {\n    const match = rawContent.match(/\\{[\\s\\S]*\\}/);\n    if (match) { try { parsed = JSON.parse(match[0]); } catch (e2) { parsed = {}; } }\n    else { parsed = {}; }\n  }\n  const cat = String(parsed.category || 'other').toLowerCase().trim();\n  const category = ['price','consultation','other'].includes(cat) ? cat : 'other';\n  items.push({\n    json: {\n      message_text: $('Test Messages').item.json.message,\n      category: category,\n      summary: parsed.summary || '',\n      reply_draft: parsed.reply_draft || '',\n      date: new Date().toISOString(),\n      status: 'processed'\n    }\n  });\n}\nreturn items;"
+      },
+      "id": "8f0e6657-a313-4bfe-9726-0f3b819084d7",
+      "name": "Parse LLM Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -304,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "cond-price",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "price",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "cond-consultation",
+                    "leftValue": "={{ $json.category }}",
+                    "rightValue": "consultation",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b4a73efc-3d28-4567-86ce-cdb9d3b906f5",
+      "name": "Category Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -48,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "PASTE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "message_text",
+            "category",
+            "summary",
+            "reply_draft",
+            "date",
+            "status"
+          ],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "22418f4b-1b93-4b07-abd3-b94e74c30403",
+      "name": "Save to Sheets - Price",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "PASTE_SHEET_ID_HERE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [
+            "message_text",
+            "category",
+            "summary",
+            "reply_draft",
+            "date",
+            "status"
+          ],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "c0fb2f0f-1ce7-4c15-b00b-78eaa143a056",
+      "name": "Save to Sheets - Consultation",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [
+        224,
+        336
+      ]
+    },
+    {
+      "parameters": {
+        "path": "9a198f03-ae58-4ab4-a6f1-f80d1f20bbfa",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -992,
+        192
+      ],
+      "id": "1819274a-8df9-464f-839d-6d238a2107a2",
+      "name": "Webhook",
+      "webhookId": "9a198f03-ae58-4ab4-a6f1-f80d1f20bbfa"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Test Messages": {
+      "main": [
+        [
+          {
+            "node": "Ollama LLM Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama LLM Analysis": {
+      "main": [
+        [
+          {
+            "node": "Parse LLM Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse LLM Response": {
+      "main": [
+        [
+          {
+            "node": "Category Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Category Switch": {
+      "main": [
+        [
+          {
+            "node": "Save to Sheets - Price",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save to Sheets - Consultation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to Sheets - Price": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "fa0cc639-14b5-41a1-b77b-fc843b0710a0",
+  "meta": {
+    "instanceId": "0a64f680c1cbfbbf9cfd20db98f8e379329f996c0afbb57601c0b9b41f877851"
+  },
+  "nodeGroups": [],
+  "id": "BGz0lU0ebTyEC8D7",
+  "tags": []
+}
