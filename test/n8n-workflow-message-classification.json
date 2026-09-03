@@ -1,0 +1,180 @@
+{
+  "name": "Классификация сообщений (Webhook → Ollama → File)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "message-classification",
+        "responseMode": "onReceived",
+        "responseData": "Message received - processing started",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ],
+      "webhookId": "msg-classification-webhook"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "/* Подготовка запроса к Ollama API */\nconst inputData = $input.first().json;\nconst message = inputData.body?.message ?? inputData.message ?? inputData.query?.message ?? (typeof inputData.body === 'string' ? inputData.body : '');\n\nconst systemPrompt = 'You are a message classifier. Analyze the user message and return ONLY a valid JSON object (no markdown, no code fences) with exactly these fields:\\n- category: one of \"price\", \"consultation\", \"other\"\\n- summary: brief summary of the message in Russian\\n- reply_draft: a polite draft reply in Russian\\n\\nClassification rules:\\n- \"price\": the message asks about prices, cost, subscription fees, payment, tariffs\\n- \"consultation\": the message asks for advice, consultation, help, technical questions, integration\\n- \"other\": greetings, thanks, complaints, or anything else\\n\\nReturn JSON only.';\n\nconst requestBody = {\n  model: 'glm-5.2:cloud',\n  stream: false,\n  format: 'json',\n  messages: [\n    { role: 'system', content: systemPrompt },\n    { role: 'user', content: String(message) }\n  ]\n};\n\nreturn [{ json: { requestBody, originalMessage: String(message) } }];"
+      },
+      "id": "prepare-llm",
+      "name": "Prepare LLM Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.2.2:11434/api/chat",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.requestBody) }}",
+        "options": {}
+      },
+      "id": "ollama-llm",
+      "name": "Ollama LLM Analysis",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "/* Парсинг ответа LLM с обработкой markdown-обёрток */\nconst input = $input.first().json;\nconst rawContent = input.message?.content ?? input.content ?? '';\nconst originalMessage = $('Prepare LLM Request').first().json.originalMessage || '';\n\nlet text = String(rawContent).trim();\n\n// Убираем markdown code-fences если модель их добавила\ntext = text.replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```$/i, '').trim();\n\nlet parsed = {};\ntry {\n  parsed = JSON.parse(text);\n} catch (e) {\n  // Fallback: извлекаем JSON-объект из текста\n  const match = text.match(/\\{[\\s\\S]*\\}/);\n  if (match) {\n    try { parsed = JSON.parse(match[0]); } catch (e2) { parsed = {}; }\n  }\n}\n\n// Нормализуем категорию\nconst validCategories = ['price', 'consultation', 'other'];\nlet category = String(parsed.category || '').toLowerCase().trim();\nif (!validCategories.includes(category)) {\n  category = 'other';\n}\n\nreturn [{\n  json: {\n    message_text: originalMessage,\n    category: category,\n    summary: String(parsed.summary || ''),\n    reply_draft: String(parsed.reply_draft || parsed.reply || ''),\n    date: new Date().toISOString(),\n    status: 'processed'\n  }\n}];"
+      },
+      "id": "parse-llm",
+      "name": "Parse LLM Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.category }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "price",
+              "outputKey": 0
+            },
+            {
+              "value2": "consultation",
+              "outputKey": 1
+            }
+          ]
+        },
+        "fallbackOutput": 2
+      },
+      "id": "category-switch",
+      "name": "Category Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 2,
+      "position": [
+        880,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "command": "={{ `echo \"[${$json.date}] message=${$json.message_text} | summary=${$json.summary} | reply_draft=${$json.reply_draft} | status=${$json.status}\" >> /home/vagrant/${$json.category}.txt` }}"
+      },
+      "id": "save-to-file",
+      "name": "Save to File",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1120,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare LLM Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare LLM Request": {
+      "main": [
+        [
+          {
+            "node": "Ollama LLM Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama LLM Analysis": {
+      "main": [
+        [
+          {
+            "node": "Parse LLM Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse LLM Response": {
+      "main": [
+        [
+          {
+            "node": "Category Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Category Switch": {
+      "main": [
+        [
+          {
+            "node": "Save to File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save to File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Save to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

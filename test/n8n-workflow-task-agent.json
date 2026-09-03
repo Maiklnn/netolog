@@ -1,0 +1,185 @@
+{
+  "id": "c52f7bc2-811e-4da3-95ee-ab82b02e129d",
+  "name": "ИИ-агент: Telegram → LLM → Яндекс.Календарь",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "task-agent",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Telegram",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ],
+      "webhookId": "task-agent-webhook"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "/* Подготовка запроса к Ollama для извлечения задачи */\r\nconst inputData = $input.first().json;\r\nconst body = inputData.body || {};\r\nconst query = inputData.query || {};\r\n\r\n// Поддержка Telegram-формата и простого {message: \"...\"}\r\nlet message = '';\r\nif (typeof body === 'object' && body !== null) {\r\n  message = (body.message && body.message.text) || body.message || body.text || '';\r\n} else if (typeof body === 'string') {\r\n  message = body;\r\n}\r\nif (!message && query.message) {\r\n  message = query.message;\r\n}\r\nmessage = String(message).trim();\r\n\r\n// Текущая дата/время в UTC+3 (Москва) для разрешения относительных сроков\r\nconst now = new Date();\r\nconst tzOffset = 3; // Europe/Moscow = UTC+3\r\nconst localTime = new Date(now.getTime() + tzOffset * 3600000);\r\nconst currentDateStr = localTime.toISOString().replace('T', ' ').slice(0, 19);\r\n\r\nconst systemPrompt = [\r\n  'Ты — ИИ-агент-ассистент. Анализируй поручения пользователя и извлекай структурированные данные для создания задачи в календаре.',\r\n  '',\r\n  'Текущая дата и время (UTC+3, Europe/Moscow): ' + currentDateStr,\r\n  '',\r\n  'Из входящего сообщения извлеки следующие поля:',\r\n  '1. task_name — краткое и понятное название задачи (что нужно сделать)',\r\n  '2. deadline — срок выполнения в формате ISO 8601 (YYYY-MM-DDTHH:MM:SS), время в часовом поясе UTC+3',\r\n  '3. duration_minutes — предполагаемая длительность в минутах (по умолчанию 60)',\r\n  '4. description — краткое описание или контекст задачи',\r\n  '5. priority — приоритет: high, medium или low (по умолчанию medium)',\r\n  '',\r\n  'Правила определения срока:',\r\n  '- \"завтра утром\" → завтра 09:00',\r\n  '- \"завтра днем\" → завтра 13:00',\r\n  '- \"завтра вечером\" → завтра 18:00',\r\n  '- \"к пятнице\" → ближайшая пятница 18:00',\r\n  '- \"к пятнице до 15:00\" → ближайшая пятница 15:00',\r\n  '- \"до 15:00\" → сегодня 15:00 (если уже позже — завтра 15:00)',\r\n  '- \"через 3 дня\" → текущая дата + 3 дня 09:00',\r\n  '- \"на следующей неделе\" → понедельник следующей недели 09:00',\r\n  '- если срок не указан → завтра 09:00',\r\n  '',\r\n  'Верни ТОЛЬКО валидный JSON (без markdown, без кодовых блоков, без пояснений):',\r\n  '{\"task_name\":\"...\",\"deadline\":\"YYYY-MM-DDTHH:MM:SS\",\"duration_minutes\":60,\"description\":\"...\",\"priority\":\"medium\"}'\r\n].join('\\n');\r\n\r\nconst requestBody = {\r\n  model: 'glm-5.2:cloud',\r\n  stream: false,\r\n  format: 'json',\r\n  messages: [\r\n    { role: 'system', content: systemPrompt },\r\n    { role: 'user', content: message }\r\n  ]\r\n};\r\n\r\nreturn [{ json: { requestBody, originalMessage: message } }];"
+      },
+      "id": "prepare-llm",
+      "name": "Prepare LLM Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.2.2:11434/api/chat",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.requestBody) }}",
+        "options": {}
+      },
+      "id": "ollama-llm",
+      "name": "Ollama LLM Analysis",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "/* Парсинг ответа LLM и построение iCalendar-события */\r\nconst input = $input.first().json;\r\nconst rawContent = input.message?.content ?? input.content ?? '';\r\nconst originalMessage = $('Prepare LLM Request').first().json.originalMessage || '';\r\n\r\n// Парсим JSON из ответа LLM (с обработкой markdown-обёрток)\r\nlet text = String(rawContent).trim();\r\ntext = text.replace(/^```(?:json)?\\s*/i, '').replace(/\\s*```$/i, '').trim();\r\n\r\nlet parsed = {};\r\ntry {\r\n  parsed = JSON.parse(text);\r\n} catch (e) {\r\n  const match = text.match(/\\{[\\s\\S]*\\}/);\r\n  if (match) {\r\n    try { parsed = JSON.parse(match[0]); } catch (e2) { parsed = {}; }\r\n  }\r\n}\r\n\r\n// Извлекаем поля\r\nconst taskName = String(parsed.task_name || 'Задача без названия');\r\nconst description = String(parsed.description || originalMessage);\r\nconst priority = String(parsed.priority || 'medium');\r\nconst durationMinutes = parseInt(parsed.duration_minutes) || 60;\r\n\r\n// Парсим дедлайн\r\nlet deadline;\r\ntry {\r\n  deadline = parsed.deadline ? new Date(parsed.deadline) : new Date(Date.now() + 86400000);\r\n  if (isNaN(deadline.getTime())) {\r\n    deadline = new Date(Date.now() + 86400000);\r\n  }\r\n} catch (e) {\r\n  deadline = new Date(Date.now() + 86400000);\r\n}\r\n\r\n// Конвертация в iCalendar UTC формат: YYYYMMDDTHHMMSSZ\r\nfunction toICAL(date) {\r\n  return date.getUTCFullYear().toString() +\r\n    String(date.getUTCMonth() + 1).padStart(2, '0') +\r\n    String(date.getUTCDate()).padStart(2, '0') + 'T' +\r\n    String(date.getUTCHours()).padStart(2, '0') +\r\n    String(date.getUTCMinutes()).padStart(2, '0') +\r\n    String(date.getUTCSeconds()).padStart(2, '0') + 'Z';\r\n}\r\n\r\nconst dtStart = toICAL(deadline);\r\nconst endDate = new Date(deadline.getTime() + durationMinutes * 60000);\r\nconst dtEnd = toICAL(endDate);\r\nconst dtStamp = toICAL(new Date());\r\n\r\n// Генерируем UID события\r\nconst uuid = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10) + '@n8n-agent';\r\n\r\n// Приоритет iCalendar (1=высокий, 5=средний, 9=низкий)\r\nconst icalPriority = priority === 'high' ? 1 : priority === 'low' ? 9 : 5;\r\n\r\n// Очистка текста для iCalendar\r\nfunction cleanICAL(text) {\r\n  return String(text).replace(/[\\n;,\\\\]/g, ' ').trim();\r\n}\r\n\r\n// Строим iCalendar-тело (CRLF — стандарт iCalendar)\r\nconst icalBody = [\r\n  'BEGIN:VCALENDAR',\r\n  'VERSION:2.0',\r\n  'PRODID:-//n8n AI Agent//RU',\r\n  'CALSCALE:GREGORIAN',\r\n  'BEGIN:VEVENT',\r\n  'UID:' + uuid,\r\n  'DTSTAMP:' + dtStamp,\r\n  'DTSTART:' + dtStart,\r\n  'DTEND:' + dtEnd,\r\n  'SUMMARY:' + cleanICAL(taskName),\r\n  'DESCRIPTION:' + cleanICAL(description),\r\n  'PRIORITY:' + icalPriority,\r\n  'END:VEVENT',\r\n  'END:VCALENDAR'\r\n].join('\\r\\n') + '\\r\\n';\r\n\r\n// Данные для Yandex Calendar (CalDAV)\r\nconst yandexEmail = 'web-nnru@yandex.ru';\r\nconst yandexPassword = 'mzffbcryjqytxefz';\r\nconst calendarId = 'events-4135431';\r\n\r\nconst caldavUrl = 'https://caldav.yandex.ru/calendars/' + encodeURIComponent(yandexEmail) + '/' + calendarId + '/' + uuid + '.ics';\r\nconst authHeader = 'Basic ' + Buffer.from(yandexEmail + ':' + yandexPassword).toString('base64');\r\n\r\nreturn [{\r\n  json: {\r\n    original_message: originalMessage,\r\n    task_name: taskName,\r\n    deadline: parsed.deadline || deadline.toISOString(),\r\n    deadline_ical: dtStart,\r\n    duration_minutes: durationMinutes,\r\n    description: description,\r\n    priority: priority,\r\n    event_uid: uuid,\r\n    ical_body: icalBody,\r\n    caldav_url: caldavUrl,\r\n    auth_header: authHeader,\r\n    status: 'parsed'\r\n  }\r\n}];"
+      },
+      "id": "parse-build",
+      "name": "Parse and Build Event",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "/* Создание события в Yandex Calendar через CalDAV PUT */\r\nconst eventData = $input.first().json;\r\n\r\nconst options = {\r\n  method: 'PUT',\r\n  url: eventData.caldav_url,\r\n  headers: {\r\n    'Content-Type': 'text/calendar; charset=utf-8',\r\n    'Authorization': eventData.auth_header\r\n  },\r\n  body: eventData.ical_body,\r\n  encoding: 'utf8',\r\n  skipSslCertificateVerification: true,\r\n  returnFullResponse: true,\r\n  timeout: 30000\r\n};\r\n\r\nlet statusCode = 0;\r\nlet responseBody = '';\r\nlet errorMessage = '';\r\n\r\ntry {\r\n  const response = await this.helpers.httpRequest(options);\r\n  // httpRequest with returnFullResponse returns { statusCode, body, headers }\r\n  if (response && typeof response.statusCode === 'number') {\r\n    statusCode = response.statusCode;\r\n    responseBody = typeof response.body === 'string' ? response.body : JSON.stringify(response.body);\r\n  } else {\r\n    // Если вернулся 直接 body (не full response)\r\n    statusCode = 200;\r\n    responseBody = String(response);\r\n  }\r\n} catch (err) {\r\n  // Ошибка может содержать statusCode\r\n  statusCode = err.statusCode || 0;\r\n  responseBody = err.message || String(err);\r\n  errorMessage = err.message || String(err);\r\n}\r\n\r\nreturn [{\r\n  json: {\r\n    statusCode: statusCode,\r\n    body: responseBody,\r\n    error: errorMessage,\r\n    caldav_url: eventData.caldav_url,\r\n    event_uid: eventData.event_uid,\r\n    status: (statusCode === 201 || statusCode === 204) ? 'created' : 'failed'\r\n  }\r\n}];"
+      },
+      "id": "yandex-calendar",
+      "name": "Create Yandex Calendar Event",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        300
+      ],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "/* Подготовка ответа пользователю */\r\nconst eventData = $('Parse and Build Event').first().json;\r\nconst calResult = $input.first();\r\n\r\nlet calStatus = 'created';\r\nlet calError = '';\r\nlet calHttpCode = null;\r\n\r\nif (calResult && calResult.json) {\r\n  calHttpCode = calResult.json.statusCode || calResult.json.status || null;\r\n  if (calResult.json.error || (calHttpCode && calHttpCode >= 400)) {\r\n    calStatus = 'failed';\r\n    calError = String((calResult.json.error && calResult.json.error.message) || calResult.json.error || ('HTTP ' + calHttpCode));\r\n  }\r\n}\r\n\r\nconst task = {\r\n  name: eventData.task_name,\r\n  deadline: eventData.deadline,\r\n  description: eventData.description,\r\n  priority: eventData.priority,\r\n  duration_minutes: eventData.duration_minutes\r\n};\r\n\r\nconst calLine = calStatus === 'created'\r\n  ? '✅ Событие создано в Яндекс.Календаре'\r\n  : '⚠️ Событие в календаре не создано: ' + calError;\r\n\r\nconst confirmation = [\r\n  '✅ Задача принята!',\r\n  '',\r\n  '📋 ' + task.name,\r\n  '📅 Срок: ' + task.deadline,\r\n  '⏱ Длительность: ' + task.duration_minutes + ' мин',\r\n  '📊 Приоритет: ' + task.priority,\r\n  '',\r\n  calLine\r\n].join('\\n');\r\n\r\nreturn [{\r\n  json: {\r\n    status: 'success',\r\n    confirmation: confirmation,\r\n    task: task,\r\n    calendar_event: {\r\n      status: calStatus,\r\n      uid: eventData.event_uid,\r\n      http_code: calHttpCode,\r\n      error: calError\r\n    },\r\n    timestamp: new Date().toISOString()\r\n  }\r\n}];"
+      },
+      "id": "prepare-response",
+      "name": "Prepare Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseCode": 200,
+        "responseBody": "={{ $json }}"
+      },
+      "id": "respond-webhook",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1320,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Telegram": {
+      "main": [
+        [
+          {
+            "node": "Prepare LLM Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare LLM Request": {
+      "main": [
+        [
+          {
+            "node": "Ollama LLM Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama LLM Analysis": {
+      "main": [
+        [
+          {
+            "node": "Parse and Build Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse and Build Event": {
+      "main": [
+        [
+          {
+            "node": "Create Yandex Calendar Event",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Yandex Calendar Event": {
+      "main": [
+        [
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

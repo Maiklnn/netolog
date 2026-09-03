@@ -1,0 +1,10 @@
+﻿
+
+    Каталог: D:\Документы\Manual\Нитология\test
+
+
+Mode                 LastWriteTime         Length Name                                         
+----                 -------------         ------ ----                                         
+-a----        03.09.2026     15:45              0 _dirlist.txt                                 
+
+
