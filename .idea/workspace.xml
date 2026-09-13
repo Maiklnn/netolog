@@ -20,17 +20,28 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="038fd028-92f2-4fcd-ac68-b34b3ce777e1" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ИИ-агенты/Архитектура и сборка ИИ агента/02. Данные и память агента/Шаблон_к_заданию__Описание_доступа_к_данным_Ражев.М.Н.docx" beforeDir="false" afterPath="$PROJECT_DIR$/ИИ-агенты/01. Архитектура и сборка ИИ агента/02. Данные и память агента/Шаблон_к_заданию__Описание_доступа_к_данным_Ражев.М.Н.docx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ИИ-агенты/Архитектура и сборка ИИ агента/04. Сборка первого ИИ-агента/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/ИИ-агенты/01. Архитектура и сборка ИИ агента/04. Сборка первого ИИ-агента/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ИИ-агенты/Архитектура и сборка ИИ агента/04. Сборка первого ИИ-агента/files/1.png" beforeDir="false" afterPath="$PROJECT_DIR$/ИИ-агенты/01. Архитектура и сборка ИИ агента/04. Сборка первого ИИ-агента/files/1.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ИИ-агенты/Архитектура и сборка ИИ агента/04. Сборка первого ИИ-агента/files/2.png" beforeDir="false" afterPath="$PROJECT_DIR$/ИИ-агенты/01. Архитектура и сборка ИИ агента/04. Сборка первого ИИ-агента/files/2.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ИИ-агенты/Архитектура и сборка ИИ агента/04. Сборка первого ИИ-агента/files/3.png" beforeDir="false" afterPath="$PROJECT_DIR$/ИИ-агенты/01. Архитектура и сборка ИИ агента/04. Сборка первого ИИ-агента/files/3.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ИИ-агенты/Архитектура и сборка ИИ агента/04. Сборка первого ИИ-агента/files/4.png" beforeDir="false" afterPath="$PROJECT_DIR$/ИИ-агенты/01. Архитектура и сборка ИИ агента/04. Сборка первого ИИ-агента/files/4.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ИИ-агенты/Архитектура и сборка ИИ агента/04. Сборка первого ИИ-агента/files/5.png" beforeDir="false" afterPath="$PROJECT_DIR$/ИИ-агенты/01. Архитектура и сборка ИИ агента/04. Сборка первого ИИ-агента/files/5.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ИИ-агенты/Архитектура и сборка ИИ агента/04. Сборка первого ИИ-агента/files/6.png" beforeDir="false" afterPath="$PROJECT_DIR$/ИИ-агенты/01. Архитектура и сборка ИИ агента/04. Сборка первого ИИ-агента/files/6.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ИИ-агенты/Архитектура и сборка ИИ агента/04. Сборка первого ИИ-агента/files/7.png" beforeDir="false" afterPath="$PROJECT_DIR$/ИИ-агенты/01. Архитектура и сборка ИИ агента/04. Сборка первого ИИ-агента/files/7.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ИИ-агенты/Архитектура и сборка ИИ агента/04. Сборка первого ИИ-агента/files/schema.json" beforeDir="false" afterPath="$PROJECT_DIR$/ИИ-агенты/01. Архитектура и сборка ИИ агента/04. Сборка первого ИИ-агента/files/schema.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/SETUP_INSTRUCTIONS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/TASK_AGENT_RESULT.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/_code_caldav_put.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/_code_parse_build.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/_code_prepare_llm.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/_code_prepare_response.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/_deploy_workflow.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/_dirlist.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/_fix_workflow.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/_generate_task_agent_workflow.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/_get_calendars.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/_inspect_exec.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/_start_n8n.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/_test_agent.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/_test_caldav_put.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/memory-bank/activeContext.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/memory-bank/progress.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/n8n-workflow-message-classification.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/n8n-workflow-task-agent.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/ИИ-агенты/02. Автоматизация с ИИ агентами/01. Автоматизация задач/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/ИИ-агенты/02. Автоматизация с ИИ агентами/01. Автоматизация задач/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,24 +67,24 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="true" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/ИИ-агенты/02. Автоматизация с ИИ агентами/01. Автоматизация задач/files" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/ИИ-агенты/02. Автоматизация с ИИ агентами/02. Сборка аналитического агента" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами\02. Сборка аналитического агента" />
+      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами" />
+      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами\01. Автоматизация задач\files" />
+      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами\01. Автоматизация задач" />
+      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\Документы\Manual\Нитология\sys_admin\12. Диплом\project" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\07. Автоматизация и CI_CD\04. Подъем инфраструктуры в облаке\files\Вспомогательные файлы" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\11. Информационная безопасность\12. Диплом\1. Подготовка к дипломной работе" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\09. Системы хранения и передачи данных\03. ELK\img" />
       <recent name="D:\Документы\Manual\Нитология\ML\03_OOP_API" />
-    </key>
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами\01. Автоматизация задач\files" />
-      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами\01. Автоматизация задач" />
-      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты" />
-      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\Архитектура и сборка ИИ агента\02. Данные и память агента" />
-      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\Архитектура и сборка ИИ агента\04. Сборка первого ИИ-агента\files" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -103,7 +114,14 @@
       <workItem from="1788036964029" duration="1191000" />
       <workItem from="1788202572965" duration="19241000" />
       <workItem from="1788284232427" duration="1309000" />
-      <workItem from="1788368759794" duration="14237000" />
+      <workItem from="1788368759794" duration="16385000" />
+      <workItem from="1788475736332" duration="166000" />
+      <workItem from="1788713491636" duration="2000" />
+      <workItem from="1788887400926" duration="2245000" />
+      <workItem from="1788892968158" duration="2389000" />
+      <workItem from="1789023505796" duration="4142000" />
+      <workItem from="1789132867270" duration="599000" />
+      <workItem from="1789338530531" duration="3127000" />
     </task>
     <servers />
   </component>

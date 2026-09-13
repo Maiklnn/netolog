@@ -49,6 +49,12 @@ curl.exe -s -G "http://192.168.56.50:5678/webhook/task-agent" --data-urlencode "
 
 Подтверждение возвращается в JSON-ответе webhook. Вот что вернул каждый тест (это и есть «уведомление от агента»):
 
+в файлике /home/bitrix/www/local/app/assets/page/bizproc/processes/modules/replace_sale.js сделай чтобы поля выбирались не по id а по названию 
+и привязки к конкретной форме не было 
+
+
+
+
 ![alt text](files/5.png)
 
 ## 6. Краткое описание решения

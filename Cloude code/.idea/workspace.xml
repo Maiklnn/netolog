@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="39e63890-f2ff-488d-bdb8-9ca9f1e9df7e" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/deployment.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../test/SETUP_INSTRUCTIONS.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../test/TASK_AGENT_RESULT.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../test/_code_caldav_put.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../test/_code_parse_build.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../test/_code_prepare_llm.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../test/_code_prepare_response.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../test/_deploy_workflow.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../test/_dirlist.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../test/_fix_workflow.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../test/_generate_task_agent_workflow.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../test/_get_calendars.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../test/_inspect_exec.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../test/_start_n8n.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../test/_test_agent.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../test/_test_caldav_put.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../test/memory-bank/activeContext.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../test/memory-bank/progress.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../test/n8n-workflow-message-classification.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../test/n8n-workflow-task-agent.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ИИ-агенты/02. Автоматизация с ИИ агентами/01. Автоматизация задач/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../ИИ-агенты/02. Автоматизация с ИИ агентами/01. Автоматизация задач/README.md" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ComposerSettings">
+    <execution />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectId" id="3IyLB0XHZH1v8T6Uw6BDxHDgFK5" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+    <option name="showMembers" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="true" />
+    <property name="WebServerToolWindowPanel.toolwindow.highlight.mappings" value="true" />
+    <property name="WebServerToolWindowPanel.toolwindow.highlight.symlinks" value="true" />
+    <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
+    <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
+    <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="vue.rearranger.settings.migration" value="true" />
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="39e63890-f2ff-488d-bdb8-9ca9f1e9df7e" name="Default Changelist" comment="" />
+      <created>1788731722939</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1788731722939</updated>
+      <workItem from="1788731723990" duration="7787000" />
+      <workItem from="1788855146350" duration="6765000" />
+      <workItem from="1788892972643" duration="5046000" />
+      <workItem from="1789023503435" duration="1188000" />
+      <workItem from="1789132869952" duration="599000" />
+      <workItem from="1789338528414" duration="1018000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="728" y="322" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1788875072096">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="-4632" y="322" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1040/-5360.0.1920.1040/-3440.0.3440.1400@-5360.0.1920.1040" timestamp="1788733933002" />
+    <state x="728" y="322" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1040/-5360.0.1920.1040/-3440.0.3440.1400@0.0.1920.1040" timestamp="1788875072096" />
+  </component>
+</project>
