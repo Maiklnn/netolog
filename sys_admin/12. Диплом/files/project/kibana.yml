@@ -1,0 +1,201 @@
+---
+# Развёртывание Kibana 8.x на Ubuntu 22.04 — веб-интерфейс для поиска по журналам,
+# которые Filebeat складывает в Elasticsearch.
+# ВМ без внешнего адреса: интерфейс публикуется через балансировщик (слушатель 5601),
+# наружу Kibana смотрит только на узлы ALB, SSH — через bastion.
+- name: Развёртывание Kibana
+  hosts: kibana
+  become: true
+
+  vars_files:
+    - elk-common.yml
+
+  vars:
+    ansible_ssh_user: user
+    # адрес слушателя 5601 балансировщика (см. outputs.tf: alb_kibana_public_ip).
+    # Нужен, чтобы Kibana формировала ссылки и редиректы на внешний адрес, а не
+    # на внутренний адрес ВМ.
+    kibana_public_url: "http://51.250.4.53:5601"
+
+  tasks:
+    - name: Ожидание готовности ВМ по SSH
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+    - name: Обновление кеша пакетов
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Вспомогательные пакеты для подключения репозитория Elastic
+      ansible.builtin.apt:
+        name:
+          - gnupg
+          - curl
+          - apt-transport-https
+        state: present
+
+    - name: Swap-файл 2 ГБ (на ВМ всего 2 ГБ памяти, Kibana — приложение на Node.js)
+      when: ansible_swaptotal_mb | int < 1024
+      block:
+        - name: Создание swap-файла
+          ansible.builtin.command: "{{ item }}"
+          loop:
+            - fallocate -l 2G /swapfile
+            - chmod 600 /swapfile
+            - mkswap /swapfile
+            - swapon /swapfile
+          changed_when: true
+
+        - name: Закрепление swap в fstab
+          ansible.builtin.lineinfile:
+            path: /etc/fstab
+            line: "/swapfile none swap sw 0 0"
+            state: present
+
+    - name: Ключ подписи репозитория Elastic
+      # Официальный адрес ключа (artifacts.elastic.co/GPG-KEY-elasticsearch) отдаёт
+      # 403 российским адресам, а на зеркалах файла ключа нет (404). Поэтому ключ
+      # Elastic — отпечаток 4609 5ACC 8548 582C 1A26 99A9 D27D 666C D88E 42B4,
+      # Elasticsearch Signing Key <dev_ops@elasticsearch.org> — хранится в проекте
+      # (каталог files/) и просто копируется на ВМ.
+      ansible.builtin.copy:
+        src: files/elasticsearch-keyring.gpg
+        dest: /usr/share/keyrings/elasticsearch-keyring.gpg
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Поиск доступного источника пакетов Elastic
+      # официальный сайт блокирует выдачу пакетов российским адресам (403)
+      ansible.builtin.uri:
+        url: "{{ item }}/{{ elastic_repo_branch }}/apt/dists/stable/Release"
+        status_code: 200
+        timeout: 20
+      loop: "{{ elastic_mirrors + [elastic_repo_official] }}"
+      register: elastic_probe
+      failed_when: false
+      changed_when: false
+
+    - name: Выбранный источник пакетов Elastic
+      ansible.builtin.set_fact:
+        elastic_repo_base: >-
+          {{ (elastic_probe.results
+              | selectattr('status', 'defined')
+              | selectattr('status', 'equalto', 200)
+              | map(attribute='item') | list | first) | default(elastic_repo_official) }}
+
+    - name: Показать выбранный источник пакетов
+      ansible.builtin.debug:
+        msg: "пакеты Kibana берутся из {{ elastic_repo_base }}"
+
+    # Файл репозитория пишем напрямую (copy): модуль apt_repository при неудачном
+    # обновлении кеша откатывает файл к прежнему содержимому.
+    - name: Подключение репозитория Elastic {{ elastic_repo_branch }}
+      ansible.builtin.copy:
+        dest: /etc/apt/sources.list.d/elastic-{{ elastic_repo_branch }}.list
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          # Источник пакетов Elastic — {{ elastic_repo_base }}
+          # (почему не официальный сайт — см. комментарий в elk-common.yml)
+          deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] {{ elastic_repo_base }}/{{ elastic_repo_branch }}/apt stable main
+
+    - name: Обновление кеша пакетов после подключения репозитория
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: Установка Kibana
+      ansible.builtin.apt:
+        name: kibana
+        state: present
+
+    # Конфигурация пишется до первого запуска: по умолчанию Kibana слушает только
+    # localhost, а встроенная защита Elasticsearch на стенде выключена.
+    - name: Конфигурация Kibana
+      ansible.builtin.copy:
+        dest: /etc/kibana/kibana.yml
+        owner: root
+        group: kibana
+        mode: "0660"
+        content: |
+          # --- сеть: слушаем все интерфейсы ВМ, в интернет отдаёт балансировщик ---
+          server.port: {{ kibana_port }}
+          server.host: "0.0.0.0"
+          # внешний адрес (слушатель балансировщика) — для ссылок и редиректов
+          server.publicBaseUrl: "{{ kibana_public_url }}"
+
+          # --- соединение с Elasticsearch по внутреннему FQDN ---
+          elasticsearch.hosts: ["http://{{ elasticsearch_host }}:{{ elasticsearch_port }}"]
+          # на медленной ВМ Elasticsearch отвечает дольше стандартных 30 с
+          elasticsearch.requestTimeout: 60000
+
+          # Ключ xpack.security настраивается только в Elasticsearch — в Kibana 8
+          # такого параметра нет, и от его указания служба падает на старте:
+          # «FATAL Error: [config validation of [xpack.security].enabled]:
+          # definition for this key is missing». Kibana сама определяет, что
+          # Elasticsearch работает без встроенной защиты, и подключается без пароля.
+
+          # --- язык интерфейса ---
+          # русской локали в Kibana 8 нет: в пакете только en, ja-JP, fr-FR, zh-CN
+          # (/usr/share/kibana/node_modules/@kbn/translations-plugin/translations),
+          # поэтому i18n.locale не задаём — интерфейс остаётся английским
+
+          logging.appenders.file.type: file
+          logging.appenders.file.fileName: /var/log/kibana/kibana.log
+          logging.appenders.file.layout.type: json
+          logging.root.appenders: [file]
+      notify: перезапуск kibana
+
+    - name: Запуск Kibana
+      ansible.builtin.systemd:
+        name: kibana
+        state: started
+        enabled: true
+        daemon_reload: true
+
+    - name: Ожидание готовности Kibana (старт на прерываемой ВМ занимает 1–2 минуты)
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ kibana_port }}/api/status"
+        return_content: true
+      register: kibana_status
+      retries: 60
+      delay: 5
+      until: kibana_status.status == 200
+
+    - name: Состояние Kibana
+      ansible.builtin.debug:
+        msg: >-
+          Kibana {{ (kibana_status.content | from_json).version.number }},
+          уровень {{ (kibana_status.content | from_json).status.overall.level }}
+
+    - name: Проверка соединения Kibana с Elasticsearch
+      # именно ради этого соединения Kibana и разворачивается: если оно не работает,
+      # в интерфейсе не будет ни данных, ни дашбордов
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ kibana_port }}/api/status"
+        return_content: true
+      register: kibana_es
+      retries: 30
+      delay: 10
+      until: >-
+        kibana_es.status == 200
+        and (kibana_es.content | from_json).status.overall.level != 'critical'
+
+    - name: Итог соединения с Elasticsearch
+      ansible.builtin.debug:
+        msg: >-
+          {% if (kibana_es.content | from_json).status.overall.level == 'critical' %}
+          ОШИБКА: {{ (kibana_es.content | from_json).status.overall.summary }}
+          {% else %}
+          соединение с Elasticsearch работает,
+          уровень {{ (kibana_es.content | from_json).status.overall.level }}
+          {% endif %}
+
+  handlers:
+    - name: перезапуск kibana
+      ansible.builtin.systemd:
+        name: kibana
+        state: restarted
+        daemon_reload: true

@@ -1,0 +1,216 @@
+---
+# Развёртывание Elasticsearch 8.x на Ubuntu 22.04 — хранилище журналов nginx.
+# ВМ без внешнего адреса: Filebeat с веб-серверов присылает журналы на внутренний
+# FQDN elasticsearch.ru-central1.internal (порт 9200 открыт только изнутри VPC),
+# SSH — через bastion.
+- name: Развёртывание Elasticsearch
+  hosts: elasticsearch
+  become: true
+
+  vars_files:
+    - elk-common.yml
+
+  vars:
+    ansible_ssh_user: user
+    es_cluster_name: "elk-24-01"
+    # JVM-куча: половина памяти ВМ (4 ГБ) — рекомендация Elasticsearch, Xms = Xmx
+    es_heap_size: "2g"
+
+  tasks:
+    - name: Ожидание готовности ВМ по SSH
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+    - name: Обновление кеша пакетов
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Вспомогательные пакеты для подключения репозитория Elastic
+      ansible.builtin.apt:
+        name:
+          - gnupg
+          - curl
+          - apt-transport-https
+        state: present
+
+    - name: Ключ подписи репозитория Elastic
+      # В официальной инструкции Elastic для deb ключ скачивается с сайта и
+      # «разворачивается» командой gpg --dearmor из armored-формата в бинарный
+      # keyring. Скачать не получается: artifacts.elastic.co/GPG-KEY-elasticsearch
+      # отдаёт 403 российским адресам, а на зеркалах файла ключа нет (404).
+      # Поэтому в проекте (каталог files/) лежит уже готовый бинарный keyring
+      # официального ключа Elastic — отпечаток
+      # 4609 5ACC 8548 582C 1A26 99A9 D27D 666C D88E 42B4,
+      # Elasticsearch Signing Key <dev_ops@elasticsearch.org>.
+      ansible.builtin.copy:
+        src: files/elasticsearch-keyring.gpg
+        dest: /usr/share/keyrings/elasticsearch-keyring.gpg
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Поиск доступного источника пакетов Elastic
+      # официальный сайт блокирует выдачу пакетов российским адресам (403), поэтому
+      # перебираем зеркала из elk-common.yml и берём первое ответившее
+      ansible.builtin.uri:
+        url: "{{ item }}/{{ elastic_repo_branch }}/apt/dists/stable/Release"
+        status_code: 200
+        timeout: 20
+      loop: "{{ elastic_mirrors + [elastic_repo_official] }}"
+      register: elastic_probe
+      failed_when: false
+      changed_when: false
+
+    - name: Выбранный источник пакетов Elastic
+      ansible.builtin.set_fact:
+        elastic_repo_base: >-
+          {{ (elastic_probe.results
+              | selectattr('status', 'defined')
+              | selectattr('status', 'equalto', 200)
+              | map(attribute='item') | list | first) | default(elastic_repo_official) }}
+
+    - name: Показать выбранный источник пакетов
+      ansible.builtin.debug:
+        msg: "пакеты Elasticsearch берутся из {{ elastic_repo_base }}"
+
+    # Файл репозитория пишем напрямую (copy), а не модулем apt_repository: тот при
+    # неудачном обновлении кеша откатывает файл к прежнему содержимому, и репозиторий
+    # остаётся указывать на недоступный официальный сайт (проверено на практике).
+    - name: Подключение репозитория Elastic {{ elastic_repo_branch }}
+      ansible.builtin.copy:
+        dest: /etc/apt/sources.list.d/elastic-{{ elastic_repo_branch }}.list
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          # Источник пакетов Elastic — {{ elastic_repo_base }}
+          # (почему не официальный сайт — см. комментарий в elk-common.yml)
+          deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] {{ elastic_repo_base }}/{{ elastic_repo_branch }}/apt stable main
+
+    - name: Обновление кеша пакетов после подключения репозитория
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: Установка Elasticsearch
+      ansible.builtin.apt:
+        name: elasticsearch
+        state: present
+
+    - name: Параметр ядра vm.max_map_count (требование Elasticsearch)
+      # без него Elasticsearch падает на старте с ошибкой mmap при индексации
+      ansible.builtin.copy:
+        dest: /etc/sysctl.d/99-elasticsearch.conf
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          # Elasticsearch требует не меньше 262144
+          vm.max_map_count=262144
+      register: es_sysctl
+
+    - name: Применение параметра ядра
+      ansible.builtin.command: sysctl --system
+      when: es_sysctl.changed
+      changed_when: true
+
+    # Конфигурацию пишем ДО первого запуска: при старте с настройками по умолчанию
+    # Elasticsearch 8 сам включает встроенную защиту, генерирует сертификаты и
+    # требует пароль — для учебного стенда это лишнее, доступ и так ограничен
+    # группой безопасности (порт 9200 открыт только изнутри VPC).
+    - name: Конфигурация Elasticsearch
+      ansible.builtin.copy:
+        dest: /etc/elasticsearch/elasticsearch.yml
+        owner: root
+        group: elasticsearch
+        mode: "0660"
+        content: |
+          # --- кластер: одноузловой, для журналов учебного стенда достаточно ---
+          cluster.name: {{ es_cluster_name }}
+          node.name: elasticsearch
+          discovery.type: single-node
+
+          # --- сеть: слушаем все интерфейсы ВМ (наружу порт закрыт группой безопасности) ---
+          network.host: 0.0.0.0
+          http.port: {{ elasticsearch_port }}
+
+          # --- каталоги данных и журналов ---
+          path.data: /var/lib/elasticsearch
+          path.logs: /var/log/elasticsearch
+
+          # --- встроенная защита выключена: стенд учебный, 9200 доступен только изнутри VPC ---
+          xpack.security.enabled: false
+          xpack.security.enrollment.enabled: false
+          xpack.security.http.ssl.enabled: false
+          # Пакет Elasticsearch 8 при установке сам включает защиту: генерирует
+          # сертификаты и записывает пароли от них в хранилище ключей
+          # (/etc/elasticsearch/elasticsearch.keystore). Если TLS для транспортного
+          # уровня не задан явно, Elasticsearch отказывается стартовать:
+          # «invalid configuration for xpack.security.transport.ssl -
+          # [xpack.security.transport.ssl.enabled] is not set, but the following
+          # settings have been configured ... keystore.secure_password». Поэтому
+          # запрещаем TLS явно.
+          xpack.security.transport.ssl.enabled: false
+
+          # --- сбор собственной статистики (нужен для раздела Stack Monitoring) ---
+          xpack.monitoring.collection.enabled: true
+      notify: перезапуск elasticsearch
+
+    - name: Размер JVM-кучи
+      ansible.builtin.copy:
+        dest: /etc/elasticsearch/jvm.options.d/heap.options
+        owner: root
+        group: elasticsearch
+        mode: "0660"
+        content: |
+          # Xms и Xmx должны совпадать — иначе JVM «дёргает» кучу
+          -Xms{{ es_heap_size }}
+          -Xmx{{ es_heap_size }}
+      notify: перезапуск elasticsearch
+
+    - name: Запуск Elasticsearch
+      ansible.builtin.systemd:
+        name: elasticsearch
+        state: started
+        enabled: true
+        daemon_reload: true
+
+    - name: Ожидание ответа Elasticsearch (первый старт на прерываемой ВМ долгий)
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ elasticsearch_port }}/"
+        return_content: true
+      register: es_root
+      retries: 60
+      delay: 5
+      until: es_root.status == 200
+
+    - name: Версия Elasticsearch и имя кластера
+      ansible.builtin.debug:
+        msg: >-
+          Elasticsearch {{ (es_root.content | from_json).version.number }},
+          кластер {{ (es_root.content | from_json).cluster_name }},
+          узел {{ (es_root.content | from_json).name }}
+
+    - name: Состояние кластера
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ elasticsearch_port }}/_cluster/health"
+        return_content: true
+      register: es_health
+      retries: 12
+      delay: 5
+      until: es_health.status == 200
+
+    - name: Показать состояние кластера
+      ansible.builtin.debug:
+        msg: >-
+          статус {{ (es_health.content | from_json).status }},
+          узлов {{ (es_health.content | from_json).number_of_nodes }},
+          активных шардов {{ (es_health.content | from_json).active_shards }}
+      # статус yellow для одноузлового кластера — норма: реплики размещать негде
+
+  handlers:
+    - name: перезапуск elasticsearch
+      ansible.builtin.systemd:
+        name: elasticsearch
+        state: restarted
+        daemon_reload: true

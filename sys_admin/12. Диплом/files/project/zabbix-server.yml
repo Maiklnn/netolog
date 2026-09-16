@@ -1,0 +1,261 @@
+---
+# Развёртывание Zabbix Server 7.0 LTS на Ubuntu 22.04.
+# Состав: PostgreSQL (база метрик) + Zabbix Server + веб-интерфейс (nginx + PHP-FPM).
+# ВМ без внешнего адреса: веб-интерфейс публикуется через балансировщик (listener 8080),
+# SSH — через bastion.
+- name: Развёртывание Zabbix Server
+  hosts: zabbix
+  become: true
+
+  vars:
+    ansible_ssh_user: user                  # вход на ВМ — только через bastion, под пользователем user
+    zabbix_release_branch: "7.0"            # ветка LTS в официальном репозитории
+    zabbix_release_pkg: "7.0-5"             # версия пакета zabbix-release
+    zabbix_db_name: "zabbix"
+    zabbix_db_user: "zabbix"
+    zabbix_db_password: "zbx_db_pwd_24_01"  # пароль учебного стенда
+    zabbix_frontend_port: 80                # порт ВМ, на который смотрит бэкенд балансировщика
+    php_version: "8.1"                      # версия PHP в Ubuntu 22.04
+
+  tasks:
+    - name: Ожидание готовности ВМ по SSH
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+    - name: Обновление кеша пакетов
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Swap-файл 2 ГБ (на ВМ всего 2 ГБ памяти, БД нужен запас)
+      when: ansible_swaptotal_mb | int < 1024
+      block:
+        - name: Создание swap-файла
+          ansible.builtin.command: "{{ item }}"
+          loop:
+            - fallocate -l 2G /swapfile
+            - chmod 600 /swapfile
+            - mkswap /swapfile
+            - swapon /swapfile
+          changed_when: true
+
+        - name: Закрепление swap в fstab
+          ansible.builtin.lineinfile:
+            path: /etc/fstab
+            line: "/swapfile none swap sw 0 0"
+            state: present
+
+    - name: Подключение официального репозитория Zabbix
+      ansible.builtin.apt:
+        deb: "https://repo.zabbix.com/zabbix/{{ zabbix_release_branch }}/ubuntu/pool/main/z/zabbix-release/zabbix-release_{{ zabbix_release_pkg }}+ubuntu22.04_all.deb"
+
+    - name: Обновление кеша после подключения репозитория
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: Установка Zabbix Server, фронтенда и зависимостей
+      ansible.builtin.apt:
+        name:
+          - postgresql
+          - python3-psycopg2
+          - nginx
+          - zabbix-server-pgsql
+          - zabbix-frontend-php
+          - zabbix-nginx-conf
+          - zabbix-sql-scripts
+          - zabbix-agent
+          - zabbix-get
+          # Расширения PHP для фронтенда. Без pgsql фронтенд отвечает
+          # "DB type POSTGRESQL is not supported by current setup. Possible values MYSQL."
+          - "php{{ php_version }}-pgsql"
+          - "php{{ php_version }}-bcmath"
+          - "php{{ php_version }}-gd"
+          - "php{{ php_version }}-mbstring"
+          - "php{{ php_version }}-xml"
+        state: present
+
+    - name: Перезапуск php-fpm, чтобы подхватились расширения PHP
+      ansible.builtin.service:
+        name: "php{{ php_version }}-fpm"
+        state: restarted
+
+    - name: Запуск PostgreSQL
+      ansible.builtin.service:
+        name: postgresql
+        state: started
+        enabled: true
+
+    - name: Создание роли и базы данных Zabbix
+      ansible.builtin.shell: |
+        set -e
+        sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='{{ zabbix_db_user }}'" | grep -q 1 \
+          || sudo -u postgres psql -c "CREATE ROLE {{ zabbix_db_user }} LOGIN PASSWORD '{{ zabbix_db_password }}'"
+        sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='{{ zabbix_db_name }}'" | grep -q 1 \
+          || sudo -u postgres createdb -O {{ zabbix_db_user }} {{ zabbix_db_name }}
+      args:
+        executable: /bin/bash
+      no_log: true
+
+    - name: Проверка, импортирована ли схема БД
+      ansible.builtin.shell: |
+        sudo -u postgres psql -tAc "SELECT count(*) FROM information_schema.tables WHERE table_schema='public'" {{ zabbix_db_name }}
+      register: zbx_schema_tables
+      changed_when: false
+
+    - name: Импорт схемы БД Zabbix
+      ansible.builtin.shell: |
+        zcat /usr/share/zabbix-sql-scripts/postgresql/server.sql.gz | sudo -u {{ zabbix_db_user }} psql {{ zabbix_db_name }}
+      when: zbx_schema_tables.stdout | trim | int < 5
+      changed_when: true
+
+    - name: Подключение Zabbix Server к базе данных
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/zabbix_server.conf
+        regexp: "^#?{{ item.key }}="
+        line: "{{ item.key }}={{ item.value }}"
+      loop:
+        - { key: "DBName", value: "{{ zabbix_db_name }}" }
+        - { key: "DBUser", value: "{{ zabbix_db_user }}" }
+        - { key: "DBPassword", value: "{{ zabbix_db_password }}" }
+        # уменьшенные кеши — ВМ минимальной конфигурации
+        - { key: "CacheSize", value: "32M" }
+        - { key: "HistoryCacheSize", value: "16M" }
+        - { key: "ValueCacheSize", value: "8M" }
+        - { key: "StartPollers", value: "5" }
+      no_log: true
+      notify: перезапуск zabbix-server
+
+    - name: Слушаем 80-й порт вместо 8080 (за балансировщиком)
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/nginx.conf
+        regexp: '^\s*#?\s*listen\s+8080;'
+        line: "        listen          {{ zabbix_frontend_port }};"
+      notify: перезапуск nginx
+
+    - name: Отключаем server_name по умолчанию
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/nginx.conf
+        regexp: '^\s*#?\s*server_name\s+example\.com;'
+        line: "        server_name     _;"
+      notify: перезапуск nginx
+
+    - name: Подключение конфигурации Zabbix к nginx
+      ansible.builtin.file:
+        src: /etc/zabbix/nginx.conf
+        dest: /etc/nginx/conf.d/zabbix.conf
+        state: link
+        force: true
+      notify: перезапуск nginx
+
+    - name: Отключение сайта nginx по умолчанию (конфликт по 80-му порту)
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: перезапуск nginx
+
+    - name: Пул PHP-FPM для Zabbix
+      ansible.builtin.file:
+        src: /etc/zabbix/php-fpm.conf
+        dest: "/etc/php/{{ php_version }}/fpm/pool.d/zabbix-php-fpm.conf"
+        state: link
+        force: true
+      notify: перезапуск php-fpm
+
+    - name: Часовой пояс PHP для фронтенда
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/php-fpm.conf
+        line: "php_value[date.timezone] = Europe/Moscow"
+        insertafter: "^\\[zabbix\\]"
+      notify: перезапуск php-fpm
+
+    - name: Файл конфигурации веб-интерфейса из шаблона пакета
+      ansible.builtin.copy:
+        src: /usr/share/zabbix/conf/zabbix.conf.php.example
+        dest: /etc/zabbix/web/zabbix.conf.php
+        remote_src: true
+        force: false
+        mode: "0640"
+        owner: www-data
+        group: www-data
+
+    - name: Параметры подключения фронтенда к базе данных
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/web/zabbix.conf.php
+        regexp: "^\\$DB\\['{{ item.key }}'\\]\\s*=.*"
+        line: "$DB['{{ item.key }}']\t\t= '{{ item.value }}';"
+      loop:
+        - { key: "TYPE", value: "POSTGRESQL" }
+        - { key: "SERVER", value: "localhost" }
+        - { key: "DATABASE", value: "{{ zabbix_db_name }}" }
+        - { key: "USER", value: "{{ zabbix_db_user }}" }
+        - { key: "PASSWORD", value: "{{ zabbix_db_password }}" }
+      no_log: true
+
+    - name: Имя сервера в веб-интерфейсе
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/web/zabbix.conf.php
+        regexp: "^\\$ZBX_SERVER_NAME\\s*=.*"
+        line: "$ZBX_SERVER_NAME\t\t= 'Zabbix 24-01';"
+
+    - name: Запуск служб Zabbix
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      loop:
+        - zabbix-server
+        - php8.1-fpm
+
+    # ВАЖНО: пакет nginx стартует раньше, чем появляется /etc/nginx/conf.d/zabbix.conf,
+    # поэтому без перезапуска nginx продолжает отдавать страницу-заглушку Ubuntu
+    # (root /var/www/html) — тогда /api_jsonrpc.php отвечает 404 и настройка по API падает.
+    - name: Перезапуск nginx с конфигурацией Zabbix
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
+
+    - name: Ожидание готовности Zabbix Server
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: 10051
+        timeout: 120
+
+    # Проверяем именно API: страница-заглушка nginx тоже отдаёт 200, поэтому
+    # проверки "/" недостаточно.
+    - name: Проверка API Zabbix (apiinfo.version)
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ zabbix_frontend_port }}/api_jsonrpc.php"
+        method: POST
+        body_format: json
+        body:
+          jsonrpc: "2.0"
+          method: apiinfo.version
+          params: {}
+          id: 1
+        headers:
+          Content-Type: application/json
+        status_code: 200
+      register: zbx_api
+      retries: 10
+      delay: 5
+      until: zbx_api.status == 200 and zbx_api.json.result is defined
+
+    - name: Версия API Zabbix
+      ansible.builtin.debug:
+        msg: "API Zabbix отвечает, версия: {{ zbx_api.json.result }}"
+
+  handlers:
+    - name: перезапуск zabbix-server
+      ansible.builtin.service:
+        name: zabbix-server
+        state: restarted
+
+    - name: перезапуск nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
+
+    - name: перезапуск php-fpm
+      ansible.builtin.service:
+        name: "php{{ php_version }}-fpm"
+        state: restarted

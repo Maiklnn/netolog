@@ -1,0 +1,94 @@
+---
+# Метрики nginx для Zabbix на веб-серверах (USE для HTTP-запросов):
+#  - utilization: количество запросов (за секунду считается в Zabbix по разнице);
+#  - saturation: активные соединения и их состояния (reading/writing/waiting);
+#  - errors: ответы 4xx и 5xx из access-лога nginx.
+# stub_status слушает только localhost, наружу порт не публикуется.
+- name: Настройка сбора метрик nginx
+  hosts: webservers
+  become: true
+
+  vars:
+    ansible_ssh_user: user
+    nginx_status_port: 8081
+    nginx_status_path: "/nginx_status"
+    nginx_access_log: "/var/log/nginx/access.log"
+
+  tasks:
+    - name: Модуль stub_status на localhost
+      ansible.builtin.copy:
+        dest: /etc/nginx/conf.d/stub_status.conf
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          # Отдаёт счётчики nginx для мониторинга (только с localhost)
+          server {
+              listen 127.0.0.1:{{ nginx_status_port }};
+              server_name _;
+
+              location {{ nginx_status_path }} {
+                  stub_status;
+                  access_log off;
+                  allow 127.0.0.1;
+                  deny all;
+              }
+          }
+      notify: перезапуск nginx
+
+    - name: Доступ пользователя zabbix к логам nginx
+      ansible.builtin.user:
+        name: zabbix
+        groups: adm
+        append: true
+
+    - name: Пользовательские параметры агента для метрик nginx
+      ansible.builtin.copy:
+        dest: /etc/zabbix/zabbix_agentd.d/userparameter_nginx_status.conf
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          # --- utilization / saturation: счётчики stub_status ---
+          UserParameter=nginx.status.active,curl -s http://127.0.0.1:{{ nginx_status_port }}{{ nginx_status_path }} | awk 'NR==1 {print $3}'
+          UserParameter=nginx.status.accepts,curl -s http://127.0.0.1:{{ nginx_status_port }}{{ nginx_status_path }} | awk 'NR==3 {print $1}'
+          UserParameter=nginx.status.handled,curl -s http://127.0.0.1:{{ nginx_status_port }}{{ nginx_status_path }} | awk 'NR==3 {print $2}'
+          UserParameter=nginx.status.requests,curl -s http://127.0.0.1:{{ nginx_status_port }}{{ nginx_status_path }} | awk 'NR==3 {print $3}'
+          UserParameter=nginx.status.reading,curl -s http://127.0.0.1:{{ nginx_status_port }}{{ nginx_status_path }} | awk 'NR==4 {print $2}'
+          UserParameter=nginx.status.writing,curl -s http://127.0.0.1:{{ nginx_status_port }}{{ nginx_status_path }} | awk 'NR==4 {print $4}'
+          UserParameter=nginx.status.waiting,curl -s http://127.0.0.1:{{ nginx_status_port }}{{ nginx_status_path }} | awk 'NR==4 {print $6}'
+
+          # --- errors: коды ответов из access-лога ---
+          UserParameter=nginx.http.log.total,awk 'END {print NR+0}' {{ nginx_access_log }}
+          UserParameter=nginx.http.log.4xx,awk '$9 ~ /^4/ {c++} END {print c+0}' {{ nginx_access_log }}
+          UserParameter=nginx.http.log.5xx,awk '$9 ~ /^5/ {c++} END {print c+0}' {{ nginx_access_log }}
+      notify: перезапуск zabbix-agent
+
+    - name: Запуск nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
+
+    - name: Проверка stub_status
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ nginx_status_port }}{{ nginx_status_path }}"
+        return_content: true
+      register: nginx_status
+      retries: 10
+      delay: 3
+      until: nginx_status.status == 200
+
+    - name: Показать счётчики stub_status
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }}: {{ nginx_status.content | replace('\n', ' | ') }}"
+
+  handlers:
+    - name: перезапуск nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
+
+    - name: перезапуск zabbix-agent
+      ansible.builtin.service:
+        name: zabbix-agent
+        state: restarted

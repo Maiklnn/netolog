@@ -1,0 +1,48 @@
+---
+# Настройка Zabbix через API: узлы сети, пороги (триггеры), графики USE и дашборды.
+# Скрипт запускается на самой ВМ с Zabbix-сервером и обращается к API на localhost.
+- name: Настройка Zabbix — узлы, пороги, графики, дашборды
+  hosts: zabbix
+  become: true
+
+  vars:
+    ansible_ssh_user: user
+
+  tasks:
+    - name: Копирование скрипта настройки Zabbix
+      ansible.builtin.copy:
+        src: zabbix-api.py
+        dest: /root/zabbix-api.py
+        owner: root
+        group: root
+        mode: "0700"
+
+    - name: Запуск настройки через Zabbix API
+      ansible.builtin.command:
+        cmd: python3 /root/zabbix-api.py
+      register: zbx_setup
+      changed_when: "'Готово.' in zbx_setup.stdout"
+
+    - name: Результат настройки
+      ansible.builtin.debug:
+        msg: "{{ zbx_setup.stdout_lines }}"
+
+    - name: Проверка доступности агентов с Zabbix-сервера
+      # в списке и ВМ стенда журналов (Elasticsearch, Kibana) — их агенты
+      # ставятся плейбуком zabbix-agent.yml
+      ansible.builtin.command:
+        cmd: "zabbix_get -s {{ item }} -k agent.version"
+      loop:
+        - bastion.ru-central1.internal
+        - web-a.ru-central1.internal
+        - web-b.ru-central1.internal
+        - elasticsearch.ru-central1.internal
+        - kibana.ru-central1.internal
+      register: zbx_agent_check
+      changed_when: false
+      failed_when: false
+
+    - name: Ответы агентов
+      ansible.builtin.debug:
+        msg: "{{ item.item }} → {{ item.stdout | default(item.stderr | default('нет ответа')) }}"
+      loop: "{{ zbx_agent_check.results }}"

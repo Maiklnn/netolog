@@ -1,0 +1,34 @@
+# Общие переменные стенда ELK (Elasticsearch + Kibana + Filebeat).
+# Подключается в playbook-ах через vars_files.
+
+# Ветка официального репозитория Elastic
+elastic_repo_branch: "8.x"
+
+# Источники пакетов. Официальный сайт Elastic отдаёт 403 на всё, что лежит в
+# /packages/ и /downloads/, если запрос приходит с российского адреса: проверено
+# и с машины-контроллера (МТС), и с ВМ внутри Yandex Cloud (выход через NAT-шлюз) —
+# разные сети, но оба адреса российские. Позже блокировка распространилась и на
+# ключ подписи: https://artifacts.elastic.co/GPG-KEY-elasticsearch теперь тоже
+# отдаёт 403, а на зеркалах этого файла нет (404 на всех трёх).
+# Зеркала ниже содержат те же самые подписанные пакеты Elastic, поэтому подпись
+# проверяется обычным ключом Elastic. Список перебирается по порядку — берётся
+# первое доступное зеркало; официальный источник оставлен запасным вариантом.
+# Ключ подписи из-за блокировки не скачивается на ВМ, а лежит в проекте:
+# files/elasticsearch-keyring.gpg — бинарный keyring официального ключа Elastic
+# (отпечаток 4609 5ACC 8548 582C 1A26 99A9 D27D 666C D88E 42B4,
+# Elasticsearch Signing Key <dev_ops@elasticsearch.org>).
+elastic_repo_official: "https://artifacts.elastic.co/packages"
+elastic_mirrors:
+  - "https://mirrors.tuna.tsinghua.edu.cn/elasticstack"
+  - "https://mirrors.aliyun.com/elasticstack"
+  - "https://mirrors.cloud.tencent.com/elasticstack"
+
+# Внутренние FQDN ВМ (зона ru-central1.internal) — адреса ВМ меняются при
+# пересоздании, имена остаются
+elasticsearch_host: "elasticsearch.ru-central1.internal"
+elasticsearch_port: 9200
+kibana_host: "kibana.ru-central1.internal"
+kibana_port: 5601
+
+# Журналы nginx на веб-серверах — их забирает Filebeat
+nginx_log_dir: "/var/log/nginx"

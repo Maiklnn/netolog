@@ -20,28 +20,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="038fd028-92f2-4fcd-ac68-b34b3ce777e1" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/deployment.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/SETUP_INSTRUCTIONS.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/TASK_AGENT_RESULT.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/_code_caldav_put.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/_code_parse_build.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/_code_prepare_llm.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/_code_prepare_response.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/_deploy_workflow.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/_dirlist.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/_fix_workflow.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/_generate_task_agent_workflow.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/_get_calendars.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/_inspect_exec.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/_start_n8n.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/_test_agent.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/_test_caldav_put.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/memory-bank/activeContext.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/memory-bank/progress.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/n8n-workflow-message-classification.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/n8n-workflow-task-agent.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/ИИ-агенты/02. Автоматизация с ИИ агентами/01. Автоматизация задач/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/ИИ-агенты/02. Автоматизация с ИИ агентами/01. Автоматизация задач/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Cloude code/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Cloude code/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sys_admin/07. Автоматизация и CI_CD/04. Подъем инфраструктуры в облаке/files/Проект/cloud-init.yml" beforeDir="false" afterPath="$PROJECT_DIR$/sys_admin/07. Автоматизация и CI_CD/04. Подъем инфраструктуры в облаке/files/Проект/cloud-init.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sys_admin/11. Информационная безопасность/12. Диплом/1. Подготовка к дипломной работе/README.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sys_admin/12. Диплом/Документация/deploy.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sys_admin/12. Диплом/Документация/info.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/sys_admin/12. Диплом/Документация/plan.md" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,24 +52,24 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="true" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/ИИ-агенты/02. Автоматизация с ИИ агентами/02. Сборка аналитического агента" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/ИИ-агенты/02. Автоматизация с ИИ агентами/02. Сборка аналитического агента/files" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами\02. Сборка аналитического агента" />
-      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами" />
-      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами\01. Автоматизация задач\files" />
-      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами\01. Автоматизация задач" />
-      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\Документы\Manual\Нитология\sys_admin\12. Диплом\project" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\07. Автоматизация и CI_CD\04. Подъем инфраструктуры в облаке\files\Вспомогательные файлы" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\11. Информационная безопасность\12. Диплом\1. Подготовка к дипломной работе" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\09. Системы хранения и передачи данных\03. ELK\img" />
       <recent name="D:\Документы\Manual\Нитология\ML\03_OOP_API" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами\02. Сборка аналитического агента\files" />
+      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами\02. Сборка аналитического агента" />
+      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами" />
+      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами\01. Автоматизация задач\files" />
+      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами\01. Автоматизация задач" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -121,7 +106,10 @@
       <workItem from="1788892968158" duration="2389000" />
       <workItem from="1789023505796" duration="4142000" />
       <workItem from="1789132867270" duration="599000" />
-      <workItem from="1789338530531" duration="3127000" />
+      <workItem from="1789338530531" duration="5178000" />
+      <workItem from="1789376451795" duration="1188000" />
+      <workItem from="1789456333270" duration="2207000" />
+      <workItem from="1789507381667" duration="4757000" />
     </task>
     <servers />
   </component>

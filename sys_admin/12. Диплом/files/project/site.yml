@@ -1,0 +1,49 @@
+---
+- name: Установка nginx и публикация статического сайта
+  gather_facts: false
+  hosts: webservers
+  vars:
+    ansible_ssh_user: user
+  become: yes
+
+  pre_tasks:
+    - name: Validating the ssh port is open and
+      wait_for:
+        host: "{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}"
+        port: 22
+        delay: 5
+        timeout: 300
+        state: started
+        search_regex: OpenSSH
+
+  tasks:
+    - name: Install nginx if it is not present
+      apt:
+        name: nginx
+        state: present
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Ensure nginx is enabled and started
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+
+    - name: Deploy static site files
+      copy:
+        src: site/
+        dest: /var/www/html/
+        owner: www-data
+        group: www-data
+        mode: "0644"
+        directory_mode: "0755"
+
+    - name: Check the site answers on port 80
+      uri:
+        url: "http://127.0.0.1/"
+        status_code: 200
+      register: site_check
+      retries: 5
+      delay: 2
+      until: site_check.status == 200

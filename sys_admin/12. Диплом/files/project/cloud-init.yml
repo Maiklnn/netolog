@@ -6,3 +6,5 @@ users:
     sudo: ["ALL=(ALL) NOPASSWD:ALL"]
     ssh_authorized_keys:
       - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPxLLs6SYPig/rwijAQ6oxq+zER5CG0MEAa34hzfdiaf mixa@DESKTOP-M6JPQEJ
+      # ключ ansible-контроллера (сервер, с которого выполняется playbook)
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIrqkp+qD61JVNYu9ChTqVZa+/1NF8K12UTfaChk8u42 root@ansible-controller

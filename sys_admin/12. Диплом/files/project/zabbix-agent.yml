@@ -1,0 +1,126 @@
+---
+# Установка Zabbix Agent 7.0 на все ВМ стенда (bastion, веб-серверы, сам Zabbix-сервер)
+# и настройка отправки метрик на Zabbix Server по внутреннему FQDN.
+- name: Установка и настройка Zabbix Agent
+  hosts: all
+  become: true
+
+  vars:
+    ansible_ssh_user: user
+    zabbix_release_branch: "7.0"
+    zabbix_release_pkg: "7.0-5"
+    # адрес Zabbix Server: внутреннее FQDN, резолвится через зону ru-central1.internal
+    zabbix_server_address: "zabbix.ru-central1.internal"
+
+  tasks:
+    - name: Ожидание готовности ВМ по SSH
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+    - name: Обновление кеша пакетов
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Подключение официального репозитория Zabbix
+      ansible.builtin.apt:
+        deb: "https://repo.zabbix.com/zabbix/{{ zabbix_release_branch }}/ubuntu/pool/main/z/zabbix-release/zabbix-release_{{ zabbix_release_pkg }}+ubuntu22.04_all.deb"
+
+    - name: Обновление кеша после подключения репозитория
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: Установка Zabbix Agent
+      ansible.builtin.apt:
+        name:
+          - zabbix-agent
+          - curl          # нужен для пользовательских параметров агента
+          - zabbix-get    # утилита zabbix_get для диагностики
+        state: present
+
+    # Агент на самой ВМ Zabbix-сервера резолвит своё FQDN в 127.0.1.1 (запись в /etc/hosts
+    # от cloud-init), поэтому Server=zabbix.ru-central1.internal разрешал бы пассивные
+    # проверки только с адреса 127.0.1.1, а сервер обращается к агенту со своего
+    # внутреннего адреса — агент рвал соединение с текстом «empty response ... because of
+    # access permission», и метрики диска и сети на этом узле не собирались.
+    # Поэтому в списке разрешённых адресов, кроме FQDN, указываем localhost и собственный
+    # внутренний адрес ВМ (факт ansible_default_ipv4, а не адрес из inventory).
+    - name: Список адресов, с которых разрешены пассивные проверки
+      ansible.builtin.set_fact:
+        zabbix_agent_allowed: >-
+          {{ [zabbix_server_address, '127.0.0.1', ansible_default_ipv4.address] | unique | join(',') }}
+
+    - name: Адрес Zabbix Server и имя хоста в конфигурации агента
+      ansible.builtin.lineinfile:
+        path: /etc/zabbix/zabbix_agentd.conf
+        regexp: "^#?{{ item.key }}="
+        line: "{{ item.key }}={{ item.value }}"
+      loop:
+        - { key: "Server", value: "{{ zabbix_agent_allowed }}" }
+        - { key: "ServerActive", value: "{{ zabbix_server_address }}" }
+        - { key: "Hostname", value: "{{ ansible_hostname }}" }
+      notify: перезапуск zabbix-agent
+
+    - name: Запуск агента
+      ansible.builtin.service:
+        name: zabbix-agent
+        state: started
+        enabled: true
+
+    # Обработчики не выполняются на узлах, где плейбук упал, поэтому изменения
+    # конфигурации применяем принудительно, не дожидаясь конца плейбука.
+    - name: Применение новой конфигурации агента до проверок
+      ansible.builtin.meta: flush_handlers
+
+    # Пробный опрос без падения задачи: если агент уже перезапущен с новым списком
+    # Server, опрос проходит сразу; если агент всё ещё работает со старой
+    # конфигурацией (например, конфигурация была изменена упавшим прогоном),
+    # проба не проходит — тогда перезапускаем агент и проверяем снова.
+    - name: Пробный опрос агента локально
+      ansible.builtin.command: "zabbix_get -s 127.0.0.1 -k agent.version"
+      register: zbx_agent_probe
+      changed_when: false
+      failed_when: false
+
+    - name: Перезапуск агента, работающего со старой конфигурацией
+      ansible.builtin.service:
+        name: zabbix-agent
+        state: restarted
+      when: zbx_agent_probe.rc != 0
+
+    - name: Проверка, что агент отвечает локально
+      ansible.builtin.command: "zabbix_get -s 127.0.0.1 -k agent.version"
+      register: zbx_agent_version
+      changed_when: false
+      retries: 5
+      delay: 3
+      until: zbx_agent_version.rc == 0
+
+    - name: Версия установленного агента
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }}: zabbix agent {{ zbx_agent_version.stdout }}"
+
+    # Проверяем именно тот путь, которым пользуется Zabbix Server: опрос агента
+    # по внутреннему FQDN. Проверка нужна на самой ВМ Zabbix-сервера — там своё FQDN
+    # резолвится в 127.0.1.1, и со старым значением Server агент рвал соединение.
+    # На остальных ВМ порт агента 10050 в внутреннюю сеть не открыт (это не нужно:
+    # сервер сам опрашивает их, см. проверку в zabbix-dashboards.yml).
+    - name: Проверка опроса агента по внутреннему FQDN
+      ansible.builtin.command: "zabbix_get -s {{ zabbix_server_address }} -k agent.version"
+      register: zbx_agent_fqdn
+      changed_when: false
+      retries: 5
+      delay: 3
+      until: zbx_agent_fqdn.rc == 0
+      when: inventory_hostname in groups['zabbix']
+
+    - name: Ответ агента по FQDN
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }}: опрос по {{ zabbix_server_address }} → {{ zbx_agent_fqdn.stdout }}"
+      when: inventory_hostname in groups['zabbix']
+
+  handlers:
+    - name: перезапуск zabbix-agent
+      ansible.builtin.service:
+        name: zabbix-agent
+        state: restarted

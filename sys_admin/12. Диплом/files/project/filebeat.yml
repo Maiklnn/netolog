@@ -1,0 +1,238 @@
+---
+# Filebeat на веб-серверах: забирает журналы nginx (access.log и error.log)
+# и отправляет их в Elasticsearch. Дашборды и конвейеры обработки журналов
+# загружаются в Elasticsearch и Kibana командой filebeat setup.
+- name: Отправка журналов nginx в Elasticsearch через Filebeat
+  hosts: webservers
+  become: true
+
+  vars_files:
+    - elk-common.yml
+
+  vars:
+    ansible_ssh_user: user
+
+  tasks:
+    - name: Ожидание готовности ВМ по SSH
+      ansible.builtin.wait_for_connection:
+        timeout: 300
+
+    - name: Обновление кеша пакетов
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Вспомогательные пакеты для подключения репозитория Elastic
+      ansible.builtin.apt:
+        name:
+          - gnupg
+          - curl
+          - apt-transport-https
+        state: present
+
+    - name: Ключ подписи репозитория Elastic
+      # Официальный адрес ключа (artifacts.elastic.co/GPG-KEY-elasticsearch) отдаёт
+      # 403 российским адресам, а на зеркалах файла ключа нет (404). Поэтому ключ
+      # Elastic — отпечаток 4609 5ACC 8548 582C 1A26 99A9 D27D 666C D88E 42B4,
+      # Elasticsearch Signing Key <dev_ops@elasticsearch.org> — хранится в проекте
+      # (каталог files/) и просто копируется на ВМ.
+      ansible.builtin.copy:
+        src: files/elasticsearch-keyring.gpg
+        dest: /usr/share/keyrings/elasticsearch-keyring.gpg
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Поиск доступного источника пакетов Elastic
+      # официальный сайт блокирует выдачу пакетов российским адресам (403)
+      ansible.builtin.uri:
+        url: "{{ item }}/{{ elastic_repo_branch }}/apt/dists/stable/Release"
+        status_code: 200
+        timeout: 20
+      loop: "{{ elastic_mirrors + [elastic_repo_official] }}"
+      register: elastic_probe
+      failed_when: false
+      changed_when: false
+
+    - name: Выбранный источник пакетов Elastic
+      ansible.builtin.set_fact:
+        elastic_repo_base: >-
+          {{ (elastic_probe.results
+              | selectattr('status', 'defined')
+              | selectattr('status', 'equalto', 200)
+              | map(attribute='item') | list | first) | default(elastic_repo_official) }}
+
+    - name: Показать выбранный источник пакетов
+      ansible.builtin.debug:
+        msg: "пакеты Filebeat берутся из {{ elastic_repo_base }}"
+
+    # Файл репозитория пишем напрямую (copy): модуль apt_repository при неудачном
+    # обновлении кеша откатывает файл к прежнему содержимому.
+    - name: Подключение репозитория Elastic {{ elastic_repo_branch }}
+      ansible.builtin.copy:
+        dest: /etc/apt/sources.list.d/elastic-{{ elastic_repo_branch }}.list
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          # Источник пакетов Elastic — {{ elastic_repo_base }}
+          # (почему не официальный сайт — см. комментарий в elk-common.yml)
+          deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] {{ elastic_repo_base }}/{{ elastic_repo_branch }}/apt stable main
+
+    - name: Обновление кеша пакетов после подключения репозитория
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: Установка Filebeat
+      ansible.builtin.apt:
+        name: filebeat
+        state: present
+
+    - name: Доступ к журналам nginx
+      # служба Filebeat работает от root и читает журналы в любом случае; членство
+      # в группе adm оставлено на случай перевода службы на пользователя filebeat
+      ansible.builtin.user:
+        name: filebeat
+        groups: adm
+        append: true
+
+    - name: Конфигурация Filebeat — модуль nginx и вывод в Elasticsearch
+      ansible.builtin.copy:
+        dest: /etc/filebeat/filebeat.yml
+        owner: root
+        group: root
+        mode: "0644"
+        content: |
+          # --- что собираем: модуль nginx, наборы access и error ---
+          # Модуль разбирает строки журналов на поля (метод, путь, код ответа, время
+          # обработки, клиент, User-Agent, для error.log — уровень и текст ошибки).
+          # Разбор выполняют конвейеры обработки Elasticsearch, они загружаются
+          # командой filebeat setup.
+          filebeat.modules:
+            - module: nginx
+              access:
+                enabled: true
+                var.paths: ["{{ nginx_log_dir }}/access.log*"]
+              error:
+                enabled: true
+                var.paths: ["{{ nginx_log_dir }}/error.log*"]
+
+          # --- куда отправляем ---
+          output.elasticsearch:
+            hosts: ["http://{{ elasticsearch_host }}:{{ elasticsearch_port }}"]
+
+          # --- где Kibana: через неё загружаются дашборды по журналам nginx ---
+          setup.kibana:
+            host: "http://{{ kibana_host }}:{{ kibana_port }}"
+
+          # --- шаблоны индексов, конвейеры и политика хранения загружаются setup-ом ---
+          setup.ilm.enabled: true
+          setup.template.enabled: true
+
+          logging.level: info
+          logging.to_files: true
+          logging.files:
+            path: /var/log/filebeat
+            name: filebeat
+            keepfiles: 7
+            permissions: 0644
+      notify: перезапуск filebeat
+
+    - name: Версия установленного Filebeat
+      ansible.builtin.command: dpkg-query -W -f='${Version}' filebeat
+      register: fb_version
+      changed_when: false
+
+    - name: Проверка синтаксиса конфигурации Filebeat
+      ansible.builtin.command: filebeat test config -e
+      register: fb_config
+      changed_when: false
+
+    - name: Проверка соединения Filebeat с Elasticsearch
+      ansible.builtin.command: filebeat test output
+      register: fb_output
+      changed_when: false
+
+    - name: Показать версию и результат проверки соединения
+      ansible.builtin.debug:
+        msg:
+          - "filebeat {{ fb_version.stdout }}"
+          - "{{ fb_output.stdout_lines | select('search', 'talk to server|version|elasticsearch') | list }}"
+
+    - name: Загрузка шаблонов индексов, конвейеров обработки и дашбордов
+      # без этого шага журналы придут неразобранными, а в Kibana не будет дашбордов
+      ansible.builtin.command: filebeat setup --modules nginx -e
+      register: fb_setup
+      changed_when: true
+      # Elasticsearch и Kibana запускаются на прерываемых ВМ медленно — даём запас
+      retries: 5
+      delay: 20
+      until: fb_setup.rc == 0
+
+    - name: Итог загрузки настроек в Elasticsearch и Kibana
+      ansible.builtin.debug:
+        msg: "{{ fb_setup.stdout_lines | select('search', 'Index setup|Loaded|dashboards|ILM|Pipeline') | list }}"
+
+    - name: Запуск Filebeat
+      ansible.builtin.systemd:
+        name: filebeat
+        state: started
+        enabled: true
+        daemon_reload: true
+
+    - name: Состояние службы Filebeat
+      ansible.builtin.command: systemctl is-active filebeat
+      register: fb_state
+      changed_when: false
+
+    - name: Показать состояние службы
+      ansible.builtin.debug:
+        msg: "filebeat: {{ fb_state.stdout }}"
+
+  handlers:
+    - name: перезапуск filebeat
+      ansible.builtin.systemd:
+        name: filebeat
+        state: restarted
+        daemon_reload: true
+
+# Проверка выполняется на самой ВМ Elasticsearch: с машины-контроллера внутренний
+# FQDN не резолвится, а ходить на 9200 через bastion для проверки не нужно.
+- name: Проверка, что журналы nginx дошли до Elasticsearch
+  hosts: elasticsearch
+  become: true
+  vars:
+    ansible_ssh_user: user
+    elasticsearch_port: 9200
+
+  tasks:
+    - name: Список индексов Filebeat
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ elasticsearch_port }}/_cat/indices/filebeat-*?format=json&h=index,docs.count,store.size&s=index"
+        return_content: true
+      register: fb_indices
+      retries: 15
+      delay: 10
+      until: "'filebeat-' in fb_indices.content"
+
+    - name: Число записей в индексах
+      ansible.builtin.debug:
+        msg: >-
+          {% for i in (fb_indices.content | from_json) %}
+          индекс {{ i.index }}: записей {{ i['docs.count'] }}, размер {{ i['store.size'] }}
+          {% endfor %}
+
+    - name: Пример последней записи журнала nginx в Elasticsearch
+      ansible.builtin.uri:
+        url: "http://127.0.0.1:{{ elasticsearch_port }}/filebeat-*/_search?size=1&sort=@timestamp:desc"
+        return_content: true
+      register: fb_last
+      changed_when: false
+
+    - name: Показать последнюю запись
+      ansible.builtin.debug:
+        msg: >-
+          узел {{ (fb_last.content | from_json).hits.hits[0]._source.host.name | default('нет') }},
+          файл {{ (fb_last.content | from_json).hits.hits[0]._source.log.file.path | default('нет') }},
+          набор {{ (fb_last.content | from_json).hits.hits[0]._source.event.dataset | default('нет') }},
+          время {{ (fb_last.content | from_json).hits.hits[0]._source['@timestamp'] | default('нет') }}
