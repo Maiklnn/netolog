@@ -22,11 +22,6 @@
     <list default="true" id="038fd028-92f2-4fcd-ac68-b34b3ce777e1" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Cloude code/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Cloude code/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sys_admin/07. Автоматизация и CI_CD/04. Подъем инфраструктуры в облаке/files/Проект/cloud-init.yml" beforeDir="false" afterPath="$PROJECT_DIR$/sys_admin/07. Автоматизация и CI_CD/04. Подъем инфраструктуры в облаке/files/Проект/cloud-init.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sys_admin/11. Информационная безопасность/12. Диплом/1. Подготовка к дипломной работе/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sys_admin/12. Диплом/Документация/deploy.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sys_admin/12. Диплом/Документация/info.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/sys_admin/12. Диплом/Документация/plan.md" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,7 +47,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="true" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/ИИ-агенты/02. Автоматизация с ИИ агентами/02. Сборка аналитического агента/files" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/sys_admin/12. Диплом/files" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
@@ -65,11 +60,11 @@
       <recent name="D:\Документы\Manual\Нитология\ML\03_OOP_API" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Документы\Manual\Нитология\sys_admin\12. Диплом\files" />
       <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами\02. Сборка аналитического агента\files" />
       <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами\02. Сборка аналитического агента" />
       <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами" />
       <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами\01. Автоматизация задач\files" />
-      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами\01. Автоматизация задач" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -109,7 +104,9 @@
       <workItem from="1789338530531" duration="5178000" />
       <workItem from="1789376451795" duration="1188000" />
       <workItem from="1789456333270" duration="2207000" />
-      <workItem from="1789507381667" duration="4757000" />
+      <workItem from="1789507381667" duration="5475000" />
+      <workItem from="1789598261077" duration="599000" />
+      <workItem from="1789643167202" duration="2042000" />
     </task>
     <servers />
   </component>

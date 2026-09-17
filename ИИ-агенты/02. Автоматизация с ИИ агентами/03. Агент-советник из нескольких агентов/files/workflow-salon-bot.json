@@ -1,0 +1,302 @@
+{
+  "name": "Салон красоты: WebHook → AI Agent (Ollama) → Яндекс.Календарь",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "salon-bot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -980,
+        300
+      ],
+      "webhookId": "salon-bot"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Приводим входящее сообщение к единому виду\nconst body = $input.first().json.body ?? $input.first().json;\nconst message = String(body.message ?? body.text ?? body.chatInput ?? '').trim();\nconst sessionId = String(body.session_id ?? body.chat_id ?? 'guest');\n\nreturn [{ json: { message, session_id: sessionId } }];"
+      },
+      "id": "a1000000-0000-4000-8000-000000000002",
+      "name": "Нормализация запроса",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -760,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "fileSelector": "/var/lib/n8n/.n8n-files/pricelist.md",
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000003",
+      "name": "Читать прайс-лист",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -540,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "data",
+        "destinationKey": "data",
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000004",
+      "name": "Прайс-лист (текст)",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Нормализация запроса').item.json.message }}",
+        "options": {
+          "systemMessage": "=Ты — администратор салона красоты «Ника». Ты общаешься с клиентом в чате и записываешь его на услуги.\n\nТекущие дата и время (Москва, UTC+3): {{ $now.setZone('Europe/Moscow').toFormat(\"yyyy-MM-dd HH:mm\") }}\n\nПРАЙС-ЛИСТ (единственный источник данных об услугах, длительности и ценах):\n{{ $('Прайс-лист (текст)').item.json.data }}\n\nАЛГОРИТМ РАБОТЫ:\n1. Определи, какую услугу хочет клиент, и найди её в прайс-листе (по названию или смыслу). Если услуги в прайс-листе нет — вежливо сообщи об этом и предложи подходящие услуги из прайс-листа.\n2. Определи желаемые дату и время. Если год не указан — бери ближайшую будущую дату. Если дата уже прошла — сообщи об этом и предложи ближайшую будущую дату. Часы работы салона: 10:00–21:00, последняя запись начинается не позже 20:00.\n3. Перед записью ОБЯЗАТЕЛЬНО проверь календарь инструментом get_calendar_events (параметр date — дата в формате YYYY-MM-DD). Инструмент вернёт занятые интервалы и свободные окна уже в московском времени — пересчитывать часовые пояса не нужно.\n4. Сравни нужный интервал [начало, начало + длительность услуги из прайс-листа] со списком занятых интервалов. Если он попадает в свободное окно — слот свободен.\n5. Если слот свободен — создай запись инструментом create_calendar_event, передав: service (точное название услуги из прайс-листа), start (начало в формате 2026-10-10T15:00, московское время), duration_minutes (длительность услуги из прайс-листа), client_name и phone (если клиент их назвал; если нет — уточни).\n6. Если слот занят — предложи ближайшие свободные варианты на этот день (шаг 30 минут в пределах рабочего дня) и запиши только после согласия клиента.\n7. Подтверди запись сообщением вида: «Вы записаны на [услуга] [дата] в [время]. Стоимость — [цена] ₽.»\n\nПРАВИЛА:\n- Не выдумывай услуги, длительность и цены — только из прайс-листа.\n- Никогда не создавай запись, не проверив календарь инструментом get_calendar_events.\n- Помни контекст предыдущих сообщений клиента и опирайся на него.\n- Если данных не хватает (услуга, дата, время) — задай один уточняющий вопрос.\n- Каждое сообщение клиенту начинай со служебного маркера «###»: после него — только сам ответ клиенту, без рассуждений, планов и упоминаний инструментов. Маркер клиент не увидит.\n- Ответ клиенту — по-русски, дружелюбно и кратко."
+        }
+      },
+      "id": "a1000000-0000-4000-8000-000000000005",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -60,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "model": "deepseek-v4.1-flash:cloud",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "a1000000-0000-4000-8000-000000000006",
+      "name": "Ollama Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        540
+      ],
+      "credentials": {
+        "ollamaApi": {
+          "id": "DEHgfM1I0ZJBmGoo",
+          "name": "Ollama (10.0.2.2:11434)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Нормализация запроса').item.json.session_id }}",
+        "contextWindowLength": 15
+      },
+      "id": "a1000000-0000-4000-8000-000000000007",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        20,
+        540
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Проверяет занятость календаря салона на указанную дату. Возвращает список занятых интервалов и свободные окна в рабочих часах 10:00–21:00 (время московское). Обязательно вызывай этот инструмент перед созданием записи.",
+        "language": "javaScript",
+        "jsCode": "/*\n * Инструмент AI Agent: get_calendar_events\n * Проверяет занятость Яндекс.Календаря салона на указанную дату.\n *\n * Почему Code Tool, а не HTTP Request Tool:\n * узел HTTP Request в n8n добавляет тело запроса только для методов\n * PATCH/POST/PUT/GET (HttpRequestV3.node.js:302), поэтому CalDAV-метод REPORT\n * всегда уходил без тела и Яндекс отвечал 504. Через this.helpers.httpRequest\n * метод и тело передаются как есть (этот же приём использован в рабочем\n * workflow «ИИ-агент: WebHook → LLM → Яндекс.Календарь»).\n *\n * Вход (JSON Schema узла): { \"date\": \"2027-02-10\" }\n * Выход: текст со списком занятых интервалов и свободных окон (время московское).\n */\n\nconst EMAIL = 'web-nnru@yandex.ru';\nconst PASSWORD = 'mzffbcryjqytxefz';\nconst CALENDAR_ID = 'events-4135431';\nconst MSK_OFFSET_MS = 3 * 60 * 60 * 1000; // Europe/Moscow = UTC+3\n\nconst date = String(query.date || '').trim();\nconst parsed = date.match(/^(\\d{4})-(\\d{2})-(\\d{2})$/);\nif (!parsed) {\n\treturn 'Ошибка: дата должна быть в формате YYYY-MM-DD, получено: \"' + date + '\"';\n}\n\n// Границы окна запроса: сутки до и двое суток после запрошенного дня\n// (чтобы поймать события, начавшиеся накануне и «налезающие» на нужный день).\nconst dayStartMsk = Date.UTC(Number(parsed[1]), Number(parsed[2]) - 1, Number(parsed[3])) - MSK_OFFSET_MS;\nconst rangeFrom = new Date(dayStartMsk - 24 * 60 * 60 * 1000);\nconst rangeTo = new Date(dayStartMsk + 2 * 24 * 60 * 60 * 1000);\nconst toCalDav = (d) => d.toISOString().replace(/[-:]|\\.\\d{3}/g, '');\n\nconst body = [\n\t'<?xml version=\"1.0\" encoding=\"utf-8\" ?>',\n\t'<c:calendar-query xmlns:d=\"DAV:\" xmlns:c=\"urn:ietf:params:xml:ns:caldav\">',\n\t'  <d:prop><d:getetag/><c:calendar-data/></d:prop>',\n\t'  <c:filter><c:comp-filter name=\"VCALENDAR\"><c:comp-filter name=\"VEVENT\">',\n\t'    <c:time-range start=\"' + toCalDav(rangeFrom) + '\" end=\"' + toCalDav(rangeTo) + '\"/>',\n\t'  </c:comp-filter></c:comp-filter></c:filter>',\n\t'</c:calendar-query>',\n].join('\\n');\n\nlet response;\ntry {\n\tresponse = await this.helpers.httpRequest({\n\t\tmethod: 'REPORT',\n\t\turl: 'https://caldav.yandex.ru/calendars/' + encodeURIComponent(EMAIL) + '/' + CALENDAR_ID + '/',\n\t\theaders: {\n\t\t\tDepth: '1',\n\t\t\t'Content-Type': 'application/xml; charset=utf-8',\n\t\t},\n\t\tauth: { username: EMAIL, password: PASSWORD },\n\t\tbody,\n\t\treturnFullResponse: true,\n\t\tignoreHttpStatusErrors: true,\n\t\ttimeout: 30000,\n\t});\n} catch (error) {\n\treturn 'Не удалось обратиться к календарю: ' + (error.message || String(error));\n}\n\nif (response.statusCode >= 400) {\n\treturn 'Календарь вернул ошибку HTTP ' + response.statusCode + ': ' + String(response.body).slice(0, 200);\n}\n\n// --- Разбор ответа CalDAV (multistatus с блоками VEVENT) -------------------\nconst payload = String(response.body || '');\nconst veventRe = /BEGIN:VEVENT[\\s\\S]*?END:VEVENT/g;\n\n// Возвращает объект Date для значения iCalendar (UTC с Z или локальное без Z).\nconst parseIcalDate = (value) => {\n\tconst m = String(value).match(/^(\\d{4})(\\d{2})(\\d{2})(?:T(\\d{2})(\\d{2})(\\d{2})(Z?))?/);\n\tif (!m) return null;\n\tconst base = Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]),\n\t\tNumber(m[4] || 0), Number(m[5] || 0), Number(m[6] || 0));\n\t// Время без суффикса Z — «плавающее»; Яндекс хранит его в московском поясе.\n\treturn new Date(m[7] === 'Z' ? base + MSK_OFFSET_MS : base);\n};\n\n// Даты/время храним уже сдвинутыми на +3 ч, поэтому toISOString() отдаёт\n// московское «настенное» время.\nconst mskDate = (d) => d.toISOString().slice(0, 10);\nconst mskTime = (d) => d.toISOString().slice(11, 16);\n// Начало и конец суток по московскому времени — в той же сдвинутой шкале\nconst dayStart = new Date(dayStartMsk + MSK_OFFSET_MS);\nconst readField = (block, name) => {\n\tconst m = block.match(new RegExp('^' + name + '(?:;[^:\\\\r\\\\n]*)?:(.+)$', 'm'));\n\treturn m ? m[1].trim() : '';\n};\n\nconst events = [];\nlet match;\nwhile ((match = veventRe.exec(payload)) !== null) {\n\tconst block = match[0];\n\tconst allDay = /^\\d{8}$/.test(readField(block, 'DTSTART'));\n\tconst start = parseIcalDate(readField(block, 'DTSTART'));\n\tif (!start) continue;\n\tlet end = parseIcalDate(readField(block, 'DTEND'));\n\tif (!end) {\n\t\tconst duration = readField(block, 'DURATION').match(/PT(?:(\\d+)H)?(?:(\\d+)M)?/);\n\t\tconst minutes = duration ? Number(duration[1] || 0) * 60 + Number(duration[2] || 0) : 60;\n\t\tend = new Date(start.getTime() + (minutes || 60) * 60 * 1000);\n\t}\n\tevents.push({\n\t\tallDay,\n\t\tstart,\n\t\tend,\n\t\tsummary: readField(block, 'SUMMARY') || 'Запись',\n\t});\n}\n\n// Оставляем только события, которые попадают в запрошенный день (по Москве)\nconst dayEvents = events\n\t.filter((e) => mskDate(e.start) === date || mskDate(e.end) === date || (e.start < new Date(dayStart.getTime() + 86400000) && e.end > dayStart))\n\t.sort((a, b) => a.start - b.start);\n\nconst lines = [];\nif (dayEvents.length === 0) {\n\tlines.push('На ' + date + ' записей в календаре нет — день полностью свободен.');\n} else {\n\tlines.push('Занятые интервалы на ' + date + ' (время московское, UTC+3):');\n\tfor (const e of dayEvents) {\n\t\tconst interval = e.allDay ? 'весь день' : mskTime(e.start) + '–' + mskTime(e.end);\n\t\tlines.push('- ' + interval + ' — ' + e.summary);\n\t}\n\n\t// Свободные окна внутри рабочих часов салона 10:00–21:00\n\tconst open = new Date(dayStart.getTime() + 10 * 3600000);\n\tconst close = new Date(dayStart.getTime() + 21 * 3600000);\n\tconst busy = dayEvents\n\t\t.filter((e) => !e.allDay)\n\t\t.map((e) => [e.start < open ? open : e.start, e.end > close ? close : e.end])\n\t\t.filter(([s, en]) => s < close && en > open)\n\t\t.sort((a, b) => a[0] - b[0]);\n\n\tconst free = [];\n\tlet cursor = open;\n\tfor (const [s, en] of busy) {\n\t\tif (s > cursor) free.push(mskTime(cursor) + '–' + mskTime(s));\n\t\tif (en > cursor) cursor = en;\n\t}\n\tif (cursor < close) free.push(mskTime(cursor) + '–' + mskTime(close));\n\tlines.push('Свободные окна в рабочие часы 10:00–21:00: ' + (free.length ? free.join(', ') : 'нет'));\n}\n\nreturn lines.join('\\n');\n",
+        "specifyInputSchema": true,
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"date\": {\n      \"type\": \"string\",\n      \"description\": \"Дата, на которую проверяется занятость, в формате YYYY-MM-DD\"\n    }\n  },\n  \"required\": [\n    \"date\"\n  ]\n}"
+      },
+      "id": "a1000000-0000-4000-8000-000000000008",
+      "name": "get_calendar_events",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        260,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "description": "Создаёт запись клиента в Яндекс.Календаре салона (событие CalDAV). Вызывай только после успешной проверки слота инструментом get_calendar_events.",
+        "language": "javaScript",
+        "jsCode": "/*\n * Инструмент AI Agent: create_calendar_event\n * Создаёт запись клиента в Яндекс.Календаре салона через CalDAV PUT.\n *\n * Вход (JSON Schema узла):\n *   service, start (московское время, YYYY-MM-DDTHH:MM), duration_minutes,\n *   client_name, phone\n * Выход: текст с результатом (создано / ошибка).\n */\n\nconst EMAIL = 'web-nnru@yandex.ru';\nconst PASSWORD = 'mzffbcryjqytxefz';\nconst CALENDAR_ID = 'events-4135431';\nconst MSK_OFFSET_MS = 3 * 60 * 60 * 1000; // Europe/Moscow = UTC+3\n\nconst service = String(query.service || '').trim() || 'Запись в салон';\nconst startRaw = String(query.start || '').trim();\nconst duration = Number(query.duration_minutes) || 60;\nconst clientName = String(query.client_name || '').trim();\nconst phone = String(query.phone || '').trim();\n\nconst parsed = startRaw.match(/^(\\d{4})-(\\d{2})-(\\d{2})[T ](\\d{2}):(\\d{2})/);\nif (!parsed) {\n\treturn 'Ошибка: start должен быть в формате YYYY-MM-DDTHH:MM (московское время), получено: \"' + startRaw + '\"';\n}\n\nconst startMsk = Date.UTC(Number(parsed[1]), Number(parsed[2]) - 1, Number(parsed[3]),\n\tNumber(parsed[4]), Number(parsed[5]));\nconst startUtc = new Date(startMsk - MSK_OFFSET_MS);\nconst endUtc = new Date(startUtc.getTime() + duration * 60 * 1000);\nconst toCalDav = (d) => d.toISOString().replace(/[-:]|\\.\\d{3}/g, '');\n\nconst cleanIcal = (value) => String(value).replace(/[\\r\\n;,]/g, ' ').trim();\nconst uid = 'n8n-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8) + '@salon-bot';\n\nconst ics = [\n\t'BEGIN:VCALENDAR',\n\t'VERSION:2.0',\n\t'PRODID:-//n8n//Salon Bot//RU',\n\t'CALSCALE:GREGORIAN',\n\t'BEGIN:VEVENT',\n\t'UID:' + uid,\n\t'DTSTAMP:' + toCalDav(new Date()),\n\t'DTSTART:' + toCalDav(startUtc),\n\t'DTEND:' + toCalDav(endUtc),\n\t'SUMMARY:' + cleanIcal(service),\n\t'DESCRIPTION:' + cleanIcal('Клиент: ' + (clientName || 'не указан') + '; телефон: ' + (phone || 'не указан')),\n\t'STATUS:CONFIRMED',\n\t'END:VEVENT',\n\t'END:VCALENDAR',\n].join('\\r\\n') + '\\r\\n';\n\nlet response;\ntry {\n\tresponse = await this.helpers.httpRequest({\n\t\tmethod: 'PUT',\n\t\turl: 'https://caldav.yandex.ru/calendars/' + encodeURIComponent(EMAIL) + '/' + CALENDAR_ID + '/' + uid + '.ics',\n\t\theaders: { 'Content-Type': 'text/calendar; charset=utf-8' },\n\t\tauth: { username: EMAIL, password: PASSWORD },\n\t\tbody: ics,\n\t\treturnFullResponse: true,\n\t\tignoreHttpStatusErrors: true,\n\t\ttimeout: 30000,\n\t});\n} catch (error) {\n\treturn 'Не удалось создать запись: ' + (error.message || String(error));\n}\n\nconst mskTime = startRaw.slice(0, 16).replace('T', ' ');\nif (response.statusCode === 201 || response.statusCode === 204 || response.statusCode === 200) {\n\treturn 'Запись создана в Яндекс.Календаре: ' + service + ', ' + mskTime +\n\t\t' (МСК), ' + duration + ' мин, клиент: ' + (clientName || 'не указан') + '. UID: ' + uid;\n}\n\nreturn 'Не удалось создать запись (HTTP ' + response.statusCode + '): ' + String(response.body).slice(0, 200);\n",
+        "specifyInputSchema": true,
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"service\": {\n      \"type\": \"string\",\n      \"description\": \"Точное название услуги из прайс-листа\"\n    },\n    \"start\": {\n      \"type\": \"string\",\n      \"description\": \"Дата и время начала записи по московскому времени, формат YYYY-MM-DDTHH:MM (например 2027-02-10T15:00)\"\n    },\n    \"duration_minutes\": {\n      \"type\": \"number\",\n      \"description\": \"Длительность услуги в минутах (из прайс-листа)\"\n    },\n    \"client_name\": {\n      \"type\": \"string\",\n      \"description\": \"Имя клиента\"\n    },\n    \"phone\": {\n      \"type\": \"string\",\n      \"description\": \"Телефон клиента\"\n    }\n  },\n  \"required\": [\n    \"service\",\n    \"start\",\n    \"duration_minutes\"\n  ]\n}"
+      },
+      "id": "a1000000-0000-4000-8000-000000000009",
+      "name": "create_calendar_event",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        500,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "/*\n * Узел «Очистка ответа» (n8n-nodes-base.code)\n * Модель deepseek-v4.1-flash:cloud — reasoning-модель: она возвращает в поле\n * output не только ответ клиенту, но и цепочку рассуждений (обычно на английском).\n * Узел оставляет только текст, предназначенный клиенту.\n *\n * 1) Приоритет — служебный маркер «###», с которого агент по системному промпту\n *    начинает ответ клиенту. Маркер ищем ТОЛЬКО в начале строки: если искать\n *    его где угодно, алгоритм спотыкается о собственные рассуждения модели\n *    («the rule says each message starts with ###.») и отдаёт клиенту хвост\n *    цепочки размышлений.\n * 2) Если маркера нет — отбрасываем рассуждения, идя по предложениям с конца\n *    до первого «английского» (нет кириллицы, но больше 12 латинских букв),\n *    и обрезаем сырой текст по началу первого оставленного предложения\n *    (обрезка по индексу, а не склейка, — так сохраняются переводы строк\n *    и список услуг).\n * 3) Дополнительно срезаем англоязычный огрызок в начале ответа\n *    («Let me just ask.\\n\\nЗдравствуйте! …»).\n */\n\nconst raw = String($json.output ?? '').trim();\n\nconst hasCyrillic = (s) => /[А-Яа-яЁё]/.test(s);\nconst latinCount = (s) => (s.match(/[A-Za-z]/g) || []).length;\n// Рассуждение: кириллицы нет, а латинских букв много\nconst isReasoning = (s) => !hasCyrillic(s) && latinCount(s) > 12;\n\n// --- 1. Маркер «###» в начале строки ---------------------------------------\nconst markerRe = /^[ \\t]*###[ \\t]*/gm;\nconst markers = [];\nlet marker;\nwhile ((marker = markerRe.exec(raw)) !== null) {\n\tmarkers.push(marker.index + marker[0].length);\n}\nfor (let i = markers.length - 1; i >= 0; i--) {\n\tconst tail = raw.slice(markers[i]).trim();\n\tif (hasCyrillic(tail)) {\n\t\treturn [{ json: { output: tail } }];\n\t}\n}\n\n// --- 2. Без маркера: режем по границе предложения --------------------------\n// Режем и там, где пробел после точки потерян («...booking.отово!» — модель\n// склеивает рассуждение с ответом).\nconst parts = raw.split(/(?<=[.!?])(?=\\s|[А-Яа-яЁё])/);\nconst sentences = [];\nlet cursor = 0;\nfor (const part of parts) {\n\tconst start = raw.indexOf(part, cursor);\n\tcursor = start + part.length;\n\tsentences.push({ start, text: part.trim() });\n}\n\nlet cut = 0;\nfor (let i = sentences.length - 1; i >= 0; i--) {\n\tif (isReasoning(sentences[i].text)) {\n\t\tcut = i + 1 < sentences.length ? sentences[i + 1].start : raw.length;\n\t\tbreak;\n\t}\n}\n\nlet output = raw.slice(cut).trim();\n\n// --- 3. Англоязычный огрызок в начале ответа -------------------------------\nconst firstCyrillic = output.search(/[А-Яа-яЁё]/);\nif (firstCyrillic > 0 && /[A-Za-z]/.test(output.slice(0, firstCyrillic))) {\n\toutput = output.slice(firstCyrillic).trim();\n}\n\nreturn [{ json: { output: output || raw } }];\n"
+      },
+      "id": "a1000000-0000-4000-8000-000000000011",
+      "name": "Очистка ответа",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.output }}",
+        "options": {}
+      },
+      "id": "a1000000-0000-4000-8000-000000000010",
+      "name": "Ответ клиенту",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        520,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Нормализация запроса",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Нормализация запроса": {
+      "main": [
+        [
+          {
+            "node": "Читать прайс-лист",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Читать прайс-лист": {
+      "main": [
+        [
+          {
+            "node": "Прайс-лист (текст)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Прайс-лист (текст)": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_calendar_events": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create_calendar_event": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Очистка ответа",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Очистка ответа": {
+      "main": [
+        [
+          {
+            "node": "Ответ клиенту",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "active": false
+}

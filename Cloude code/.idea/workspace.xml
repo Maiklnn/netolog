@@ -22,11 +22,6 @@
     <list default="true" id="39e63890-f2ff-488d-bdb8-9ca9f1e9df7e" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../sys_admin/07. Автоматизация и CI_CD/04. Подъем инфраструктуры в облаке/files/Проект/cloud-init.yml" beforeDir="false" afterPath="$PROJECT_DIR$/../sys_admin/07. Автоматизация и CI_CD/04. Подъем инфраструктуры в облаке/files/Проект/cloud-init.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../sys_admin/11. Информационная безопасность/12. Диплом/1. Подготовка к дипломной работе/README.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../sys_admin/12. Диплом/Документация/deploy.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../sys_admin/12. Диплом/Документация/info.md" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../sys_admin/12. Диплом/Документация/plan.md" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -75,6 +70,8 @@
       <workItem from="1789376453743" duration="1188000" />
       <workItem from="1789456331355" duration="595000" />
       <workItem from="1789507383979" duration="979000" />
+      <workItem from="1789598252197" duration="599000" />
+      <workItem from="1789643169853" duration="1197000" />
     </task>
     <servers />
   </component>
