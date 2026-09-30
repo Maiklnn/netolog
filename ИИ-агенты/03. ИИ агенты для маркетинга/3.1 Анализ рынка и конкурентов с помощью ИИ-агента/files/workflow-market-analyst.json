@@ -1,0 +1,502 @@
+{
+  "name": "Агент рыночной аналитики: онлайн-школы английского языка",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1,
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 9,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "b1000000-0000-4000-8000-000000000001",
+      "name": "Расписание (еженедельно, Пн 09:00)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1060,
+        260
+      ],
+      "notes": "Регулярный запуск: каждый понедельник в 09:00 по времени сервера."
+    },
+    {
+      "parameters": {},
+      "id": "b1000000-0000-4000-8000-000000000002",
+      "name": "Запуск вручную (кнопка)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1060,
+        440
+      ],
+      "notes": "Ручной запуск из интерфейса n8n кнопкой «Execute workflow»."
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "market-analyst",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "b1000000-0000-4000-8000-000000000016",
+      "name": "Запуск по ссылке (Webhook)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1060,
+        620
+      ],
+      "webhookId": "market-analyst-briefing",
+      "notes": "Ручной запуск по ссылке: GET http://192.168.56.10:5678/webhook/market-analyst"
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "fileSelector": "/var/lib/n8n/.n8n-files/market-analyst/tariffs.csv",
+        "options": {}
+      },
+      "id": "b1000000-0000-4000-8000-000000000003",
+      "name": "1. Тарифы конкурентов (CSV)",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -820,
+        260
+      ],
+      "notes": "ИСТОЧНИК 1 (первичный): таблица тарифов, собранная вручную с сайтов конкурентов."
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "data",
+        "destinationKey": "data",
+        "options": {}
+      },
+      "id": "b1000000-0000-4000-8000-000000000004",
+      "name": "1. Тарифы (текст)",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -620,
+        260
+      ],
+      "notes": ""
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "fileSelector": "/var/lib/n8n/.n8n-files/market-analyst/reviews.csv",
+        "options": {}
+      },
+      "id": "b1000000-0000-4000-8000-000000000005",
+      "name": "2. Отзывы пользователей (CSV)",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        260
+      ],
+      "notes": "ИСТОЧНИК 2 (поведенческий): отзывы с открытых площадок."
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "data",
+        "destinationKey": "data",
+        "options": {}
+      },
+      "id": "b1000000-0000-4000-8000-000000000006",
+      "name": "2. Отзывы (текст)",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -220,
+        260
+      ],
+      "notes": ""
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "fileSelector": "/var/lib/n8n/.n8n-files/market-analyst/market-review.md",
+        "options": {}
+      },
+      "id": "b1000000-0000-4000-8000-000000000007",
+      "name": "3. Обзор рынка (MD)",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        260
+      ],
+      "notes": "ИСТОЧНИК 3 (вторичный): дайджест отраслевых публикаций."
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "data",
+        "destinationKey": "data",
+        "options": {}
+      },
+      "id": "b1000000-0000-4000-8000-000000000008",
+      "name": "3. Обзор рынка (текст)",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        180,
+        260
+      ],
+      "notes": ""
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================================\n// ШАГ 2. ПОДГОТОВКА ДАННЫХ — очистка, нормализация, объединение в один контекст\n// ----------------------------------------------------------------------------\n// На входе три разнородных источника:\n//   1) Тарифы конкурентов  — CSV, собранный вручную с сайтов школ (первичный)\n//   2) Отзывы пользователей — CSV с открытых площадок (поведенческий)\n//   3) Обзор рынка          — текстовая выгрузка профильных материалов (вторичный)\n//\n// На выходе — один нормализованный JSON-контекст: единые названия школ, единая\n// дата в формате YYYY-MM, единый список категорий, дедупликация и чистка текста.\n// ============================================================================\n\nconst tariffsRaw = String($('1. Тарифы (текст)').first().json.data || '');\nconst reviewsRaw = String($('2. Отзывы (текст)').first().json.data || '');\nconst marketRaw  = String($('3. Обзор рынка (текст)').first().json.data || '');\n\n// --- 1. Разбор CSV (с учётом кавычек и переводов строк внутри поля) ---\nfunction parseCSV(text) {\n  const rows = [];\n  let row = [], field = '', inQ = false;\n  const s = String(text).replace(/\\r\\n/g, '\\n').replace(/\\r/g, '\\n');\n  for (let i = 0; i < s.length; i++) {\n    const c = s[i];\n    if (inQ) {\n      if (c === '\"') {\n        if (s[i + 1] === '\"') { field += '\"'; i++; } else { inQ = false; }\n      } else field += c;\n    } else if (c === '\"') {\n      inQ = true;\n    } else if (c === ',') {\n      row.push(field); field = '';\n    } else if (c === '\\n') {\n      row.push(field); rows.push(row); row = []; field = '';\n    } else {\n      field += c;\n    }\n  }\n  if (field.length || row.length) { row.push(field); rows.push(row); }\n  const head = (rows.shift() || []).map(h => h.trim());\n  return rows\n    .filter(r => r.some(v => String(v).trim() !== ''))\n    .map(r => {\n      const o = {};\n      head.forEach((h, i) => { o[h] = (r[i] === undefined ? '' : String(r[i])).trim(); });\n      return o;\n    });\n}\n\n// --- 2. Чистка текста: лишние пробелы, переводы строк, кавычки ---\nfunction clean(v) {\n  return String(v == null ? '' : v)\n    .replace(/\\s+/g, ' ')\n    .replace(/^[\"'«»\\s]+|[\"'«»\\s]+$/g, '')\n    .trim();\n}\n\n// --- 3. Единые названия школ (нормализация сущности) ---\nconst SCHOOLS = {\n  'skyeng': 'Skyeng', 'скиенг': 'Skyeng', 'скайенг': 'Skyeng', 'скай инглиш': 'Skyeng',\n  'инглекс': 'Инглекс', 'englex': 'Инглекс',\n  'englishdom': 'EnglishDom', 'инглишдом': 'EnglishDom', 'инглиш дом': 'EnglishDom'\n};\nfunction normSchool(v) {\n  const k = clean(v).toLowerCase().replace(/[()«»\"]/g, '').replace(/\\s+/g, ' ');\n  if (SCHOOLS[k]) return SCHOOLS[k];\n  const hit = Object.keys(SCHOOLS).find(a => k.includes(a));\n  return hit ? SCHOOLS[hit] : clean(v);\n}\n\n// --- 4. Единый формат даты: DD.MM.YYYY | YYYY-MM-DD | «март 2025» -> YYYY-MM ---\nconst MONTHS = {\n  'январ': '01', 'феврал': '02', 'март': '03', 'апрел': '04', 'ма': '05',\n  'июн': '06', 'июл': '07', 'август': '08', 'сентябр': '09', 'октябр': '10',\n  'ноябр': '11', 'декабр': '12'\n};\nfunction normDate(v) {\n  const s = clean(v);\n  let m = s.match(/(\\d{4})-(\\d{2})-(\\d{2})/);                 // 2025-03-12\n  if (m) return m[1] + '-' + m[2];\n  m = s.match(/(\\d{1,2})[.\\/](\\d{1,2})[.\\/](\\d{4})/);          // 12.03.2025\n  if (m) return m[3] + '-' + m[2].padStart(2, '0');\n  m = s.match(/(\\d{1,2})\\s+([а-яё]+)\\s+(\\d{4})/i);             // 12 марта 2025\n  if (m) {\n    const key = Object.keys(MONTHS).find(k => m[2].toLowerCase().startsWith(k));\n    if (key) return m[3] + '-' + MONTHS[key];\n  }\n  m = s.match(/([а-яё]+)\\s+(\\d{4})/i);                         // март 2025\n  if (m) {\n    const key = Object.keys(MONTHS).find(k => m[1].toLowerCase().startsWith(k));\n    if (key) return m[2] + '-' + MONTHS[key];\n  }\n  m = s.match(/(\\d{4})/);                                      // только год\n  if (m) return m[1];\n  return 'дата не указана';\n}\n\n// --- 5. Единый список категорий: любой текст -> одна каноническая категория ---\n// Сначала пытаемся распознать ЯВНО указанную категорию (колонка category),\n// и только если её нет — определяем категорию по тексту отзыва. Так текстовые\n// совпадения не перебивают разметку, сделанную при сборе данных.\nconst CATEGORY_ALIASES = [\n  [/списан|возврат|деньг|refund|двойн|удерж/i,                              'Списания и возвраты'],\n  [/навязыв|навяза|впарив|доплат|продаж/i,                                  'Навязывание услуг'],\n  [/пробн|бесплатн|вводн/i,                                                 'Пробный урок'],\n  [/разговорн|клуб|speaking/i,                                              'Разговорный клуб'],\n  [/гибк|удобн|свободн|круглосуточн|расписание под/i,                       'Гибкость расписания'],\n  [/отмен|перенос|расписан|график|опозда/i,                                 'Отмена и перенос занятий'],\n  [/цен|дорог|стоимост|тариф|оплат|подорож/i,                               'Цена и оплата'],\n  [/препод|учител|репетитор|носител|педагог/i,                              'Преподаватель'],\n  [/техн|платформ|приложен|интерфейс|кабинет|связ|звук|лаг|глюч|микрофон/i, 'Платформа и техника'],\n  [/поддержк|менеджер|куратор|служб/i,                                      'Поддержка'],\n  [/результат|прогресс|уровен|выучил|эффект|заговор/i,                      'Результат и прогресс'],\n  [/домашн|материал|учебник|методик/i,                                      'Материалы и ДЗ'],\n  [/сайт|регистрац/i,                                                       'Сайт и личный кабинет'],\n  [/репутац|политич|контор|скандал|довери/i,                                'Репутация компании']\n];\n// те же правила, но применяются к тексту отзыва, если категория не указана\nconst CATEGORY_RULES = [\n  [/списан|двойн.*оплат|верн.*деньг|возврат|refund/i,                      'Списания и возвраты'],\n  [/навязыв|навяза|доплат|прода.*(курс|пакет)|впарив/i,                     'Навязывание услуг'],\n  [/пробн|бесплатн.*урок|вводн.*урок/i,                                     'Пробный урок'],\n  [/разговорн.*(клуб|практик)|клуб/i,                                       'Разговорный клуб'],\n  [/гибк|удобн.*врем|свободн.*слот|круглосуточн/i,                          'Гибкость расписания'],\n  [/отмен|перенос|расписан|график|опозда/i,                                 'Отмена и перенос занятий'],\n  [/цен|дорог|стоимост|тариф|оплат|подорож|дороже/i,                        'Цена и оплата'],\n  [/препод|учител|репетитор|носител|педагог/i,                              'Преподаватель'],\n  [/техн|платформ|приложен|интерфейс|связь|звук|лага|глюч|микрофон|кабинет/i, 'Платформа и техника'],\n  [/поддержк|менеджер|служб.*забот|куратор/i,                               'Поддержка'],\n  [/результат|прогресс|заговор|уровен|выучил|стал.*говорить|эффект/i,       'Результат и прогресс'],\n  [/домашн|материал|учебник|методик/i,                                      'Материалы и ДЗ'],\n  [/регистрац|личн.*кабинет|сайт/i,                                         'Сайт и личный кабинет'],\n  [/репутац|политич|скандал|контор|довери/i,                                'Репутация компании']\n];\nfunction normCategory(explicit, text) {\n  const e = clean(explicit).toLowerCase();\n  if (e) {\n    for (const [re, name] of CATEGORY_ALIASES) if (re.test(e)) return name;\n  }\n  const t = clean(text);\n  for (const [re, name] of CATEGORY_RULES) if (re.test(t)) return name;\n  return 'Прочее';\n}\n\n// --- 6. Тональность: из оценки (1-5) либо из текста ---\nfunction normType(type, rating, text) {\n  const t = clean(type).toLowerCase();\n  if (/позитив|positive/.test(t)) return 'позитив';\n  if (/негатив|negative/.test(t)) return 'негатив';\n  if (/смешан|mixed|нейтрал/.test(t)) return 'смешанный';\n  const r = parseFloat(clean(rating).replace(',', '.'));\n  if (!isNaN(r)) return r >= 4 ? 'позитив' : (r <= 2 ? 'негатив' : 'смешанный');\n  if (/отличн|нрав|рекоменд|довол|супер|удобн/i.test(text)) return 'позитив';\n  if (/ужас|разочаров|плохо|обман|вернул|больше не/i.test(text)) return 'негатив';\n  return 'смешанный';\n}\n\n// --- 7. Нормализация трёх источников ---\nconst tariffs = parseCSV(tariffsRaw)\n  .map(r => {\n    const priceFrom = parseFloat(clean(r.price_from).replace(/[^\\d.]/g, '')) || null;\n    const priceTo   = parseFloat(clean(r.price_to).replace(/[^\\d.]/g, '')) || null;\n    const perLesson = parseFloat(clean(r.price_per_lesson).replace(/[^\\d.]/g, '')) || null;\n    return {\n      source: 'Тарифы конкурентов',\n      school: normSchool(r.school),\n      plan: clean(r.plan),\n      lessons: clean(r.lessons),\n      lesson_minutes: clean(r.lesson_minutes),\n      price_per_lesson: perLesson,\n      price_from: priceFrom,\n      price_to: priceTo,\n      // Валюта обязательна: EnglishDom работает на украинском рынке и публикует\n      // цены в гривнах. Без пометки валюты модель сравнила бы 380 грн с 1890 ₽\n      // как сопоставимые числа.\n      currency: /uah|грн/i.test(clean(r.currency)) ? 'грн' : '₽',\n      format: clean(r.format),\n      trial_lesson: clean(r.trial_lesson),\n      notes: clean(r.notes),\n      source_url: clean(r.source_url),\n      checked_date: normDate(r.checked_date)\n    };\n  })\n  .filter(r => r.school && (r.plan || r.price_from));\n\nconst seenReview = new Set();\nconst reviews = parseCSV(reviewsRaw)\n  .map(r => {\n    const text = clean(r.text);\n    return {\n      source: 'Отзывы пользователей',\n      id: clean(r.id),\n      school: normSchool(r.school),\n      date: normDate(r.date),\n      rating: clean(r.rating),\n      platform: clean(r.platform),\n      type: normType(r.type, r.rating, text),\n      category: normCategory(r.category, text),\n      text: text.length > 600 ? text.slice(0, 600) + '…' : text,\n      source_url: clean(r.source_url)\n    };\n  })\n  .filter(r => {\n    if (!r.school || r.text.length < 15) return false;\n    const key = (r.school + '|' + r.text.slice(0, 80)).toLowerCase();\n    if (seenReview.has(key)) return false;   // дедупликация повторов\n    seenReview.add(key);\n    return true;\n  });\n\nconst marketReview = String(marketRaw).split('\\n').map(l => l.replace(/\\s+$/, '')).join('\\n').trim();\n\n// --- 8. Первичная статистика: частоты по категориям (основа для группировки) ---\nconst byCategory = {};\nfor (const r of reviews) {\n  const c = byCategory[r.category] || (byCategory[r.category] = {\n    category: r.category, total: 0, негатив: 0, позитив: 0, смешанный: 0,\n    schools: {}, platforms: {}, months: {}, examples: []\n  });\n  c.total++;\n  c[r.type] = (c[r.type] || 0) + 1;\n  c.schools[r.school] = (c.schools[r.school] || 0) + 1;\n  c.platforms[r.platform] = (c.platforms[r.platform] || 0) + 1;\n  if (/^\\d{4}-\\d{2}$/.test(r.date)) c.months[r.date] = (c.months[r.date] || 0) + 1;\n  if (c.examples.length < 3) c.examples.push('#' + r.id + ': ' + r.text.slice(0, 160));\n}\n\nconst context = {\n  prepared_at: new Date().toISOString().slice(0, 10),\n  object: 'Ниша онлайн-школ английского языка (обучение взрослых, B2C, Россия)',\n  competitors: ['Skyeng', 'Инглекс', 'EnglishDom'],\n  sources: {\n    tariffs: { type: 'первичный', role: 'основной', items: tariffs.length, file: 'tariffs.csv' },\n    reviews: { type: 'поведенческий', role: 'основной', items: reviews.length, file: 'reviews.csv' },\n    market:  { type: 'вторичный', role: 'дополнительный', file: 'market-review.md' }\n  },\n  normalized: { tariffs: tariffs, reviews: reviews, market_review_text: marketReview },\n  stats: {\n    reviews_total: reviews.length,\n    by_school: reviews.reduce((a, r) => (a[r.school] = (a[r.school] || 0) + 1, a), {}),\n    by_type: reviews.reduce((a, r) => (a[r.type] = (a[r.type] || 0) + 1, a), {}),\n    platforms: reviews.reduce((a, r) => (a[r.platform] = (a[r.platform] || 0) + 1, a), {}),\n    by_month: reviews.filter(r => /^\\d{4}-\\d{2}$/.test(r.date))\n      .reduce((a, r) => (a[r.date] = (a[r.date] || 0) + 1, a), {}),\n    date_range: (() => {\n      const d = reviews.map(r => r.date).filter(x => /^\\d{4}-\\d{2}/.test(x)).sort();\n      return d.length ? d[0] + ' … ' + d[d.length - 1] : 'даты не указаны';\n    })(),\n    by_category: Object.values(byCategory).sort((a, b) => b.total - a.total)\n  }\n};\n\nreturn [{ json: { context: context, context_json: JSON.stringify(context) } }];\n"
+      },
+      "id": "b1000000-0000-4000-8000-000000000009",
+      "name": "Нормализация данных",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        380,
+        260
+      ],
+      "notes": "Очистка, приведение к единому виду, объединение трёх источников в один контекст."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================================\n// ШАГ 3. ФИЛЬТРАЦИЯ ШУМА, ГРУППИРОВКА И ВЫДЕЛЕНИЕ КЛЮЧЕВЫХ СИГНАЛОВ\n// ----------------------------------------------------------------------------\n// Здесь заложены жёсткие правила, которые не дают агенту выдать случайный\n// сигнал за вывод. Правила видны прямо в коде — это «правила workflow».\n//\n//   Правило 1 (порог значимости). Сигнал попадает в выводы, только если он\n//     подтверждён >= MIN_SIGNAL независимыми единицами наблюдения.\n//   Правило 2 (кросс-подтверждение). Сигнал усиливается, если встречается\n//     более чем у одной школы ИЛИ подтверждается другим источником (обзор рынка).\n//   Правило 3 (уровни аналитики). Каждый сигнал получает уровень:\n//     ДАННЫЕ      — единичный факт (в выводы не идёт, остаётся в приложении);\n//     НАБЛЮДЕНИЕ  — повторяется, но без объяснения значимости;\n//     ИНСАЙТ      — повторяется + есть подтверждение + понятно, что с этим делать;\n//     ГИПОТЕЗА    — единичный/слабый сигнал, который нельзя терять, но нельзя\n//                   и подавать как вывод.\n// ============================================================================\n\nconst ctx = $json.context;\nconst reviews = ctx.normalized.reviews || [];\nconst tariffs = ctx.normalized.tariffs || [];\nconst marketText = String(ctx.normalized.market_review_text || '');\n\nconst MIN_SIGNAL = 2;        // минимум единиц наблюдения для «наблюдения»\nconst MIN_INSIGHT = 3;       // минимум единиц наблюдения для «инсайта»\n\nconst uniq = a => Array.from(new Set(a));\n\n// --- 1. Группировка: похожие сигналы объединяются в одну категорию ---\nconst groups = {};\nfor (const r of reviews) {\n  const g = groups[r.category] || (groups[r.category] = {\n    category: r.category, items: [], schools: [], platforms: [], months: [],\n    types: { 'позитив': 0, 'негатив': 0, 'смешанный': 0 }\n  });\n  g.items.push(r);\n  g.schools = uniq(g.schools.concat([r.school]));\n  g.platforms = uniq(g.platforms.concat([r.platform]));\n  if (/^\\d{4}-\\d{2}$/.test(r.date)) g.months = uniq(g.months.concat([r.date]));\n  g.types[r.type]++;\n}\n\n// --- 2. Кросс-подтверждение из вторичного источника ---\n// Ключевые слова категории, наличие которых в обзоре рынка усиливает сигнал.\nconst MARKET_KEYWORDS = {\n  'Цена и оплата':                 [/цен|подорож|стоимост|чек/i],\n  'Списания и возвраты':           [/возврат|списан|refund|оплат/i],\n  'Преподаватель':                 [/преподавател|репетитор|кадр|текучк/i],\n  'Платформа и техника':           [/платформ|приложен|мобильн|онлайн-урок|технолог/i],\n  'Поддержка':                     [/поддержк|сервис|клиентск/i],\n  'Результат и прогресс':          [/результат|эффективн|прогресс|качеств/i],\n  'Отмена и перенос занятий':      [/расписан|гибк|отмен/i],\n  'Навязывание услуг':             [/навязыв|дополнительн.*продаж|upsell|апсел/i],\n  'Пробный урок':                  [/пробн|бесплатн|вводн/i],\n  'Гибкость расписания':           [/гибк|расписан|24\\/7|круглосуточн/i],\n  'Разговорный клуб':              [/разговорн|speaking|клуб|практик/i],\n  'Материалы и ДЗ':                [/материал|методик|учебн|контент/i],\n  'Сайт и личный кабинет':         [/интерфейс|личн.*кабинет|сайт|регистрац/i],\n  'Репутация компании':            [/репутац|довери|бренд|скандал/i],\n  'Прочее':                        []\n};\nconst categoryInMarket = c =>\n  (MARKET_KEYWORDS[c] || []).some(re => re.test(marketText));\n\n// --- 3. Присвоение уровней аналитики ---\nconst observations = [];\nconst noise = [];\nconst hypotheses = [];\n\nfor (const g of Object.values(groups).sort((a, b) => b.items.length - a.items.length)) {\n  const count = g.items.length;\n  const crossSchool = g.schools.length >= 2;\n  const crossSource = categoryInMarket(g.category);\n  const negative = g.types['негатив'] || 0;\n  const positive = g.types['позитив'] || 0;\n  const dominant = negative > positive ? 'негатив'\n                 : positive > negative ? 'позитив' : 'смешанный';\n\n  const signal = {\n    category: g.category,\n    count: count,\n    schools: g.schools,\n    platforms: g.platforms,\n    months: g.months,\n    types: g.types,\n    dominant_sentiment: dominant,\n    cross_school: crossSchool,\n    cross_source: crossSource,\n    examples: g.items.slice(0, 4).map(r => '#' + r.id + ' (' + r.school + ', ' + r.date + '): ' + r.text.slice(0, 200)),\n    schools_negative: uniq(g.items.filter(r => r.type === 'негатив').map(r => r.school))\n  };\n\n  if (count >= MIN_INSIGHT && (crossSchool || crossSource)) {\n    // Правило 2+3: повторяется, подтверждается, понятно что делать — ИНСАЙТ\n    signal.level = 'ИНСАЙТ (подтверждён: ' + count + ' наблюдений, школ: ' + g.schools.length +\n                   (crossSource ? ', + подтверждение из обзора рынка' : '') + ')';\n    observations.push(signal);\n  } else if (count >= MIN_SIGNAL) {\n    // Правило 1: повторяется в нескольких единицах наблюдения — НАБЛЮДЕНИЕ\n    signal.level = 'НАБЛЮДЕНИЕ (повторяется: ' + count + ' упоминаний' +\n                   (crossSchool ? ', у ' + g.schools.length + ' школ' : '') + ')';\n    observations.push(signal);\n  } else if (negative >= 1 || crossSource) {\n    // Единичное упоминание: выводом быть не может, но и терять его нельзя — ГИПОТЕЗА.\n    // Отдельно помечаем случай, когда сигнал всё-таки подтверждён вторым источником.\n    signal.level = 'ГИПОТЕЗА (единичное упоминание' +\n                   (crossSource ? ', но подтверждено обзором рынка' : ', подтверждений недостаточно') + ')';\n    hypotheses.push(signal);\n  } else {\n    // Единичный нейтральный или позитивный сигнал — ДАННЫЕ, в выводы не идёт\n    signal.level = 'ДАННЫЕ (единичный факт, исключён из выводов)';\n    noise.push(signal);\n  }\n}\n\n// --- 4. Уязвимости конкурентов: только повторяющиеся (>=2) негативные сигналы ---\nconst weaknesses = [];\nfor (const school of ctx.competitors) {\n  const bad = reviews.filter(r => r.school === school && r.type === 'негатив');\n  const byCat = {};\n  for (const r of bad) byCat[r.category] = (byCat[r.category] || 0) + 1;\n  const confirmed = Object.entries(byCat).filter(([, n]) => n >= MIN_SIGNAL)\n    .sort((a, b) => b[1] - a[1]);\n  if (confirmed.length) {\n    weaknesses.push({\n      school: school,\n      negative_total: bad.length,\n      negative_share: reviews.filter(r => r.school === school).length\n        ? Math.round(bad.length / reviews.filter(r => r.school === school).length * 100) : 0,\n      confirmed: confirmed.map(([c, n]) => ({ category: c, mentions: n })),\n      single_mentions: Object.entries(byCat).filter(([, n]) => n < MIN_SIGNAL).map(([c]) => c),\n      examples: bad.filter(r => confirmed.some(([c]) => c === r.category))\n        .slice(0, 4).map(r => '#' + r.id + ' (' + r.category + '): ' + r.text.slice(0, 180))\n    });\n  }\n}\n\n// --- 5. Сводка по тарифам (первичный источник) ---\nconst tariffSummary = ctx.competitors.map(school => {\n  const rows = tariffs.filter(t => t.school === school);\n  const prices = rows.map(r => r.price_per_lesson).filter(Boolean);\n  const froms = rows.map(r => r.price_from).filter(Boolean);\n  const tos = rows.map(r => r.price_to).filter(Boolean);\n  return {\n    school: school,\n    plans: rows.length,\n    // Минимум и максимум считаются ВНУТРИ одной школы, поэтому смешения валют\n    // не происходит: у каждой школы своя валюта (Россия — рубли, EnglishDom — гривны).\n    currency: uniq(rows.map(r => r.currency).filter(Boolean)).join('/') || '₽',\n    price_per_lesson_min: prices.length ? Math.min(...prices) : null,\n    price_per_lesson_max: prices.length ? Math.max(...prices) : null,\n    price_from_min: froms.length ? Math.min(...froms) : null,\n    price_to_max: tos.length ? Math.max(...tos) : null,\n    lesson_minutes: uniq(rows.map(r => r.lesson_minutes).filter(Boolean)),\n    formats: uniq(rows.map(r => r.format).filter(Boolean)),\n    trial: uniq(rows.map(r => r.trial_lesson).filter(Boolean)),\n    notes: uniq(rows.map(r => r.notes).filter(Boolean)).slice(0, 6),\n    urls: uniq(rows.map(r => r.source_url).filter(Boolean))\n  };\n});\n\n// --- 6. Упаковка для LLM: только то, что прошло фильтр ---\nfunction tbl(rows) {\n  return rows.map(r => '| ' + r.join(' | ') + ' |').join('\\n');\n}\n\nconst monthly = Object.entries(ctx.stats.by_month).sort();\n\nlet pack = '# ПОДГОТОВЛЕННЫЙ КОНТЕКСТ ДЛЯ АНАЛИЗА\\n\\n';\npack += '## Контекст\\n';\npack += '- Объект анализа: ' + ctx.object + '\\n';\npack += '- Конкуренты: ' + ctx.competitors.join(', ') + '\\n';\npack += '- Период данных: ' + ctx.stats.date_range + '\\n';\npack += '- Дата подготовки: ' + ctx.prepared_at + '\\n';\npack += '- Источники: ' + Object.entries(ctx.sources)\n  .map(([k, v]) => v.type + ' (' + v.role + ') — ' + (v.file || k) +\n       (v.items ? ', единиц: ' + v.items : '')).join('; ') + '\\n\\n';\n\npack += '## Тарифы конкурентов (первичный источник, нормализовано)\\n';\npack += '| Школа | Тариф | Занятий | Цена занятия | Валюта | Мин | Макс | Длит., мин | Формат | Пробный | Примечание |\\n';\npack += '|---|---|---|---|---|---|---|---|---|---|---|\\n';\npack += tbl(tariffs.map(t => [t.school, t.plan, t.lessons,\n  t.price_per_lesson || '—', t.currency || '₽', t.price_from || '—', t.price_to || '—',\n  t.lesson_minutes || '—', t.format || '—', t.trial_lesson || '—', (t.notes || '').slice(0, 160)])) + '\\n\\n';\n\n// Предупреждение обязательно: иначе модель складывает гривны с рублями.\nconst currencies = uniq(tariffs.map(t => t.currency));\nif (currencies.length > 1) {\n  pack += 'ВНИМАНИЕ К ТАБЛИЦЕ ТАРИФОВ: цены приведены в РАЗНЫХ валютах (колонка «Валюта»). ' +\n    'Тарифы EnglishDom — в гривнах (грн), потому что школа работает на украинском рынке; ' +\n    'рублёвых тарифов у неё нет. Численно сравнивать гривны с рублями НЕЛЬЗЯ, ' +\n    'суммы и средние по разным валютам не считай.\\n\\n';\n}\n\npack += '## Сводка по тарифам\\n';\npack += '| Школа | Тарифов | Валюта | Мин за занятие | Макс за занятие | Длительность | Форматы | Пробный урок |\\n|---|---|---|---|---|---|---|---|\\n';\npack += tbl(tariffSummary.map(s => [s.school, s.plans, s.currency,\n  s.price_per_lesson_min || '—', s.price_per_lesson_max || '—',\n  s.lesson_minutes.join('/') || '—', s.formats.join('; ') || '—', s.trial.join('; ') || '—'])) + '\\n\\n';\n\npack += '## Отзывы пользователей: частоты (поведенческий источник)\\n';\npack += 'Всего отзывов: ' + ctx.stats.reviews_total + '. По школам: ' +\n  Object.entries(ctx.stats.by_school).map(([k, v]) => k + ' — ' + v).join(', ') + '.\\n';\npack += 'Тональность: ' + Object.entries(ctx.stats.by_type).map(([k, v]) => k + ' — ' + v).join(', ') + '.\\n';\npack += 'Площадки: ' + Object.entries(ctx.stats.platforms).map(([k, v]) => k + ' — ' + v).join(', ') + '.\\n';\nif (monthly.length) pack += 'По месяцам: ' + monthly.map(([m, n]) => m + ' — ' + n).join(', ') + '.\\n';\npack += '\\n### Повторяющиеся сигналы (прошли фильтр шума, порог >= ' + MIN_SIGNAL + ')\\n';\nfor (const s of observations) {\n  pack += '\\n**' + s.category + '** — ' + s.level + '\\n';\n  pack += '  школ: ' + s.schools.join(', ') + '; тональность: ' + s.dominant_sentiment +\n          ' (негатив ' + s.types['негатив'] + ', позитив ' + s.types['позитив'] + ', смешанный ' + s.types['смешанный'] + ')\\n';\n  if (s.months.length) pack += '  месяцы: ' + s.months.join(', ') + '\\n';\n  for (const e of s.examples) pack += '  - ' + e + '\\n';\n}\npack += '\\n### Сигналы ниже порога (переданы как ГИПОТЕЗЫ, не как выводы)\\n';\nif (!hypotheses.length) pack += '- нет\\n';\nfor (const h of hypotheses) {\n  pack += '- ' + h.category + ' — упоминаний: ' + h.count + ' (школы: ' + h.schools.join(', ') + ')\\n';\n}\npack += '\\n### Единичные факты (ШУМ, в выводы НЕ включать)\\n';\nif (!noise.length) pack += '- нет\\n';\nfor (const n of noise) {\n  pack += '- ' + n.category + ' — 1 упоминание (' + n.schools.join(', ') + ')\\n';\n}\n\npack += '\\n## Уязвимости конкурентов (повторяющиеся негативные сигналы, >= ' + MIN_SIGNAL + ')\\n';\nfor (const w of weaknesses) {\n  pack += '\\n**' + w.school + '** — негативных отзывов ' + w.negative_total + ' из ' +\n          reviews.filter(r => r.school === w.school).length + ' (' + w.negative_share + '%)\\n';\n  for (const c of w.confirmed) pack += '  - ' + c.category + ' — подтверждено ' + c.mentions + ' отзывами\\n';\n  if (w.single_mentions.length) pack += '  - единичные жалобы (не выводы): ' + w.single_mentions.join(', ') + '\\n';\n  for (const e of w.examples) pack += '  - пример: ' + e + '\\n';\n}\n\npack += '\\n## Отраслевой обзор рынка (вторичный источник, полный текст)\\n';\npack += marketText + '\\n';\n\nreturn [{\n  json: {\n    context: ctx,\n    analytics_pack: pack,\n    counts: {\n      reviews: reviews.length, tariffs: tariffs.length,\n      observations: observations.length, hypotheses: hypotheses.length,\n      noise_excluded: noise.length, weaknesses: weaknesses.length\n    },\n    observations: observations, hypotheses: hypotheses, noise: noise,\n    weaknesses: weaknesses, tariff_summary: tariffSummary\n  }\n}];\n"
+      },
+      "id": "b1000000-0000-4000-8000-000000000010",
+      "name": "Фильтрация и группировка",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        580,
+        260
+      ],
+      "notes": "Порог значимости, кросс-подтверждение, уровни: данные / наблюдение / инсайт / гипотеза."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.analytics_pack }}",
+        "options": {
+          "systemMessage": "=Ты — ИИ-аналитик рынка и конкурентов. Ты готовишь регулярный аналитический брифинг\nпо нише онлайн-школ английского языка для продуктовой и маркетинговой команды.\n\nЖЁСТКИЕ ПРАВИЛА РАБОТЫ С ДАННЫМИ\n\n1. Используй ТОЛЬКО данные, переданные тебе в блоке «ПОДГОТОВЛЕННЫЙ КОНТЕКСТ ДЛЯ АНАЛИЗА».\n   Не добавляй факты, цифры, названия компаний и события, которых там нет. Если ты знаешь\n   что-то по этой теме из общих знаний — не используй это в брифинге.\n2. Если данных для вывода недостаточно — прямо напиши: «Данных для корректного вывода\n   недостаточно» — и укажи, каких именно данных не хватает.\n3. Считай вывод ПОДТВЕРЖДЁННЫМ только если он: повторяется в нескольких единицах\n   наблюдения ИЛИ подтверждается более чем одним источником ИЛИ опирается на динамику\n   во времени. Всё остальное — гипотеза.\n4. НЕ называй наблюдение трендом без повторяемости во времени или подтверждения из\n   нескольких независимых наблюдений. Если опоры на динамику нет — пиши «паттерн»\n   или «гипотеза», но не «тренд».\n5. Исключай шум: единичные упоминания, случайные всплески, нерелевантные данные.\n   В контексте уже есть блоки «Единичные факты (ШУМ)» и «Сигналы ниже порога» —\n   эти сигналы НЕЛЬЗЯ подавать как выводы. Их можно упомянуть только в разделе\n   гипотез, явно указав, что подтверждений мало.\n6. Не выдумывай причинно-следственные связи. Если связь между явлениями не следует\n   из данных — не утверждай её. Формулируй как предположение с оговоркой.\n7. Следи за валютой. В таблице тарифов есть колонка «Валюта»: у одной из школ цены\n   в гривнах (грн), у остальных в рублях (₽). НЕ сравнивай гривны с рублями численно,\n   не считай средние и разницы по разным валютам и не называй одну школу дешевле\n   другой на основании таких чисел. Сравнивать можно только структуру тарифов:\n   размер пакетной скидки в процентах, длительность урока, состав форматов.\n8. Если данные помечены как «НЕПОДТВЕРЖДЕНО» или «актуальность не подтверждена» —\n   используй их только с этой пометкой и не подавай как факт.\n\nУРОВНИ АНАЛИТИКИ — РАЗДЕЛЯЙ ИХ СТРОГО\n\n- ДАННЫЕ — единичный факт из источника. Приводится как факт, без обобщений.\n- НАБЛЮДЕНИЕ — закономерность, которая повторяется. Указывай, сколько раз и где.\n- ИНСАЙТ — подтверждённое наблюдение, для которого понятно, ПОЧЕМУ это важно и\n  ЧТО с этим делать. Обязательно формулируй применение: что меняем в продукте,\n  цене, коммуникации или маркетинге.\n- ГИПОТЕЗА — вывод, для которого подтверждений пока недостаточно. Помечай\n  явно словом «гипотеза» и указывай, чего не хватает для проверки.\n\nСТРУКТУРА БРИФИНГА (строго соблюдай порядок и заголовки)\n\n## 1. Контекст анализа\nЧто анализировалось, какие конкуренты, какие источники, за какой период.\nЗаканчивай строкой «Ограничения данных:» с перечнем того, чего в данных нет.\n\n## 2. Тренды\nТолько выводы с опорой на динамику во времени или на подтверждение из нескольких\nнезависимых наблюдений. Для каждого тренда — строка «Основание:» с указанием\nконкретных данных (источник, цифры, период).\nЕсли опоры нет — напиши дословно: «Данных для корректного вывода о трендах\nнедостаточно.» и объясни, какого источника не хватает.\n\n## 3. Паттерны\nПовторяющиеся наблюдения. Включай только те, что встречаются минимум в нескольких\nединицах данных или более чем в одном источнике. Для каждого — «Основание:» с\nчислом упоминаний, школами, площадками и подтверждением из второго источника.\n\n## 4. Уязвимости конкурентов\nПовторяющиеся слабые места и пробелы в предложении конкурентов. Для каждой —\n«Основание:» с числом подтверждающих отзывов и ссылкой на тарифные данные.\nЕдиничные жалобы не включай — упомяни их только в разделе гипотез.\n\n## 5. Гипотезы и ограничения\nСначала гипотезы (каждая с пометкой «Гипотеза» и объяснением, почему она пока\nне подтверждена). Затем — ограничения данных и возможные искажения выборки.\n\n## 6. Что делать (приоритизированные действия)\n3–5 конкретных действий для продуктовой и маркетинговой команды. Каждое действие\nдолжно опираться на вывод из разделов 2–4. Не предлагай действий, не следующих\nиз данных.\n\nТРЕБОВАНИЯ К ФОРМАТУ ОТВЕТА\n\n- Отвечай по-русски, в формате Markdown.\n- Для каждого вывода обязательна строка «Основание:» с конкретными данными:\n  цифры, число упоминаний, названия школ, площадки, периоды.\n- Если какой-то раздел пуст — пиши «нет подтверждённых данных» и объясняй почему.\n- Разделяй факт и оценку: если цифра — это оценка аналитиков, а не измеренный\n  факт, помечай это.\n- Не используй слова «очевидно», «безусловно», «все знают».\n- Не добавляй вводных фраз и рассуждений о своей работе.\n\nФОРМАТ ВЫВОДА (важно технически)\n\nТвой ответ должен начинаться со служебного маркера «###» в отдельной строке.\nСразу после маркера — текст брифинга. Ничего до маркера писать не нужно:\nни планов, ни рассуждений, ни пересказа инструкций. Маркер читатель не увидит,\nон нужен только чтобы система отделила брифинг от служебного текста.\n\nЕщё три технических требования, они обязательны:\n\n- Брифинг пишется РОВНО ОДИН РАЗ. Не печатай черновик, не повторяй разделы,\n  не выдавай второй, «улучшенный» вариант ответа. Один набор разделов 1–6.\n- После раздела «## 6. Что делать» текст заканчивается. Никаких дополнительных\n  разделов, приложений и итоговых пересказов после него.\n- Не пересказывай эти инструкции и не комментируй свою работу."
+        }
+      },
+      "id": "b1000000-0000-4000-8000-000000000011",
+      "name": "Аналитик рынка (LLM)",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        800,
+        260
+      ],
+      "notes": "LLM-узел с системным промптом аналитика."
+    },
+    {
+      "parameters": {
+        "model": "deepseek-v4.1-flash:cloud",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "b1000000-0000-4000-8000-000000000012",
+      "name": "Ollama Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        760,
+        480
+      ],
+      "credentials": {
+        "ollamaApi": {
+          "id": "DEHgfM1I0ZJBmGoo",
+          "name": "Ollama (10.0.2.2:11434)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================================\n// ШАГ 5. ОЧИСТКА ОТВЕТА LLM И ФОРМИРОВАНИЕ ИТОГОВОГО БРИФИНГА\n// ----------------------------------------------------------------------------\n// Используемая модель (deepseek-v4.1-flash:cloud) — «рассуждающая»: вместе с\n// брифингом она возвращает цепочку размышлений на английском, причём в самих\n// рассуждениях часто повторяется план с теми же заголовками разделов.\n// Поэтому надёжный признак готового брифинга — не маркер, а ПОЛНЫЙ набор из\n// шести разделов, идущих по порядку. Берём самый поздний такой фрагмент:\n// рассуждения всегда идут раньше финального ответа.\n// ============================================================================\n\nconst src = $input.first().json;\nconst raw = String(\n  (src.message && src.message.content) ? src.message.content :\n  (src.content || src.text || src.output || '')\n).replace(/\\r\\n/g, '\\n');\n\n// Ключевые слова обязательных разделов — в том порядке, в котором они должны идти.\nconst SEC_KEYWORDS = [/контекст/i, /тренд/i, /паттерн/i, /уязвим/i, /гипотез/i, /что делать/i];\n\n// Ищем заголовки разделов ПО ВСЕМУ тексту, а не по началам строк: модель иногда\n// приклеивает заголовок к служебной фразе и он оказывается не в начале строки —\n// например «I'll write concisely but completely.### 1. Контекст анализа».\n// Такой заголовок старый экстрактор не видел и возвращал вместо брифинга план.\nfunction findHeads(t) {\n  const re = /(#{1,6})[ \\t]*([1-6])\\.[ \\t]*([^\\n]*)/g;\n  const heads = [];\n  let m;\n  while ((m = re.exec(t)) !== null) {\n    const sec = parseInt(m[2], 10) - 1;\n    if (sec < 0 || sec > 5) continue;\n    if (!SEC_KEYWORDS[sec].test(m[3])) continue;   // «1. Что-то другое» не считаем\n    heads.push({ sec: sec, start: m.index });\n  }\n  return heads;\n}\n\n// Тело раздела-заглушки: «...», «перечислить.», «list.», «3-5 действий.» —\n// так модель размечает план перед тем, как писать сам брифинг.\nfunction looksLikeStub(s) {\n  return s.replace(/[.\\-—–…\\s]/g, '').length < 30;\n}\n\n// --- 1. Отрезаем служебные рассуждения модели ---\nfunction extractBriefing(t) {\n  const lines = t.split('\\n');\n  const heads = findHeads(t);\n\n  // Основной способ: последний фрагмент, где все шесть разделов идут по порядку,\n  // и при этом каждый раздел наполнен текстом, а не заглушкой.\n  const starts = heads.filter(h => h.sec === 0);\n  for (let k = starts.length - 1; k >= 0; k--) {\n    const chain = [starts[k]];\n    let ok = true;\n    for (let s = 1; s < 6; s++) {\n      const next = heads.find(h => h.sec === s && h.start > chain[chain.length - 1].start);\n      if (!next) { ok = false; break; }\n      chain.push(next);\n    }\n    if (!ok) continue;\n\n    // Проверяем, что все шесть разделов действительно написаны.\n    let stubbed = false;\n    for (let i = 0; i < 6; i++) {\n      const bodyStart = t.indexOf('\\n', chain[i].start);\n      const from = bodyStart < 0 ? t.length : bodyStart + 1;\n      const to = i < 5 ? chain[i + 1].start : t.length;\n      if (looksLikeStub(t.slice(from, to))) { stubbed = true; break; }\n    }\n    if (stubbed) continue;\n\n    // Модель нередко печатает ответ дважды. Конец брифинга — начало ПОВТОРНОГО\n    // раздела 1, то есть следующий заголовок первого раздела после шестого.\n    const restart = heads.find(h => h.sec === 0 && h.start > chain[5].start);\n    const end = restart ? restart.start : t.length;\n\n    const body = t.slice(chain[0].start, end).trim();\n    if (body.length >= 800) return body;\n  }\n\n  // Запасной способ 1: всё после последнего маркера «###».\n  const marker = t.lastIndexOf('###');\n  if (marker >= 0) return t.slice(marker).replace(/^#+\\s*/, '').trim();\n\n  // Запасной способ 2: первый заголовок Markdown с кириллицей.\n  let head = -1;\n  for (let i = 0; i < lines.length; i++) {\n    if (/^#{1,3}\\s+\\S/.test(lines[i]) && /[а-яё]/i.test(lines[i])) { head = i; break; }\n  }\n  if (head >= 0) return lines.slice(head).join('\\n').trim();\n\n  // Запасной способ 3: отбрасываем ведущие англоязычные абзацы.\n  const out = [];\n  let started = false;\n  for (const l of lines) {\n    const latin = (l.match(/[A-Za-z]/g) || []).length;\n    const cyr = (l.match(/[А-Яа-яЁё]/g) || []).length;\n    if (!started && latin > 20 && cyr < 5) continue;\n    if (l.trim()) started = true;\n    out.push(l);\n  }\n  return out.join('\\n').trim();\n}\n\nlet briefing = extractBriefing(raw);\n\n// --- 2. Финальная чистка: маркеры списка-заглушек и хвостовые служебные строки ---\nbriefing = briefing\n  .replace(/\\n{3,}/g, '\\n\\n')\n  .replace(/^\\s*(###\\s*)?(Вот|Here is|Below is)[^\\n]*\\n/i, '')\n  .trim();\n\n// --- 3. Подставляем фактические метаданные прогона ---\nconst counts = $('Фильтрация и группировка').first().json.counts;\nconst ctxStats = $('Фильтрация и группировка').first().json.context.stats;\n\nconst header =\n  '# Аналитический брифинг: онлайн-школы английского языка\\n\\n' +\n  '_Сформирован ИИ-агентом рыночной аналитики. ' +\n  'Дата прогона: ' + $now.setZone('Europe/Moscow').toFormat('yyyy-MM-dd HH:mm') + ' (МСК)._\\n\\n' +\n  '_Объект анализа: ' + $('Фильтрация и группировка').first().json.context.object + '._\\n' +\n  '_Конкуренты: ' + $('Фильтрация и группировка').first().json.context.competitors.join(', ') + '._\\n' +\n  '_Период данных: ' + ctxStats.date_range + '._\\n' +\n  '_Обработано: тарифных позиций — ' + counts.tariffs + ', отзывов — ' + counts.reviews + '._\\n' +\n  '_Прошло фильтр шума: сигналов-наблюдений — ' + counts.observations +\n  ', гипотез — ' + counts.hypotheses + ', исключено единичных — ' + counts.noise_excluded + '._\\n\\n---\\n\\n';\n\nconst briefingMd = header + briefing;\n\nif (!briefing || briefing.length < 300) {\n  throw new Error('Брифинг пуст или слишком короткий (' + (briefing || '').length +\n                  ' символов). Проверьте ответ LLM.');\n}\n\n// Предохранитель: если в извлечённом тексте нет всех шести разделов, значит\n// за брифинг принят план или черновик. Лучше упасть с внятной ошибкой, чем\n// отдать команде заглушку с «...» вместо анализа.\nconst foundSecs = findHeads(briefing).map(h => h.sec);\nconst lackSecs = [0, 1, 2, 3, 4, 5].filter(n => foundSecs.indexOf(n) < 0);\nif (lackSecs.length) {\n  throw new Error('В извлечённом брифинге нет разделов: ' +\n    lackSecs.map(n => n + 1).join(', ') +\n    '. Похоже, за брифинг принят план или черновик ответа модели.');\n}\n\nreturn [{\n  json: {\n    briefing_md: briefingMd,\n    briefing_chars: briefingMd.length,\n    generated_at: $now.setZone('Europe/Moscow').toFormat('yyyy-MM-dd HH:mm'),\n    run_date: $now.setZone('Europe/Moscow').toFormat('yyyy-MM-dd'),\n    counts: counts,\n    raw_llm_chars: raw.length,\n    reasoning_stripped: raw.length - briefing.length\n  }\n}];\n"
+      },
+      "id": "b1000000-0000-4000-8000-000000000013",
+      "name": "Очистка брифинга",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1020,
+        260
+      ],
+      "notes": "Отсекает служебные рассуждения модели, собирает итоговый Markdown."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================================\n// ШАГ 6. АВТОМАТИЧЕСКАЯ САМОПРОВЕРКА КАЧЕСТВА БРИФИНГА\n// ----------------------------------------------------------------------------\n// Задание требует, чтобы результат можно было проверить. Этот узел прогоняет\n// брифинг по чек-листу механически, а не «на глаз»:\n//   1) все ли обязательные разделы на месте;\n//   2) у каждого вывода есть строка «Основание:»;\n//   3) упомянуты ли конкуренты;\n//   4) нет ли ЧИСЕЛ, которых не было в исходных данных (защита от галлюцинаций);\n//   5) не попали ли в выводы сигналы, которые фильтр пометил как шум;\n//   6) отделены ли гипотезы от подтверждённых выводов.\n// ============================================================================\n\nconst brief = $('Очистка брифинга').first().json;\nconst pack = $('Фильтрация и группировка').first().json;\nconst md = String(brief.briefing_md || '');\nconst source = String(pack.analytics_pack || '');\n\nconst checks = [];\nconst add = (name, ok, detail) => checks.push({ name: name, ok: !!ok, detail: detail });\n\n// --- 1. Обязательные разделы ---\nconst REQUIRED = [\n  ['1. Контекст анализа', /##\\s*1\\.\\s*Контекст/i],\n  ['2. Тренды',          /##\\s*2\\.\\s*Тренды/i],\n  ['3. Паттерны',        /##\\s*3\\.\\s*Паттерны/i],\n  ['4. Уязвимости конкурентов', /##\\s*4\\.\\s*Уязвимост/i],\n  ['5. Гипотезы и ограничения', /##\\s*5\\.\\s*Гипотез/i],\n  ['6. Что делать',      /##\\s*6\\.\\s*Что делать/i]\n];\nconst missing = REQUIRED.filter(([, re]) => !re.test(md)).map(([n]) => n);\nadd('Все обязательные разделы присутствуют', missing.length === 0,\n    missing.length ? 'нет разделов: ' + missing.join(', ') : 'найдены все ' + REQUIRED.length + ' разделов');\n\n// --- 2. Строки «Основание:» ---\n// ВАЖНО: \\w в JavaScript не включает кириллицу, поэтому «Основание:» нужно\n// ловить явным классом [а-яё], иначе счётчик всегда даёт ноль.\nconst grounds = (md.match(/Основан[а-яё]*\\s*[:—–]/gi) || []).length;\n// примерно считаем выводы: пункты списка и подзаголовки в разделах 2-4\nconst sec24 = (md.split(/##\\s*5\\./)[0].split(/##\\s*2\\./)[1]) || '';\n// выводы в брифинге оформляются и списком, и подзаголовками, и жирным лидом\nconst claims = (sec24.match(/^\\s*(?:[-*]|\\d+\\.)\\s+\\S|^#{3,4}\\s+\\S|^\\*\\*[^*\\n]+\\*\\*/gm) || []).length;\nadd('У выводов указаны основания', grounds >= 3,\n    'строк «Основание:» — ' + grounds + ', пунктов-выводов в разделах 2–4 — ~' + claims);\n\n// --- 3. Конкуренты упомянуты ---\nconst comps = pack.context.competitors || [];\nconst mentioned = comps.filter(c => new RegExp(c.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&'), 'i').test(md));\nconst absent = comps.filter(c => mentioned.indexOf(c) < 0);\nadd('Упомянуты все конкуренты', absent.length === 0,\n    absent.length ? 'в брифинге нет: ' + absent.join(', ')\n                  : 'найдены все ' + comps.length + ': ' + comps.join(', '));\n\n// --- 4. Числа, которых нет в исходных данных (проверка на галлюцинации) ---\nfunction numbers(text) {\n  const out = new Set();\n  // Пробел — разделитель разрядов ТОЛЬКО если за ним ровно три цифры и дальше\n  // не цифра. Иначе «#9 2025-10» склеивалось бы в 92025, «#23 2026-08» — в 232026,\n  // и проверка выдавала бы ложные срабатывания на датах.\n  const re = /\\d{1,3}(?:[ \\s]\\d{3})+(?!\\d)(?:[.,]\\d+)?|\\d+(?:[.,]\\d+)?/g;\n  let m;\n  while ((m = re.exec(text)) !== null) {\n    const digits = m[0].replace(/[ \\s]/g, '').replace(',', '.');\n    const val = parseFloat(digits);\n    if (!isNaN(val) && digits.replace(/\\D/g, '').length >= 2) out.add(val);  // >=2 цифры: отсекаем нумерацию\n  }\n  return out;\n}\nconst srcNums = numbers(source);\nconst briefNums = numbers(md);\n\n// Модели разрешено считать простую арифметику из переданных чисел: доли,\n// проценты, разницы, отношения. Поэтому кроме «сырых» чисел источника\n// собираем множество производных значений (два операнда, 5 операций).\nconst r2 = x => Math.round(x * 100) / 100;\nconst srcArr = [...srcNums];\nconst derived = new Set(), derivedInt = new Set();\nfor (const a of srcArr) {\n  for (const b of srcArr) {\n    const vals = [a + b, a - b, a / b, (a - b) / b * 100, a * b];\n    for (const x of vals) {\n      if (!isFinite(x)) continue;\n      derived.add(r2(x));\n      derivedInt.add(Math.round(x));\n    }\n  }\n}\n\nconst unknown = [];\nfor (const v of briefNums) {\n  const found = srcNums.has(v) ||\n                derived.has(r2(v)) || derivedInt.has(Math.round(v)) ||\n                srcNums.has(v * 100) || srcNums.has(v / 100) ||   // проценты/доли\n                [...srcNums].some(s => Math.abs(s - v) < 0.51);   // округление\n  if (!found) unknown.push(v);\n}\nadd('Числа подтверждаются исходными данными', unknown.length === 0,\n    unknown.length\n      ? 'НЕТ в источниках и не выводятся арифметикой из них: ' +\n        unknown.slice(0, 12).join(', ') + (unknown.length > 12 ? ' …' : '') +\n        ' — проверить вручную'\n      : 'все ' + briefNums.size + ' чисел брифинга подтверждаются данными ' +\n        'или выводятся из них простой арифметикой');\n\n// --- 5. Шум не попал в разделы выводов ---\nconst noiseCats = (pack.noise || []).map(n => n.category);\nconst outputsOnly = md.split(/##\\s*5\\./)[0];   // разделы 1–4\nconst leaked = noiseCats.filter(c => new RegExp(c.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&'), 'i').test(outputsOnly));\nadd('Единичные сигналы (шум) не попали в выводы', leaked.length === 0,\n    leaked.length ? 'в разделах 1–4 упомянуты шумовые категории: ' + leaked.join(', ')\n                  : 'из ' + noiseCats.length + ' шумовых категорий ни одна не попала в разделы выводов');\n\n// --- 6. Гипотезы отделены от выводов ---\nconst hypMentions = (md.match(/гипотез/gi) || []).length;\nadd('Гипотезы отделены от подтверждённых выводов', hypMentions >= 2,\n    'упоминаний «гипотез» — ' + hypMentions);\n\n// --- 7. Оговорка о недостатке данных, если трендов нет ---\nconst trendSection = (md.split(/##\\s*3\\./)[0].split(/##\\s*2\\./)[1]) || '';\nconst trendHonest = /недостаточно|нет подтверждённых данных|Данных для корректного вывода/i.test(trendSection);\nconst trendGrounded = /Основан/i.test(trendSection);\nadd('Раздел трендов не перегружен выводами без оснований',\n    trendHonest || trendGrounded,\n    trendHonest ? 'есть явная оговорка о недостатке данных'\n                : trendGrounded ? 'каждый тренд приведён со строкой «Основание:»'\n                                : 'в разделе трендов нет ни оснований, ни оговорки о нехватке данных');\n\n// --- Итог ---\nconst passed = checks.filter(c => c.ok).length;\nconst total = checks.length;\n\nlet appendix = '\\n\\n---\\n\\n## Приложение. Автоматическая самопроверка качества\\n\\n';\nappendix += 'Проверка выполнена узлом «Самопроверка качества» сразу после генерации брифинга. ';\nappendix += 'Пройдено **' + passed + ' из ' + total + '** проверок.\\n\\n';\nappendix += '| № | Проверка | Результат | Детали |\\n|---|---|---|---|\\n';\nchecks.forEach((c, i) => {\n  appendix += '| ' + (i + 1) + ' | ' + c.name + ' | ' + (c.ok ? '✅ пройдено' : '⚠️ требует внимания') + ' | ' + c.detail + ' |\\n';\n});\nappendix += '\\n**Параметры прогона:** тарифных позиций — ' + brief.counts.tariffs +\n  ', отзывов — ' + brief.counts.reviews +\n  ', сигналов-наблюдений — ' + brief.counts.observations +\n  ', гипотез — ' + brief.counts.hypotheses +\n  ', исключено единичных сигналов — ' + brief.counts.noise_excluded + '.\\n';\nappendix += '\\n**Служебная информация:** символов в ответе модели — ' + brief.raw_llm_chars +\n  ', из них отброшено как служебные рассуждения — ' + brief.reasoning_stripped + '.\\n';\n\nreturn [{\n  json: {\n    briefing_md: md + appendix,\n    generated_at: brief.generated_at,\n    run_date: brief.run_date,\n    counts: brief.counts,\n    self_check: { passed: passed, total: total, checks: checks },\n    self_check_passed: passed === total,\n    appendix_md: appendix\n  }\n}];\n"
+      },
+      "id": "b1000000-0000-4000-8000-000000000014",
+      "name": "Самопроверка качества",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1240,
+        260
+      ],
+      "notes": "Автоматический чек-лист качества: разделы, основания, числа, шум."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================================\n// ШАГ 6. ПОДГОТОВКА БРИФИНГА К ЗАПИСИ НА ДИСК\n// ----------------------------------------------------------------------------\n// Операция write в узле «Read/Write Files from Disk» работает с БИНАРНЫМИ\n// данными, а не с текстовым полем JSON. Поэтому текст брифинга превращается\n// в бинарный файл с именем briefing-<дата прогона>.md и MIME-типом text/markdown.\n// ============================================================================\n\nconst b = $('Самопроверка качества').first().json;\nconst fileName = 'briefing-' + b.run_date + '.md';\n\nconst bin = await helpers.prepareBinaryData(\n  Buffer.from(b.briefing_md, 'utf8'),\n  fileName,\n  'text/markdown'\n);\n\nreturn [{\n  json: {\n    run_date: b.run_date,\n    file_name: fileName,\n    briefing_chars: b.briefing_chars,\n    self_check_passed: b.self_check_passed,\n    briefing_md: b.briefing_md\n  },\n  binary: { data: bin }\n}];\n"
+      },
+      "id": "b1000000-0000-4000-8000-000000000018",
+      "name": "Подготовка файла брифинга",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        260
+      ],
+      "notes": "Переводит текст брифинга в бинарные данные: операция write ждёт файл, а не текстовое поле."
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/var/lib/n8n/.n8n-files/market-analyst/briefing-{{ $json.run_date }}.md",
+        "dataPropertyName": "data",
+        "options": {}
+      },
+      "id": "b1000000-0000-4000-8000-000000000015",
+      "name": "Сохранить брифинг в файл",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1640,
+        260
+      ],
+      "notes": "Брифинг сохраняется на диск сервера с датой прогона в имени файла."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Финальный узел: возвращает готовый брифинг и результат самопроверки.\n// Он же служит ответом при запуске по ссылке (Webhook).\nconst b = $('Самопроверка качества').first().json;\nreturn [{ json: {\n  status: 'ok',\n  generated_at: b.generated_at,\n  run_date: b.run_date,\n  counts: b.counts,\n  self_check_passed: b.self_check_passed,\n  self_check: b.self_check,\n  briefing_md: b.briefing_md\n} }];\n"
+      },
+      "id": "b1000000-0000-4000-8000-000000000017",
+      "name": "Показать брифинг",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1840,
+        260
+      ],
+      "notes": "Возвращает брифинг: виден в интерфейсе n8n и в ответе webhook."
+    }
+  ],
+  "connections": {
+    "Расписание (еженедельно, Пн 09:00)": {
+      "main": [
+        [
+          {
+            "node": "1. Тарифы конкурентов (CSV)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Запуск вручную (кнопка)": {
+      "main": [
+        [
+          {
+            "node": "1. Тарифы конкурентов (CSV)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Запуск по ссылке (Webhook)": {
+      "main": [
+        [
+          {
+            "node": "1. Тарифы конкурентов (CSV)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "1. Тарифы конкурентов (CSV)": {
+      "main": [
+        [
+          {
+            "node": "1. Тарифы (текст)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "1. Тарифы (текст)": {
+      "main": [
+        [
+          {
+            "node": "2. Отзывы пользователей (CSV)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2. Отзывы пользователей (CSV)": {
+      "main": [
+        [
+          {
+            "node": "2. Отзывы (текст)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2. Отзывы (текст)": {
+      "main": [
+        [
+          {
+            "node": "3. Обзор рынка (MD)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3. Обзор рынка (MD)": {
+      "main": [
+        [
+          {
+            "node": "3. Обзор рынка (текст)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3. Обзор рынка (текст)": {
+      "main": [
+        [
+          {
+            "node": "Нормализация данных",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Нормализация данных": {
+      "main": [
+        [
+          {
+            "node": "Фильтрация и группировка",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Фильтрация и группировка": {
+      "main": [
+        [
+          {
+            "node": "Аналитик рынка (LLM)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Аналитик рынка (LLM)": {
+      "main": [
+        [
+          {
+            "node": "Очистка брифинга",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Очистка брифинга": {
+      "main": [
+        [
+          {
+            "node": "Самопроверка качества",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Самопроверка качества": {
+      "main": [
+        [
+          {
+            "node": "Подготовка файла брифинга",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Подготовка файла брифинга": {
+      "main": [
+        [
+          {
+            "node": "Сохранить брифинг в файл",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Сохранить брифинг в файл": {
+      "main": [
+        [
+          {
+            "node": "Показать брифинг",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Аналитик рынка (LLM)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "active": false
+}

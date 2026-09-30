@@ -1,0 +1,1612 @@
+{
+  "context": {
+    "prepared_at": "2026-09-23",
+    "object": "Ниша онлайн-школ английского языка (обучение взрослых, B2C, Россия)",
+    "competitors": [
+      "Skyeng",
+      "Инглекс",
+      "EnglishDom"
+    ],
+    "sources": {
+      "tariffs": {
+        "type": "первичный",
+        "role": "основной",
+        "items": 27,
+        "file": "tariffs.csv"
+      },
+      "reviews": {
+        "type": "поведенческий",
+        "role": "основной",
+        "items": 30,
+        "file": "reviews.csv"
+      },
+      "market": {
+        "type": "вторичный",
+        "role": "дополнительный",
+        "file": "market-review.md"
+      }
+    },
+    "normalized": {
+      "tariffs": [
+        {
+          "source": "Тарифы конкурентов",
+          "school": "Skyeng",
+          "plan": "Базовый (с русскоязычным преподавателем) 8 уроков",
+          "lessons": "8",
+          "lesson_minutes": "50",
+          "price_per_lesson": 1890,
+          "price_from": 15120,
+          "price_to": 15120,
+          "currency": "₽",
+          "format": "индивидуально",
+          "trial_lesson": "есть — бесплатный вводный урок 30 мин",
+          "notes": "На сайте публикуется только цена за урок «от 1 890 ₽»; сумма пакета посчитана как 1890×8. К пакету +1 бонусный урок",
+          "source_url": "https://skyeng.ru/programs/razgovornyj-anglijskij/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "Skyeng",
+          "plan": "Базовый (с русскоязычным преподавателем) 16 уроков",
+          "lessons": "16",
+          "lesson_minutes": "50",
+          "price_per_lesson": 1690,
+          "price_from": 27040,
+          "price_to": 27040,
+          "currency": "₽",
+          "format": "индивидуально",
+          "trial_lesson": "есть — бесплатный вводный урок 30 мин",
+          "notes": "Сумма пакета посчитана как 1690×16. Скидка от 25% к минимальному пакету",
+          "source_url": "https://skyeng.ru/programs/razgovornyj-anglijskij/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "Skyeng",
+          "plan": "Базовый (с русскоязычным преподавателем) 32 урока",
+          "lessons": "32",
+          "lesson_minutes": "50",
+          "price_per_lesson": 1390,
+          "price_from": 44480,
+          "price_to": 44480,
+          "currency": "₽",
+          "format": "индивидуально",
+          "trial_lesson": "есть — бесплатный вводный урок 30 мин",
+          "notes": "Сумма пакета посчитана как 1390×32. Полная линейка: 8→1890, 16→1690, 32→1390, 64→1290, 96→1190, 128→1090 ₽/урок. 2 бесплатных переноса в месяц",
+          "source_url": "https://skyeng.ru/programs/razgovornyj-anglijskij/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "Skyeng",
+          "plan": "Премиум (премиум-преподаватель) 32 урока",
+          "lessons": "32",
+          "lesson_minutes": "50",
+          "price_per_lesson": 2390,
+          "price_from": 76480,
+          "price_to": 76480,
+          "currency": "₽",
+          "format": "индивидуально",
+          "trial_lesson": "есть — бесплатный вводный урок",
+          "notes": "Сумма пакета посчитана как 2390×32. Линейка Премиум: 8→2690, 16→2390, 32→2390, 64→1890, 96→1690, 128→1590 ₽/урок. Персональный менеджер, разговорные клубы, перенос за 4 часа",
+          "source_url": "https://skyeng.ru/programs/razgovornyj-anglijskij/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "Skyeng",
+          "plan": "Групповые уроки (мини-группа до 6 человек)",
+          "lessons": "",
+          "lesson_minutes": "50",
+          "price_per_lesson": 1290,
+          "price_from": null,
+          "price_to": null,
+          "currency": "₽",
+          "format": "мини-группа до 6 человек",
+          "trial_lesson": "есть — бесплатный вводный урок",
+          "notes": "Продаётся поурочно или подпиской, размер пакета на странице не указан. По акции от 987 ₽/урок (−23%). Фиксированное расписание",
+          "source_url": "https://skyeng.ru/price/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "Skyeng",
+          "plan": "Уроки с англоязычным преподавателем (носитель)",
+          "lessons": "",
+          "lesson_minutes": "50",
+          "price_per_lesson": 3190,
+          "price_from": null,
+          "price_to": null,
+          "currency": "₽",
+          "format": "индивидуально с носителем",
+          "trial_lesson": "есть — бесплатный вводный урок",
+          "notes": "Цена «от 3 190 ₽/урок» — минимальная, на большом пакете. Разбивка по размерам пакетов не публикуется. Самый дорогой тариф школы",
+          "source_url": "https://skyeng.ru/programs/individualnye-kursy-anglijskogo-yazyka/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "Инглекс",
+          "plan": "Базовый «Английский 360°» 10 тренингов",
+          "lessons": "10",
+          "lesson_minutes": "45",
+          "price_per_lesson": 1620,
+          "price_from": 16200,
+          "price_to": 16200,
+          "currency": "₽",
+          "format": "индивидуально",
+          "trial_lesson": "есть — бесплатный вводный урок с преподавателем",
+          "notes": "Пакетный прайс 45 мин: 5→2160, 10→1620, 20→1500, 40→1380, 80→1290 ₽. Тариф действует с 26.11.2025",
+          "source_url": "https://englex.ru/prices/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "Инглекс",
+          "plan": "Базовый «Английский 360°» 20 тренингов",
+          "lessons": "20",
+          "lesson_minutes": "45",
+          "price_per_lesson": 1500,
+          "price_from": 30000,
+          "price_to": 30000,
+          "currency": "₽",
+          "format": "индивидуально",
+          "trial_lesson": "есть — бесплатный вводный урок",
+          "notes": "Скидка 30% к минимальному пакету. Отмены: 1 в месяц при 1–2 занятиях в неделю, 2 — при 3 и более",
+          "source_url": "https://englex.ru/prices/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "Инглекс",
+          "plan": "Базовый «Английский 360°» 80 тренингов",
+          "lessons": "80",
+          "lesson_minutes": "45",
+          "price_per_lesson": 1290,
+          "price_from": 103200,
+          "price_to": 103200,
+          "currency": "₽",
+          "format": "индивидуально",
+          "trial_lesson": "есть — бесплатный вводный урок",
+          "notes": "Минимальная цена урока на тарифе (−40%), плюс клуб Skills на 30 дней. Рассрочка на 6–10 мес. Возврат за непройденные занятия по запросу",
+          "source_url": "https://englex.ru/prices/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "Инглекс",
+          "plan": "Базовый «Английский 360°» 20 тренингов по 60 мин",
+          "lessons": "20",
+          "lesson_minutes": "60",
+          "price_per_lesson": 2000,
+          "price_from": 40000,
+          "price_to": 40000,
+          "currency": "₽",
+          "format": "индивидуально",
+          "trial_lesson": "есть — бесплатный вводный урок",
+          "notes": "Пакетный прайс 60 мин: 5→2880, 10→2160, 20→2000, 40→1840, 60→1720 ₽",
+          "source_url": "https://englex.ru/prices/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "Инглекс",
+          "plan": "Интенсивный курс (A1) 100 тренингов",
+          "lessons": "100",
+          "lesson_minutes": "45",
+          "price_per_lesson": 810,
+          "price_from": 81000,
+          "price_to": 81000,
+          "currency": "₽",
+          "format": "индивидуально",
+          "trial_lesson": "есть — бесплатный вводный урок",
+          "notes": "Самое дешёвое предложение школы. На Интенсивном курсе отмены занятий НЕДОСТУПНЫ. Малый пакет: 20 тренингов по 1 090 ₽",
+          "source_url": "https://englex.ru/prices/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "Инглекс",
+          "plan": "Премиальный «Английский 360°» 20 тренингов",
+          "lessons": "20",
+          "lesson_minutes": "45",
+          "price_per_lesson": 2190,
+          "price_from": 43800,
+          "price_to": 43800,
+          "currency": "₽",
+          "format": "индивидуально",
+          "trial_lesson": "есть — бесплатный вводный урок",
+          "notes": "Тариф действует с 03.08.2026 только для действующих клиентов. Включает топ-преподавателей, безлимитные переносы, безлимитный клуб Skills",
+          "source_url": "https://englex.ru/prices/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "Инглекс",
+          "plan": "С носителем «Разговорная практика» 20 тренингов",
+          "lessons": "20",
+          "lesson_minutes": "45",
+          "price_per_lesson": 2290,
+          "price_from": 45800,
+          "price_to": 45800,
+          "currency": "₽",
+          "format": "индивидуально с носителем",
+          "trial_lesson": "есть — бесплатный вводный урок",
+          "notes": "Скидка всего 10% против 30% на Базовом. Прайс 45 мин: 5→2550, 10→2420, 20→2290, 40→2160, 80→2040 ₽. Уровни от A2 до C2",
+          "source_url": "https://englex.ru/courses/native/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "EnglishDom",
+          "plan": "Індивідуальні з локальним викладачем 5 занять",
+          "lessons": "5",
+          "lesson_minutes": "50",
+          "price_per_lesson": 450,
+          "price_from": 450,
+          "price_to": 450,
+          "currency": "грн",
+          "format": "индивидуально онлайн",
+          "trial_lesson": "есть — бесплатный пробный урок",
+          "notes": "Цены 2024 года из архива, актуальность НЕ подтверждена. 450 грн за урок. ВАЖНО: школа работает на украинском рынке, рублёвых тарифов нет — школа указывает, что не обучает граждан РФ и Беларуси",
+          "source_url": "https://web.archive.org/web/20240222142128/https://www.englishdom.com/ua/prices/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "EnglishDom",
+          "plan": "Індивідуальні з локальним викладачем 10 занять",
+          "lessons": "10",
+          "lesson_minutes": "50",
+          "price_per_lesson": 430,
+          "price_from": 430,
+          "price_to": 430,
+          "currency": "грн",
+          "format": "индивидуально онлайн",
+          "trial_lesson": "есть — бесплатный пробный урок",
+          "notes": "Цены 2024 года из архива, актуальность НЕ подтверждена. 430 грн за урок. Пакетная скидка к цене малого пакета — 4%",
+          "source_url": "https://web.archive.org/web/20240222142128/https://www.englishdom.com/ua/prices/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "EnglishDom",
+          "plan": "Індивідуальні з локальним викладачем 20 занять",
+          "lessons": "20",
+          "lesson_minutes": "50",
+          "price_per_lesson": 405,
+          "price_from": 405,
+          "price_to": 405,
+          "currency": "грн",
+          "format": "индивидуально онлайн",
+          "trial_lesson": "есть — бесплатный пробный урок",
+          "notes": "Цены 2024 года из архива, актуальность НЕ подтверждена. 405 грн за урок. Пакет 20 занятий — самый популярный у школы",
+          "source_url": "https://web.archive.org/web/20240222142128/https://www.englishdom.com/ua/prices/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "EnglishDom",
+          "plan": "Індивідуальні з локальним викладачем 50 занять",
+          "lessons": "50",
+          "lesson_minutes": "50",
+          "price_per_lesson": 380,
+          "price_from": 380,
+          "price_to": 380,
+          "currency": "грн",
+          "format": "индивидуально онлайн",
+          "trial_lesson": "есть — бесплатный пробный урок",
+          "notes": "Цены 2024 года из архива, актуальность НЕ подтверждена. 380 грн за урок — минимум по школе; скидка 16% к цене малого пакета",
+          "source_url": "https://web.archive.org/web/20240222142128/https://www.englishdom.com/ua/prices/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "EnglishDom",
+          "plan": "Індивідуальні з носієм мови 5 занять",
+          "lessons": "5",
+          "lesson_minutes": "50",
+          "price_per_lesson": 1100,
+          "price_from": 1100,
+          "price_to": 1100,
+          "currency": "грн",
+          "format": "индивидуально с носителем",
+          "trial_lesson": "есть — бесплатный пробный урок",
+          "notes": "Цены 2024 года из архива. 1100 грн за урок. Цифры подтверждены вторым независимым снимком — промо-лендингом 2024-01",
+          "source_url": "https://web.archive.org/web/20240222142128/https://www.englishdom.com/ua/prices/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "EnglishDom",
+          "plan": "Індивідуальні з носієм мови 20 занять",
+          "lessons": "20",
+          "lesson_minutes": "50",
+          "price_per_lesson": 1000,
+          "price_from": 1000,
+          "price_to": 1000,
+          "currency": "грн",
+          "format": "индивидуально с носителем",
+          "trial_lesson": "есть — бесплатный пробный урок",
+          "notes": "Цены 2024 года из архива. 1000 грн за урок. Пакетная скидка всего 9% — на порядок меньше, чем у локального преподавателя",
+          "source_url": "https://web.archive.org/web/20240222142128/https://www.englishdom.com/ua/prices/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "EnglishDom",
+          "plan": "Індивідуальні з носієм мови 50 занять",
+          "lessons": "50",
+          "lesson_minutes": "50",
+          "price_per_lesson": 920,
+          "price_from": 920,
+          "price_to": 920,
+          "currency": "грн",
+          "format": "индивидуально с носителем",
+          "trial_lesson": "есть — бесплатный пробный урок",
+          "notes": "Цены 2024 года из архива. 920 грн за урок — минимум по носителям, скидка 16% к малому пакету",
+          "source_url": "https://web.archive.org/web/20240222142128/https://www.englishdom.com/ua/prices/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "EnglishDom",
+          "plan": "Індивідуальні з преміум-викладачем 5 занять",
+          "lessons": "5",
+          "lesson_minutes": "50",
+          "price_per_lesson": 620,
+          "price_from": 620,
+          "price_to": 620,
+          "currency": "грн",
+          "format": "индивидуально премиум",
+          "trial_lesson": "есть — бесплатный пробный урок",
+          "notes": "Цены 2024 года из архива. 620 грн за урок. Промежуточный тариф между локальным преподавателем и носителем",
+          "source_url": "https://web.archive.org/web/20240222142128/https://www.englishdom.com/ua/prices/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "EnglishDom",
+          "plan": "Індивідуальні з преміум-викладачем 50 занять",
+          "lessons": "50",
+          "lesson_minutes": "50",
+          "price_per_lesson": 520,
+          "price_from": 520,
+          "price_to": 520,
+          "currency": "грн",
+          "format": "индивидуально премиум",
+          "trial_lesson": "есть — бесплатный пробный урок",
+          "notes": "Цены 2024 года из архива. 520 грн за урок, скидка 16% к малому пакету",
+          "source_url": "https://web.archive.org/web/20240222142128/https://www.englishdom.com/ua/prices/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "EnglishDom",
+          "plan": "Групові заняття (до 7 осіб) 60 уроків",
+          "lessons": "60",
+          "lesson_minutes": "50",
+          "price_per_lesson": 250,
+          "price_from": 250,
+          "price_to": 250,
+          "currency": "грн",
+          "format": "группа до 7 человек",
+          "trial_lesson": "есть — бесплатный пробный урок",
+          "notes": "Самый свежий подтверждённый источник по школе — архивный снимок 2026-06-19. 250 грн за урок, группа до 7 человек, 2–3 раза в неделю, доступ к разговорным клубам",
+          "source_url": "https://web.archive.org/web/20260619122857/https://www.englishdom.com/ua/group-lessons/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "EnglishDom",
+          "plan": "Акційна пропозиція backtoschool (локальний викладач) 50 занять",
+          "lessons": "50",
+          "lesson_minutes": "50",
+          "price_per_lesson": 340,
+          "price_from": 340,
+          "price_to": 420,
+          "currency": "грн",
+          "format": "индивидуально онлайн",
+          "trial_lesson": "есть — бесплатный пробный урок",
+          "notes": "Архивный снимок 2024-01-23. Акция снижает цену урока до 340 грн (−24% к базовым 450). Бонус до 7 уроков при первой оплате, оплата частями",
+          "source_url": "https://web.archive.org/web/20240123152813/https://promo.englishdom.com/backtoschool23",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "EnglishDom",
+          "plan": "Індивідуальні з локальним викладачем (історичні ціни 2021) 50 занять",
+          "lessons": "50",
+          "lesson_minutes": "",
+          "price_per_lesson": 250,
+          "price_from": 250,
+          "price_to": 315,
+          "currency": "грн",
+          "format": "индивидуально онлайн",
+          "trial_lesson": "есть",
+          "notes": "ИСТОРИЧЕСКИЕ цены 2021 года, снимок 2021-06-24: 5/10/20/50 занятий = 315/295/275/250 грн. Показывает динамику: цена урока выросла с 250 до 380 грн — это +52% за три года",
+          "source_url": "https://web.archive.org/web/20210624001824/https://promo.englishdom.com/free-lesson",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "EnglishDom",
+          "plan": "Індивідуальні з локальним викладачем 2025/2026 [НЕПОДТВЕРЖДЕНО]",
+          "lessons": "10",
+          "lesson_minutes": "50",
+          "price_per_lesson": 495,
+          "price_from": 495,
+          "price_to": 495,
+          "currency": "грн",
+          "format": "индивидуально онлайн",
+          "trial_lesson": "есть — бесплатный пробный урок",
+          "notes": "НЕПОДТВЕРЖДЕНО ПЕРВОИСТОЧНИКОМ: только сводка поисковой выдачи, три запроса дали одинаковые цифры. НЕ использовать как факт. Пакеты 10+2/20+4/50+6/75 = 495/445/420/395 грн",
+          "source_url": "https://www.englishdom.com/ua/prices/",
+          "checked_date": "2026-09"
+        },
+        {
+          "source": "Тарифы конкурентов",
+          "school": "EnglishDom",
+          "plan": "Індивідуальні з носієм мови 2025/2026 [НЕПОДТВЕРЖДЕНО]",
+          "lessons": "10",
+          "lesson_minutes": "50",
+          "price_per_lesson": 1130,
+          "price_from": 1130,
+          "price_to": 1130,
+          "currency": "грн",
+          "format": "индивидуально с носителем",
+          "trial_lesson": "есть — бесплатный пробный урок",
+          "notes": "НЕПОДТВЕРЖДЕНО ПЕРВОИСТОЧНИКОМ: только сводка поисковой выдачи. НЕ использовать как факт. 1130/1060/920 грн за урок",
+          "source_url": "https://www.englishdom.com/ua/prices/",
+          "checked_date": "2026-09"
+        }
+      ],
+      "reviews": [
+        {
+          "source": "Отзывы пользователей",
+          "id": "1",
+          "school": "Skyeng",
+          "date": "2026-09",
+          "rating": "2",
+          "platform": "Отзовик",
+          "type": "негатив",
+          "category": "Преподаватель",
+          "text": "Занималась немецким: что-то новое узнала, но мало. Главный минус — выраженная незаинтересованность преподавателя, занятие шло формально.",
+          "source_url": "https://otzovik.com/review_18682419.html"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "2",
+          "school": "Skyeng",
+          "date": "2026-09",
+          "rating": "1",
+          "platform": "Отзовик",
+          "type": "негатив",
+          "category": "Навязывание услуг",
+          "text": "Оставила личные данные для кабинета на сайте другой школы — и неделю ей звонили по несколько раз с разных номеров, приглашая на урок.",
+          "source_url": "https://otzovik.com/review_18660017.html"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "3",
+          "school": "Skyeng",
+          "date": "2026-09",
+          "rating": "5",
+          "platform": "Отзовик",
+          "type": "позитив",
+          "category": "Преподаватель",
+          "text": "Курс китайского с преподавателем Анастасией: материал подаётся понятно и последовательно, сложное разбирается подробно, страх перед иероглифами ушёл через несколько занятий.",
+          "source_url": "https://otzovik.com/review_18653732.html"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "4",
+          "school": "Skyeng",
+          "date": "2026-08",
+          "rating": "1",
+          "platform": "irecommend",
+          "type": "негатив",
+          "category": "Списания и возвраты",
+          "text": "Автор направил официальную досудебную претензию. По его словам, школа отказывается возвращать деньги и полностью игнорирует клиента.",
+          "source_url": "https://irecommend.ru/content/skaieng-otkazyvaetsya-vozvrashchat-dengi"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "5",
+          "school": "Skyeng",
+          "date": "2026-07",
+          "rating": "5",
+          "platform": "Отзовик",
+          "type": "позитив",
+          "category": "Цена и оплата",
+          "text": "Учил английский раньше, но говорить было сложно — выбрал преподавателя с упором на разговорную речь и доволен результатом. Из минусов указал только одно: хотелось бы подешевле.",
+          "source_url": "https://otzovik.com/review_18510522.html"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "6",
+          "school": "Skyeng",
+          "date": "2026-05",
+          "rating": "5",
+          "platform": "irecommend",
+          "type": "позитив",
+          "category": "Платформа и техника",
+          "text": "Пользуется платформой почти два года, опыт в целом позитивный: личный кабинет простой, нравится учить слова и обсуждать интересные темы.",
+          "source_url": "https://irecommend.ru/content/udobno-uchit-slova-i-obsuzhdat-interesnye-temy"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "7",
+          "school": "Skyeng",
+          "date": "2025-11",
+          "rating": "1",
+          "platform": "irecommend",
+          "type": "негатив",
+          "category": "Поддержка",
+          "text": "Контраст до и после оплаты: до старта обучения с клиентом активно общаются, перезванивают, уточняют условия. После — по мнению автора, сплошной игнор и бездействие.",
+          "source_url": "https://irecommend.ru/content/ignor-i-bezdeistvie-eto-pro-skyeng"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "8",
+          "school": "Skyeng",
+          "date": "2025-11",
+          "rating": "1",
+          "platform": "irecommend",
+          "type": "негатив",
+          "category": "Поддержка",
+          "text": "Крайне разочарована: служба поддержки, по словам автора, не работает вообще, ответы приходится ждать месяцами.",
+          "source_url": "https://irecommend.ru/content/uzhasno-ne-rekomenduyu-n11100069"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "9",
+          "school": "Skyeng",
+          "date": "2025-10",
+          "rating": "1",
+          "platform": "irecommend",
+          "type": "негатив",
+          "category": "Списания и возвраты",
+          "text": "Полгода занималась английским в группе, решила прекратить обучение и вернуть деньги за оплаченный год — возврат средств превратился в проблему.",
+          "source_url": "https://irecommend.ru/content/otvratitelno-n11050293"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "10",
+          "school": "Skyeng",
+          "date": "2025-03",
+          "rating": "5",
+          "platform": "irecommend",
+          "type": "позитив",
+          "category": "Преподаватель",
+          "text": "Плотно занимается с марта 2024 года, английский потребовался для работы. С преподавателем сложились очень тёплые отношения.",
+          "source_url": "https://irecommend.ru/content/nashla-podrugu-i-psikhologa-v-litse-svoego-uchitelya"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "11",
+          "school": "Skyeng",
+          "date": "2025-03",
+          "rating": "",
+          "platform": "otzyvru",
+          "type": "позитив",
+          "category": "Преподаватель",
+          "text": "Брал премиум-тариф и остался доволен подходом: дают выбор преподавателя по интересам, методика на высшем уровне.",
+          "source_url": "https://www.otzyvru.com/skyeng"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "12",
+          "school": "Skyeng",
+          "date": "2025-01",
+          "rating": "5",
+          "platform": "irecommend",
+          "type": "позитив",
+          "category": "Результат и прогресс",
+          "text": "Занимается больше двух лет, начинала с нулевого уровня — сейчас, по её словам, достаточно хороший прогресс и неплохо разговаривает.",
+          "source_url": "https://irecommend.ru/content/prishla-s-nulevym-urovnem-seichas-neplokho-razgovarivayu"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "13",
+          "school": "Skyeng",
+          "date": "2023-06",
+          "rating": "",
+          "platform": "otzyvru",
+          "type": "негатив",
+          "category": "Преподаватель",
+          "text": "Занималась 3 месяца — результата нет: задания однотипные, у премиум-преподавателя сильный акцент, обратной связи и работы над ошибками не было; платформа часто выдавала ошибки.",
+          "source_url": "https://www.otzyvru.com/skyeng"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "14",
+          "school": "Инглекс",
+          "date": "2026-08",
+          "rating": "5",
+          "platform": "edu.vbr.ru",
+          "type": "позитив",
+          "category": "Преподаватель",
+          "text": "Дочь занимается на курсе для детей: стеснялась говорить, преподаватель постепенно разговорила её через короткие диалоги. Сейчас дочь стала смелее и сама учит слова.",
+          "source_url": "https://edu.vbr.ru/school/ingleks/otzivy/"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "15",
+          "school": "Инглекс",
+          "date": "2026-08",
+          "rating": "5",
+          "platform": "mooc.ru",
+          "type": "позитив",
+          "category": "Результат и прогресс",
+          "text": "Занимается 4 месяца, преподаватель нравится. Радует своя платформа — уроки, домашка и словарь в одном месте, но главное — видит реальный прогресс.",
+          "source_url": "https://mooc.ru/company/englex/reviews"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "16",
+          "school": "Инглекс",
+          "date": "2025-06",
+          "rating": "5",
+          "platform": "edu.vbr.ru",
+          "type": "позитив",
+          "category": "Преподаватель",
+          "text": "Пришёл из Skyeng и не пожалел: сильнейшая сторона Инглекса — преподавательский состав, школа меньше и отбор качественнее; в Skyeng занятия идут строго по учебнику.",
+          "source_url": "https://edu.vbr.ru/school/ingleks/otzivy/"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "17",
+          "school": "Инглекс",
+          "date": "2025-04",
+          "rating": "2",
+          "platform": "edu.vbr.ru",
+          "type": "негатив",
+          "category": "Отмена и перенос занятий",
+          "text": "Плюсы — хорошая программа, но неудобное и устаревшее приложение; правила отмены такие, что даже заранее согласованное с преподавателем изменение расписания считается отменой.",
+          "source_url": "https://edu.vbr.ru/school/ingleks/otzivy/"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "18",
+          "school": "Инглекс",
+          "date": "2025-01",
+          "rating": "1",
+          "platform": "irecommend",
+          "type": "негатив",
+          "category": "Отмена и перенос занятий",
+          "text": "При выборе школы опиралась на возможность бесплатной отмены занятий. С декабря 2024 года школа ввела новые правила, и автор осталась крайне недовольна.",
+          "source_url": "https://irecommend.ru/content/nedovolna-n10454712"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "19",
+          "school": "Инглекс",
+          "date": "2024-08",
+          "rating": "1",
+          "platform": "irecommend",
+          "type": "негатив",
+          "category": "Преподаватель",
+          "text": "Начала обучение примерно в апреле для подготовки к экзамену. Отзыв озаглавлен «Ужасная школа с вялыми преподавателями».",
+          "source_url": "https://irecommend.ru/content/uzhasnaya-shkola-s-vyalymi-prepodavatelyami"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "20",
+          "school": "Инглекс",
+          "date": "2024-01",
+          "rating": "4",
+          "platform": "irecommend",
+          "type": "позитив",
+          "category": "Преподаватель",
+          "text": "Автор сама преподаватель английского: долго искала школу и преподавателя, чтобы улучшить собственный язык. Школу рекомендует.",
+          "source_url": "https://irecommend.ru/content/rekomenduyu-etu-shkolu-2"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "21",
+          "school": "Инглекс",
+          "date": "2023-10",
+          "rating": "1",
+          "platform": "mooc.ru",
+          "type": "негатив",
+          "category": "Платформа и техника",
+          "text": "За 7–8 уроков упало и качество, и организация: платформа упала на 20-й минуте, урок не компенсировали; преподаватель дважды отменила занятие, о чём школа не знала. По письменным домашним заданиям обратной связи не предусмотрено.",
+          "source_url": "https://mooc.ru/company/englex/reviews"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "22",
+          "school": "Инглекс",
+          "date": "2022-01",
+          "rating": "2",
+          "platform": "irecommend",
+          "type": "негатив",
+          "category": "Пробный урок",
+          "text": "Слабая платформа; уровень языка определили неправильно.",
+          "source_url": "https://irecommend.ru/content/englex-khm-slabaya-platforma-uroven-moego-yazyka-opredelili-nepravilno"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "23",
+          "school": "EnglishDom",
+          "date": "2026-08",
+          "rating": "4",
+          "platform": "realreviews.io",
+          "type": "смешанный",
+          "category": "Списания и возвраты",
+          "text": "Удобно, но расписание давит»: ожидал идеальной сетки занятий, но вечерние часы быстро разлетаются. При этом контент сильный, разговорная практика постоянная; советует брать пакет с запасом времени.",
+          "source_url": "https://realreviews.io/reviews/englishdom.com"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "24",
+          "school": "EnglishDom",
+          "date": "2026-04",
+          "rating": "5",
+          "platform": "irecommend",
+          "type": "позитив",
+          "category": "Платформа и техника",
+          "text": "Люблю эту школу!» Занимается уже второй год, хвалит платформу — и для занятий с учителем, и для самостоятельного изучения.",
+          "source_url": "https://irecommend.ru/content/legkii-i-interaktivnyi-put-dlya-izucheniya-yazyka"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "25",
+          "school": "EnglishDom",
+          "date": "2025-11",
+          "rating": "",
+          "platform": "vidhuk.ua",
+          "type": "негатив",
+          "category": "Списания и возвраты",
+          "text": "Только негатив: после оплаты два занятия отменили, причём причины называли разные. После просьбы вернуть деньги получала только обещания — средства так и не вернули.",
+          "source_url": "https://www.vidhuk.ua/english-dom/review-2263282"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "26",
+          "school": "EnglishDom",
+          "date": "2024-04",
+          "rating": "1",
+          "platform": "irecommend",
+          "type": "негатив",
+          "category": "Репутация компании",
+          "text": "Хороший преподаватель, но мерзкая контора»: претензия не к обучению, а к публичной политической позиции компании и просьбам о спонсировании.",
+          "source_url": "https://irecommend.ru/content/khoroshaya-prepod-no-merzkaya-kontora"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "27",
+          "school": "EnglishDom",
+          "date": "2024-04",
+          "rating": "1",
+          "platform": "irecommend",
+          "type": "негатив",
+          "category": "Навязывание услуг",
+          "text": "Сомнительная контора»: реальный уровень знаний занижают, а после пробного урока выпрашивают покупку полного курса.",
+          "source_url": "https://irecommend.ru/content/somnitelnaya-kontora-vyprashivayushchaya-kupit-polnyi-kurs-i-zanizhayushchaya-vash-uroven-zn"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "28",
+          "school": "EnglishDom",
+          "date": "2023-07",
+          "rating": "1",
+          "platform": "irecommend",
+          "type": "негатив",
+          "category": "Результат и прогресс",
+          "text": "Не советую! Деньги на ветер»: много наслышан о школе из-за рекламы, но обучение не оправдало ожиданий.",
+          "source_url": "https://irecommend.ru/content/ne-sovetuyu-dengi-na-veter-3"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "29",
+          "school": "EnglishDom",
+          "date": "2022-10",
+          "rating": "",
+          "platform": "otzyvru",
+          "type": "позитив",
+          "category": "Преподаватель",
+          "text": "Благодарность преподавателю Александре: понятное объяснение грамматики, разбор ошибок, внимание к деталям. Между уроками — задания в приложении и разговорные клубы.",
+          "source_url": "https://www.otzyvru.com/englishdom"
+        },
+        {
+          "source": "Отзывы пользователей",
+          "id": "30",
+          "school": "EnglishDom",
+          "date": "2022-04",
+          "rating": "1",
+          "platform": "irecommend",
+          "type": "негатив",
+          "category": "Отмена и перенос занятий",
+          "text": "Ужасная школа»: баланс перевели в другую школу, уроки постоянно отменяются и об этом даже не предупреждают заранее.",
+          "source_url": "https://irecommend.ru/content/uzhasnaya-shkola-3"
+        }
+      ],
+      "market_review_text": "# ОБЗОР РЫНКА: онлайн-обучение иностранным языкам в России\nДайджест профильных публикаций и отраслевых исследований. Вторичный источник.\nСобран: 23.09.2026. Период публикаций: 2024 — июнь 2026.\n\nВАЖНО О ДОСТОВЕРНОСТИ: все цифры ниже — из открытых публикаций. Там, где\nисточник даёт оценку, а не измеренный факт, это указано явно. Название источника\nи URL приведены для каждой цифры.\n\n---\n\n## 1. Объём и динамика рынка EdTech в целом\n\n| Показатель | Значение | Год | Источник | Факт / оценка |\n|---|---|---|---|---|\n| Суммарная выручка топ-100 EdTech-компаний РФ | 154 млрд ₽ (+12% г/г) | 2025 | Smart Ranking / Коммерсантъ | оценка аналитиков |\n| Суммарная выручка топ-100 | 144,5 млрд ₽ (+19% г/г) | 2024 | Smart Ranking | оценка аналитиков |\n| Суммарная выручка топ-100 | 122 млрд ₽ (+32% г/г) | 2023 | Smart Ranking | оценка аналитиков |\n| Выручка топ-100 за квартал | 38,2 млрд ₽ (+19,6%) | Q3 2024 | Skillbox Media | оценка аналитиков |\n| Выручка топ-100 за квартал | 34,2 млрд ₽ (+10%) | Q2 2025 | Коммерсантъ | оценка аналитиков |\n| Выручка топ-100 за квартал | ~42 млрд ₽ (+12,2%) | Q3 2025 | Коммерсантъ | оценка аналитиков |\n\nИсточники:\n- https://smartranking.ru/ru/analytics/edtechs/edtech-rynok-vyros-v-2025-godu-na-12/\n- https://www.kommersant.ru/doc/8398823\n- https://www.unkniga.ru/news/edtech-rynok-vyros-v-2024-godu-na-19.html\n- https://skillbox.ru/media/edtech/u-rossiyskogo-edtech-rynka-v-tretem-kvartale-2024-goda-smenilsya-lider/\n- https://www.kommersant.ru/doc/7940500\n- https://www.kommersant.ru/doc/8180766\n\n**Динамика темпов роста топ-100:** +32% (2023) → +19% (2024) → +12% (2025).\nТретий год подряд замедление. Основатель Smart Ranking Дарья Рыжкова:\n«По сути, рынок стагнирует»; «с учётом инфляции рынок находится на грани\nрецессии» (Коммерсантъ, 03.02.2026 и 03.08.2025).\n\nПрогноз участников на 2026 год: рост сегмента 5–10% (Smart Ranking).\n\n---\n\n## 2. Сегмент «Иностранные языки» — что известно точно\n\n| Показатель | Значение | Период | Источник |\n|---|---|---|---|\n| **Доля сегмента «Иностранные языки» в выручке топ-100** | **7%** | Q3 2024 | Skillbox Media |\n| **Динамика сегмента «Иностранные языки»** | **−6,7% г/г** | Q3 2024 | Skillbox Media |\n| Сегмент «Бизнес-образование» (для сравнения) | 3% рынка, −50% г/г | Q3 2024 | Skillbox Media |\n| Детский сегмент | 12,5 млрд ₽ (37% рынка), +16% | Q2 2025 | Skillbox Media |\n| Детский сегмент | 13,7 млрд ₽, +9,4% | Q3 2025 | Коммерсантъ |\n| ДПО (доп. проф. образование) | 52,5 млрд ₽ за год, +6% (было +16,1%) | 2025 | Smart Ranking |\n\nИсточник: https://skillbox.ru/media/edtech/u-rossiyskogo-edtech-rynka-v-tretem-kvartale-2024-goda-smenilsya-lider/\n\nВАЖНОЕ ОГРАНИЧЕНИЕ: рублёвого объёма сегмента английского языка за 2024–2025\nв открытом доступе НЕТ. Есть только доля 7% (Q3 2024) и падение −6,7%.\nТочные цифры — только в платных отчётах (РБК Магазин исследований, 199 000 ₽).\nДоля сегмента иностранных языков за 2025 год в квартальных обзорах не выделялась.\n\n---\n\n## 3. Спрос на английский язык: динамика во времени\n\n**Поисковый интерес (кластер запросов «Яндекс.Вордстат», исследование сети\nHelen Doron, публикация 03.03.2026, агрегатор fb.ru):**\n\n| Год | Динамика интереса к изучению английского |\n|---|---|\n| 2021 | +5,3% |\n| 2022 | −2,2% |\n| 2023 | −10,2% |\n| 2024 | −13,0% |\n| 2025 | **+12,1%** |\n\nТо есть после трёх лет падения в 2025 году интерес к английскому развернулся\nв рост. Запрос на разговорную практику вырос вдвое. Детская аудитория: интерес\nк языковым продуктам +70% (Skyeng + «Билайн Аналитика»).\nИсточник: https://fb.ru/news/languages/2026/3/3/423364\n\nОГОВОРКА: fb.ru — контент-агрегатор, пересказывающий пресс-релизы; первичные\nотчёты Helen Doron и Skyeng публично не выложены. Это динамика ПОИСКОВОГО\nИНТЕРЕСА, а не выручки. Сопоставлять её с выручкой сегмента (7%, −6,7%)\nнапрямую нельзя — это разные метрики.\n\n---\n\n## 4. Средний чек и цены\n\n| Показатель | Значение | Год | Источник | Тип |\n|---|---|---|---|---|\n| Средние затраты россиян на онлайн-обучение | 32 191 ₽ (+~6 тыс. ₽ к 2024) | 2025 | РБК Тренды / «Нетология» (опрос «ОнИн», август 2025, 2 500 чел., 18–64 г.) | измеренный факт |\n| Планируемые затраты на обучение | ~52 тыс. ₽ | 2026 (план) | там же | измеренный факт |\n| Средние затраты на смену профессии | 44 тыс. ₽ | 2025 | там же | измеренный факт |\n| Средняя ставка репетитора за ак. час | 48,7% берут 1001–2000 ₽; 17,9% — >2000 ₽ | 2025 | Forbes Education / «Авито Услуги» + ProgressMe (1 717 педагогов, 10 000 заказчиков) | измеренный факт |\n| Бюджет семьи на репетитора | >60% семей готовы выделять ~10 000 ₽/мес | 2025 | Forbes Education | измеренный факт |\n| Прайс Skyeng (справочник) | от 18 960 ₽ за курс (24 ч.), средняя 790 ₽/ак.час | 2026 | study.ru | данные агрегатора, низкая достоверность |\n\nИсточники:\n- https://trends.rbc.ru/trends/education/692412399a79474b2d95a90f\n- https://www.cnews.ru/news/line/2025-11-21_onlajn-obrazovanie_voshlo\n- https://www.forbes.ru/education/546706-castnyj-sektor-ot-cego-zavisit-zarabotok-repetitorov-v-rossii\n- https://www.study.ru/schools/moskva/skyeng\n\nОГРАНИЧЕНИЕ: средний чек 32 191 ₽ — по ВСЕМУ онлайн-образованию, а не по\nанглийскому языку. Среднего чека именно по языковым курсам в открытом доступе нет.\n\n---\n\n## 5. Концентрация и крупнейшие игроки\n\n| Игрок / показатель | Значение | Период | Источник |\n|---|---|---|---|\n| Доля экосистемы VK (Skillbox, Geekbrains, Учи.ру, Тетрика и др.) | 14,9% | I пол. 2024 | Skillbox Media / Smart Ranking |\n| **Доля экосистемы Skyeng** | **9,9%** | I пол. 2024 | там же |\n| Доля «Синергии» | 7,8% | I пол. 2024 | там же |\n| Доля экосистемы Сбера | 6,8% | I пол. 2024 | там же |\n| Доля экосистемы Яндекса | 5,6% | I пол. 2024 | там же |\n| Концентрация: топ-5 экосистем | 45% рынка | I пол. 2024 | там же |\n| Концентрация: топ-10 компаний | ~55% выручки топ-100 | 2024 | Smart Ranking |\n| **Выручка Skyeng** | **12,8 млрд ₽ (+5,1%), 3-е место** | 2025 | Коммерсантъ |\n| Выручка «Синергии» (лидер) | 16,1 млрд ₽ (+26,3%) | 2025 | Коммерсантъ |\n| Выручка Skillbox Holding (VK) | 12,9 млрд ₽ (+5,3%) | 2025 | Коммерсантъ |\n| Выручка «100балльного репетитора» | 4,4 млрд ₽ (+118,4%) | 2025 | Коммерсантъ |\n\nИсточники:\n- https://skillbox.ru/media/edtech/stalo-izvestno-kakie-doli-rynka-zanimayut-pyat-krupneyshih-ekosistem-rossiyskogo-edtech/\n- https://www.kommersant.ru/doc/8398823\n\nВАЖНО: 9,9% — это доля ВСЕЙ экосистемы Skyeng во всём EdTech (все направления),\nа не доля в сегменте английского языка. Точная доля Skyeng именно в языковом\nсегменте публично не раскрывается. Встречающуюся в интернете цифру «~20% рынка\nязыков у Skyeng» использовать НЕЛЬЗЯ — она не подтверждена (20% была заявленной\nв 2021 году целью Skysmart по рынку школьного онлайн-образования).\n\n---\n\n## 6. Тренды, названные аналитиками рынка\n\n1. **Переход от роста к стагнации.** Темпы роста топ-100 снижаются третий год:\n   +32% → +19% → +12%. Номинальный рост при этом ниже инфляции — аналитики\n   говорят о «грани рецессии».\n   Источник: https://www.kommersant.ru/doc/8398823\n\n2. **ИИ — единственный драйвер роста.** Спрос на машинное обучение +60% г/г,\n   на прикладное использование нейросетей ~+15%. «Навыковые» курсы по ИИ растут\n   в три раза быстрее остальных. Источник: https://www.kommersant.ru/doc/8398823\n\n3. **ИИ-репетиторы: анонсов много, внедрений мало.** 33% компаний планируют\n   адаптивные траектории, 29% — ИИ-тьюторов. Пример эффекта: ИИ-помощник\n   Skillbox дал +20% фиксаций прогресса и −10% времени на домашние задания.\n   Прогноз: к 2026 году в языковом обучении цифровой тьютор станет обязательной\n   частью сервиса. Источник: https://trends.rbc.ru/trends/education/6952218e9a79473ffc6f6b06\n\n4. **ИИ как прямой конкурент, а не дополнение.** Базовые запросы («объясни\n   задачу», «помоги с эссе») учащиеся закрывают через ChatGPT. Chegg объявила\n   о сокращении ~45% сотрудников из-за «новых реалий ИИ».\n   Источник: https://trends.rbc.ru/trends/education/6952218e9a79473ffc6f6b06\n\n5. **Короткие форматы и микрообучение.** 70% курсов длятся не более трёх\n   месяцев; 61% студентов выбирают короткие курсы как основной формат,\n   23% — интенсивы. Источники: https://www.cnews.ru/news/line/2025-11-21_onlajn-obrazovanie_voshlo ;\n   https://www.kommersant.ru/doc/7940500\n\n6. **Мобильные приложения вытесняют школы в самостоятельном обучении.**\n   72% изучающих языки предпочитают приложения для самостоятельных занятий;\n   среди начинающих без репетитора — 70%. Глобальный рынок приложений для\n   изучения языков — $25 млрд (+18% к 2023). CAC приложений в 5 раз ниже, чем\n   у языковых школ. РФ в топ-5 стран по времени в приложениях (45 мин/день).\n   Источник: https://www.vedomosti.ru/press_releases/2026/06/04/yazikovoi-rinok-2026-kak-prilozheniya-zahvatili-70-auditorii-samouchek\n\n7. **Консолидация рынка.** Топ-10 — ~55% выручки, топ-5 экосистем — 45%.\n   В Q3 2025 Smart Ranking формулирует: «главной задачей участников рынка\n   становится сохранение позиций и занятие доли мелких игроков и репетиторов».\n   Источники: https://www.unkniga.ru/news/edtech-rynok-vyros-v-2024-godu-na-19.html ;\n   https://www.kommersant.ru/doc/8180766\n\n8. **Бум репетиторства и самозанятости.** Около трети репетиторов зарабатывают\n   свыше 80 000 ₽/мес; 97,2% дают онлайн-уроки; 67,8% работают только\n   дистанционно. Вакансии онлайн-репетиторов +51% г/г, запросы контактов +126%.\n   Источники: https://www.forbes.ru/education/546706-castnyj-sektor-ot-cego-zavisit-zarabotok-repetitorov-v-rossii ;\n   https://1prime.ru/20250821/repetitor-860989559.html\n\n9. **Рост цен и переход на рассрочку.** Рассрочка стала «двигателем продаж»\n   дорогих курсов. Государство вводит «период охлаждения» для рассрочек свыше\n   50 тыс. ₽. Цикл принятия решения о покупке удлинился с 3–5 до 7–10 дней.\n   Источники: https://www.kommersant.ru/doc/7940500 ; https://www.kommersant.ru/doc/8180766\n\n10. **Выдавливание зарубежных игроков.** Coursera и edX ушли из РФ в 2022 году.\n    Duolingo остаётся доступным, но под давлением: в 2024 удалил контент по\n    требованию Роскомнадзора, 26.03.2026 оштрафован на 2 млн ₽ за нарушение\n    закона о персональных данных. Пользователи языковых приложений в РФ выросли\n    на 35% из-за ухода западных сервисов и сложностей с оплатой.\n    Источники: https://www.vedomosti.ru/press_releases/2026/06/04/yazikovoi-rinok-2026-kak-prilozheniya-zahvatili-70-auditorii-samouchek ;\n    https://www.forbes.ru/education/558155-duolingo-ostrafovali-na-2-mln-rublej-za-narusenie-zakona-o-personal-nyh-dannyh\n\n11. **Смена языковых приоритетов.** Спрос на китайский +89%, на корейский\n    +182% (2023–2025). Китайский генерирует 56% выручки неанглийских языковых\n    направлений. Источник: https://www.vedomosti.ru/press_releases/2026/06/04/yazikovoi-rinok-2026-kak-prilozheniya-zahvatili-70-auditorii-samouchek\n\n12. **Инфобизнес и «массовые» онлайн-школы — самые уязвимые.** В Q3 2025 трафик\n    у них −5% г/г, число лидов −7%, выручка за 9 месяцев 116,5 млрд ₽ (−5%).\n    Впервые зафиксировано падение годовой выручки у GetCourse.\n    Источник: https://trends.rbc.ru/trends/education/6952218e9a79473ffc6f6b06\n\n---\n\n## 7. Регулирование (влияет на продукт и маркетинг)\n\n- **Лицензирование.** Постановление Правительства РФ № 1490 от 18.09.2020\n  (ред. от 27.01.2026), срок продлён до 01.09.2032, вступает в силу с 01.09.2026.\n  П. 11.1: при реализации программ ИСКЛЮЧИТЕЛЬНО дистанционно соискатель лицензии\n  не представляет документы о зданиях, материально-техническом обеспечении и\n  санитарно-эпидемиологическое заключение. То есть онлайн-школам лицензироваться\n  стало проще.\n  Источник: https://www.leocdn.ru/uploadsForSiteId/200273/content/550f9f20-167d-4d07-98c5-23566b398181.pdf\n\n- **Маркировка интернет-рекламы (ЕРИР).** С 01.09.2023 обязательна по ст. 18.1\n  ФЗ-38: токен через ОРД и передача данных в ЕРИР Роскомнадзора.\n  Источник: https://edlegal.ru/blog/zakon-o-reklame-dlya-edtech/\n\n- **Реклама курсов.** Запрещены: гарантии финансового результата и\n  трудоустройства, некорректные сравнения с конкурентами, выдуманные рейтинги,\n  скрытые условия и цены, ложные отзывы (ст. 5 ФЗ-38). Штрафы по ст. 14.3 КоАП\n  для юрлиц — 100 000–500 000 ₽. По 152-ФЗ — до 6 млн ₽.\n  Источник: https://edlegal.ru/blog/zakon-o-reklame-dlya-edtech/\n\n- **Сокращение часов иностранного языка в школах — драйвер спроса на\n  репетиторов.** Приказы Минпросвещения № 729 от 08.10.2025 и № 808 от\n  10.11.2025. С 01.09.2026 в 5 классе иностранный язык сокращается с 3 до\n  2 часов в неделю; с 01.09.2027 — в 6 и 7 классах. Общий объём курса\n  сокращается с 510 до 408 часов.\n  Источник: https://bazanpa.ru/minprosveshcheniia-rossii-pismo-n03-1566-ot20082026-h7227589/\n\n- **Ограничение онлайн-обучения для медиков и фармацевтов.** С 01.03.2026\n  введены ограничения на дистанционные технологии в этом направлении.\n  Это прецедент ограничения онлайн-формата в отдельных отраслях.\n  Источник: https://smartranking.ru/ru/analytics/edtechs/edtech-rynok-vyros-v-2025-godu-na-12/\n\n---\n\n## 8. Противоречия и ограничения данных\n\n1. Рост детского сегмента за 2025: у Smart Ranking на сайте «20%», у\n   Коммерсанта со ссылкой на то же исследование — «22,2%». Расхождение внутри\n   одного источника.\n2. Рынок 2025: номинально +12%, но аналитики называют состояние стагнацией и\n   «гранью рецессии» — номинальный рост и реальное падение сосуществуют.\n3. Динамика языкового сегмента: −6,7% по выручке (Q3 2024) против +12,1% по\n   поисковому интересу (2025). Это РАЗНЫЕ метрики, сравнивать напрямую нельзя.\n4. Средний чек 32 191 ₽ — по всему онлайн-образованию, не по английскому.\n5. Доля Skyeng 9,9% — по всей экосистеме во всём EdTech, не по языковому сегменту.\n6. Три источника, которые не открылись: РБК Компании (401), RG.ru (SSL),\n   T-Bank «Секреты» (SSL).\n\n---\n\n## 9. Чего в открытых источниках НЕТ\n\n- Рублёвый объём сегмента изучения английского языка за 2024–2025 (только доля\n  7% и −6,7% за Q3 2024).\n- Доля сегмента иностранных языков за 2025 год.\n- Точная доля Skyeng именно в сегменте английского языка.\n- Средний чек именно на языковые курсы.\n- Официальная статистика роста цен на языковые курсы за 2025 год."
+    },
+    "stats": {
+      "reviews_total": 30,
+      "by_school": {
+        "Skyeng": 13,
+        "Инглекс": 9,
+        "EnglishDom": 8
+      },
+      "by_type": {
+        "негатив": 17,
+        "позитив": 12,
+        "смешанный": 1
+      },
+      "platforms": {
+        "Отзовик": 4,
+        "irecommend": 16,
+        "otzyvru": 3,
+        "edu.vbr.ru": 3,
+        "mooc.ru": 2,
+        "realreviews.io": 1,
+        "vidhuk.ua": 1
+      },
+      "by_month": {
+        "2026-09": 3,
+        "2026-08": 4,
+        "2026-07": 1,
+        "2026-05": 1,
+        "2025-11": 3,
+        "2025-10": 1,
+        "2025-03": 2,
+        "2025-01": 2,
+        "2023-06": 1,
+        "2025-06": 1,
+        "2025-04": 1,
+        "2024-08": 1,
+        "2024-01": 1,
+        "2023-10": 1,
+        "2022-01": 1,
+        "2026-04": 1,
+        "2024-04": 2,
+        "2023-07": 1,
+        "2022-10": 1,
+        "2022-04": 1
+      },
+      "date_range": "2022-01 … 2026-09",
+      "by_category": [
+        {
+          "category": "Преподаватель",
+          "total": 10,
+          "негатив": 3,
+          "позитив": 7,
+          "смешанный": 0,
+          "schools": {
+            "Skyeng": 5,
+            "Инглекс": 4,
+            "EnglishDom": 1
+          },
+          "platforms": {
+            "Отзовик": 2,
+            "irecommend": 3,
+            "otzyvru": 3,
+            "edu.vbr.ru": 2
+          },
+          "months": {
+            "2026-09": 2,
+            "2025-03": 2,
+            "2023-06": 1,
+            "2026-08": 1,
+            "2025-06": 1,
+            "2024-08": 1,
+            "2024-01": 1,
+            "2022-10": 1
+          },
+          "examples": [
+            "#1: Занималась немецким: что-то новое узнала, но мало. Главный минус — выраженная незаинтересованность преподавателя, занятие шло формально.",
+            "#3: Курс китайского с преподавателем Анастасией: материал подаётся понятно и последовательно, сложное разбирается подробно, страх перед иероглифами ушёл через неско",
+            "#10: Плотно занимается с марта 2024 года, английский потребовался для работы. С преподавателем сложились очень тёплые отношения."
+          ]
+        },
+        {
+          "category": "Списания и возвраты",
+          "total": 4,
+          "негатив": 3,
+          "позитив": 0,
+          "смешанный": 1,
+          "schools": {
+            "Skyeng": 2,
+            "EnglishDom": 2
+          },
+          "platforms": {
+            "irecommend": 2,
+            "realreviews.io": 1,
+            "vidhuk.ua": 1
+          },
+          "months": {
+            "2026-08": 2,
+            "2025-10": 1,
+            "2025-11": 1
+          },
+          "examples": [
+            "#4: Автор направил официальную досудебную претензию. По его словам, школа отказывается возвращать деньги и полностью игнорирует клиента.",
+            "#9: Полгода занималась английским в группе, решила прекратить обучение и вернуть деньги за оплаченный год — возврат средств превратился в проблему.",
+            "#23: Удобно, но расписание давит»: ожидал идеальной сетки занятий, но вечерние часы быстро разлетаются. При этом контент сильный, разговорная практика постоянная; со"
+          ]
+        },
+        {
+          "category": "Платформа и техника",
+          "total": 3,
+          "негатив": 1,
+          "позитив": 2,
+          "смешанный": 0,
+          "schools": {
+            "Skyeng": 1,
+            "Инглекс": 1,
+            "EnglishDom": 1
+          },
+          "platforms": {
+            "irecommend": 2,
+            "mooc.ru": 1
+          },
+          "months": {
+            "2026-05": 1,
+            "2023-10": 1,
+            "2026-04": 1
+          },
+          "examples": [
+            "#6: Пользуется платформой почти два года, опыт в целом позитивный: личный кабинет простой, нравится учить слова и обсуждать интересные темы.",
+            "#21: За 7–8 уроков упало и качество, и организация: платформа упала на 20-й минуте, урок не компенсировали; преподаватель дважды отменила занятие, о чём школа не зна",
+            "#24: Люблю эту школу!» Занимается уже второй год, хвалит платформу — и для занятий с учителем, и для самостоятельного изучения."
+          ]
+        },
+        {
+          "category": "Результат и прогресс",
+          "total": 3,
+          "негатив": 1,
+          "позитив": 2,
+          "смешанный": 0,
+          "schools": {
+            "Skyeng": 1,
+            "Инглекс": 1,
+            "EnglishDom": 1
+          },
+          "platforms": {
+            "irecommend": 2,
+            "mooc.ru": 1
+          },
+          "months": {
+            "2025-01": 1,
+            "2026-08": 1,
+            "2023-07": 1
+          },
+          "examples": [
+            "#12: Занимается больше двух лет, начинала с нулевого уровня — сейчас, по её словам, достаточно хороший прогресс и неплохо разговаривает.",
+            "#15: Занимается 4 месяца, преподаватель нравится. Радует своя платформа — уроки, домашка и словарь в одном месте, но главное — видит реальный прогресс.",
+            "#28: Не советую! Деньги на ветер»: много наслышан о школе из-за рекламы, но обучение не оправдало ожиданий."
+          ]
+        },
+        {
+          "category": "Отмена и перенос занятий",
+          "total": 3,
+          "негатив": 3,
+          "позитив": 0,
+          "смешанный": 0,
+          "schools": {
+            "Инглекс": 2,
+            "EnglishDom": 1
+          },
+          "platforms": {
+            "edu.vbr.ru": 1,
+            "irecommend": 2
+          },
+          "months": {
+            "2025-04": 1,
+            "2025-01": 1,
+            "2022-04": 1
+          },
+          "examples": [
+            "#17: Плюсы — хорошая программа, но неудобное и устаревшее приложение; правила отмены такие, что даже заранее согласованное с преподавателем изменение расписания счит",
+            "#18: При выборе школы опиралась на возможность бесплатной отмены занятий. С декабря 2024 года школа ввела новые правила, и автор осталась крайне недовольна.",
+            "#30: Ужасная школа»: баланс перевели в другую школу, уроки постоянно отменяются и об этом даже не предупреждают заранее."
+          ]
+        },
+        {
+          "category": "Навязывание услуг",
+          "total": 2,
+          "негатив": 2,
+          "позитив": 0,
+          "смешанный": 0,
+          "schools": {
+            "Skyeng": 1,
+            "EnglishDom": 1
+          },
+          "platforms": {
+            "Отзовик": 1,
+            "irecommend": 1
+          },
+          "months": {
+            "2026-09": 1,
+            "2024-04": 1
+          },
+          "examples": [
+            "#2: Оставила личные данные для кабинета на сайте другой школы — и неделю ей звонили по несколько раз с разных номеров, приглашая на урок.",
+            "#27: Сомнительная контора»: реальный уровень знаний занижают, а после пробного урока выпрашивают покупку полного курса."
+          ]
+        },
+        {
+          "category": "Поддержка",
+          "total": 2,
+          "негатив": 2,
+          "позитив": 0,
+          "смешанный": 0,
+          "schools": {
+            "Skyeng": 2
+          },
+          "platforms": {
+            "irecommend": 2
+          },
+          "months": {
+            "2025-11": 2
+          },
+          "examples": [
+            "#7: Контраст до и после оплаты: до старта обучения с клиентом активно общаются, перезванивают, уточняют условия. После — по мнению автора, сплошной игнор и бездейст",
+            "#8: Крайне разочарована: служба поддержки, по словам автора, не работает вообще, ответы приходится ждать месяцами."
+          ]
+        },
+        {
+          "category": "Цена и оплата",
+          "total": 1,
+          "негатив": 0,
+          "позитив": 1,
+          "смешанный": 0,
+          "schools": {
+            "Skyeng": 1
+          },
+          "platforms": {
+            "Отзовик": 1
+          },
+          "months": {
+            "2026-07": 1
+          },
+          "examples": [
+            "#5: Учил английский раньше, но говорить было сложно — выбрал преподавателя с упором на разговорную речь и доволен результатом. Из минусов указал только одно: хотело"
+          ]
+        },
+        {
+          "category": "Пробный урок",
+          "total": 1,
+          "негатив": 1,
+          "позитив": 0,
+          "смешанный": 0,
+          "schools": {
+            "Инглекс": 1
+          },
+          "platforms": {
+            "irecommend": 1
+          },
+          "months": {
+            "2022-01": 1
+          },
+          "examples": [
+            "#22: Слабая платформа; уровень языка определили неправильно."
+          ]
+        },
+        {
+          "category": "Репутация компании",
+          "total": 1,
+          "негатив": 1,
+          "позитив": 0,
+          "смешанный": 0,
+          "schools": {
+            "EnglishDom": 1
+          },
+          "platforms": {
+            "irecommend": 1
+          },
+          "months": {
+            "2024-04": 1
+          },
+          "examples": [
+            "#26: Хороший преподаватель, но мерзкая контора»: претензия не к обучению, а к публичной политической позиции компании и просьбам о спонсировании."
+          ]
+        }
+      ]
+    }
+  },
+  "analytics_pack": "# ПОДГОТОВЛЕННЫЙ КОНТЕКСТ ДЛЯ АНАЛИЗА\n\n## Контекст\n- Объект анализа: Ниша онлайн-школ английского языка (обучение взрослых, B2C, Россия)\n- Конкуренты: Skyeng, Инглекс, EnglishDom\n- Период данных: 2022-01 … 2026-09\n- Дата подготовки: 2026-09-23\n- Источники: первичный (основной) — tariffs.csv, единиц: 27; поведенческий (основной) — reviews.csv, единиц: 30; вторичный (дополнительный) — market-review.md\n\n## Тарифы конкурентов (первичный источник, нормализовано)\n| Школа | Тариф | Занятий | Цена занятия | Валюта | Мин | Макс | Длит., мин | Формат | Пробный | Примечание |\n|---|---|---|---|---|---|---|---|---|---|---|\n| Skyeng | Базовый (с русскоязычным преподавателем) 8 уроков | 8 | 1890 | ₽ | 15120 | 15120 | 50 | индивидуально | есть — бесплатный вводный урок 30 мин | На сайте публикуется только цена за урок «от 1 890 ₽»; сумма пакета посчитана как 1890×8. К пакету +1 бонусный урок |\n| Skyeng | Базовый (с русскоязычным преподавателем) 16 уроков | 16 | 1690 | ₽ | 27040 | 27040 | 50 | индивидуально | есть — бесплатный вводный урок 30 мин | Сумма пакета посчитана как 1690×16. Скидка от 25% к минимальному пакету |\n| Skyeng | Базовый (с русскоязычным преподавателем) 32 урока | 32 | 1390 | ₽ | 44480 | 44480 | 50 | индивидуально | есть — бесплатный вводный урок 30 мин | Сумма пакета посчитана как 1390×32. Полная линейка: 8→1890, 16→1690, 32→1390, 64→1290, 96→1190, 128→1090 ₽/урок. 2 бесплатных переноса в месяц |\n| Skyeng | Премиум (премиум-преподаватель) 32 урока | 32 | 2390 | ₽ | 76480 | 76480 | 50 | индивидуально | есть — бесплатный вводный урок | Сумма пакета посчитана как 2390×32. Линейка Премиум: 8→2690, 16→2390, 32→2390, 64→1890, 96→1690, 128→1590 ₽/урок. Персональный менеджер, разговорные клубы, пере |\n| Skyeng | Групповые уроки (мини-группа до 6 человек) |  | 1290 | ₽ | — | — | 50 | мини-группа до 6 человек | есть — бесплатный вводный урок | Продаётся поурочно или подпиской, размер пакета на странице не указан. По акции от 987 ₽/урок (−23%). Фиксированное расписание |\n| Skyeng | Уроки с англоязычным преподавателем (носитель) |  | 3190 | ₽ | — | — | 50 | индивидуально с носителем | есть — бесплатный вводный урок | Цена «от 3 190 ₽/урок» — минимальная, на большом пакете. Разбивка по размерам пакетов не публикуется. Самый дорогой тариф школы |\n| Инглекс | Базовый «Английский 360°» 10 тренингов | 10 | 1620 | ₽ | 16200 | 16200 | 45 | индивидуально | есть — бесплатный вводный урок с преподавателем | Пакетный прайс 45 мин: 5→2160, 10→1620, 20→1500, 40→1380, 80→1290 ₽. Тариф действует с 26.11.2025 |\n| Инглекс | Базовый «Английский 360°» 20 тренингов | 20 | 1500 | ₽ | 30000 | 30000 | 45 | индивидуально | есть — бесплатный вводный урок | Скидка 30% к минимальному пакету. Отмены: 1 в месяц при 1–2 занятиях в неделю, 2 — при 3 и более |\n| Инглекс | Базовый «Английский 360°» 80 тренингов | 80 | 1290 | ₽ | 103200 | 103200 | 45 | индивидуально | есть — бесплатный вводный урок | Минимальная цена урока на тарифе (−40%), плюс клуб Skills на 30 дней. Рассрочка на 6–10 мес. Возврат за непройденные занятия по запросу |\n| Инглекс | Базовый «Английский 360°» 20 тренингов по 60 мин | 20 | 2000 | ₽ | 40000 | 40000 | 60 | индивидуально | есть — бесплатный вводный урок | Пакетный прайс 60 мин: 5→2880, 10→2160, 20→2000, 40→1840, 60→1720 ₽ |\n| Инглекс | Интенсивный курс (A1) 100 тренингов | 100 | 810 | ₽ | 81000 | 81000 | 45 | индивидуально | есть — бесплатный вводный урок | Самое дешёвое предложение школы. На Интенсивном курсе отмены занятий НЕДОСТУПНЫ. Малый пакет: 20 тренингов по 1 090 ₽ |\n| Инглекс | Премиальный «Английский 360°» 20 тренингов | 20 | 2190 | ₽ | 43800 | 43800 | 45 | индивидуально | есть — бесплатный вводный урок | Тариф действует с 03.08.2026 только для действующих клиентов. Включает топ-преподавателей, безлимитные переносы, безлимитный клуб Skills |\n| Инглекс | С носителем «Разговорная практика» 20 тренингов | 20 | 2290 | ₽ | 45800 | 45800 | 45 | индивидуально с носителем | есть — бесплатный вводный урок | Скидка всего 10% против 30% на Базовом. Прайс 45 мин: 5→2550, 10→2420, 20→2290, 40→2160, 80→2040 ₽. Уровни от A2 до C2 |\n| EnglishDom | Індивідуальні з локальним викладачем 5 занять | 5 | 450 | грн | 450 | 450 | 50 | индивидуально онлайн | есть — бесплатный пробный урок | Цены 2024 года из архива, актуальность НЕ подтверждена. 450 грн за урок. ВАЖНО: школа работает на украинском рынке, рублёвых тарифов нет — школа указывает, что  |\n| EnglishDom | Індивідуальні з локальним викладачем 10 занять | 10 | 430 | грн | 430 | 430 | 50 | индивидуально онлайн | есть — бесплатный пробный урок | Цены 2024 года из архива, актуальность НЕ подтверждена. 430 грн за урок. Пакетная скидка к цене малого пакета — 4% |\n| EnglishDom | Індивідуальні з локальним викладачем 20 занять | 20 | 405 | грн | 405 | 405 | 50 | индивидуально онлайн | есть — бесплатный пробный урок | Цены 2024 года из архива, актуальность НЕ подтверждена. 405 грн за урок. Пакет 20 занятий — самый популярный у школы |\n| EnglishDom | Індивідуальні з локальним викладачем 50 занять | 50 | 380 | грн | 380 | 380 | 50 | индивидуально онлайн | есть — бесплатный пробный урок | Цены 2024 года из архива, актуальность НЕ подтверждена. 380 грн за урок — минимум по школе; скидка 16% к цене малого пакета |\n| EnglishDom | Індивідуальні з носієм мови 5 занять | 5 | 1100 | грн | 1100 | 1100 | 50 | индивидуально с носителем | есть — бесплатный пробный урок | Цены 2024 года из архива. 1100 грн за урок. Цифры подтверждены вторым независимым снимком — промо-лендингом 2024-01 |\n| EnglishDom | Індивідуальні з носієм мови 20 занять | 20 | 1000 | грн | 1000 | 1000 | 50 | индивидуально с носителем | есть — бесплатный пробный урок | Цены 2024 года из архива. 1000 грн за урок. Пакетная скидка всего 9% — на порядок меньше, чем у локального преподавателя |\n| EnglishDom | Індивідуальні з носієм мови 50 занять | 50 | 920 | грн | 920 | 920 | 50 | индивидуально с носителем | есть — бесплатный пробный урок | Цены 2024 года из архива. 920 грн за урок — минимум по носителям, скидка 16% к малому пакету |\n| EnglishDom | Індивідуальні з преміум-викладачем 5 занять | 5 | 620 | грн | 620 | 620 | 50 | индивидуально премиум | есть — бесплатный пробный урок | Цены 2024 года из архива. 620 грн за урок. Промежуточный тариф между локальным преподавателем и носителем |\n| EnglishDom | Індивідуальні з преміум-викладачем 50 занять | 50 | 520 | грн | 520 | 520 | 50 | индивидуально премиум | есть — бесплатный пробный урок | Цены 2024 года из архива. 520 грн за урок, скидка 16% к малому пакету |\n| EnglishDom | Групові заняття (до 7 осіб) 60 уроків | 60 | 250 | грн | 250 | 250 | 50 | группа до 7 человек | есть — бесплатный пробный урок | Самый свежий подтверждённый источник по школе — архивный снимок 2026-06-19. 250 грн за урок, группа до 7 человек, 2–3 раза в неделю, доступ к разговорным клубам |\n| EnglishDom | Акційна пропозиція backtoschool (локальний викладач) 50 занять | 50 | 340 | грн | 340 | 420 | 50 | индивидуально онлайн | есть — бесплатный пробный урок | Архивный снимок 2024-01-23. Акция снижает цену урока до 340 грн (−24% к базовым 450). Бонус до 7 уроков при первой оплате, оплата частями |\n| EnglishDom | Індивідуальні з локальним викладачем (історичні ціни 2021) 50 занять | 50 | 250 | грн | 250 | 315 | — | индивидуально онлайн | есть | ИСТОРИЧЕСКИЕ цены 2021 года, снимок 2021-06-24: 5/10/20/50 занятий = 315/295/275/250 грн. Показывает динамику: цена урока выросла с 250 до 380 грн — это +52% за |\n| EnglishDom | Індивідуальні з локальним викладачем 2025/2026 [НЕПОДТВЕРЖДЕНО] | 10 | 495 | грн | 495 | 495 | 50 | индивидуально онлайн | есть — бесплатный пробный урок | НЕПОДТВЕРЖДЕНО ПЕРВОИСТОЧНИКОМ: только сводка поисковой выдачи, три запроса дали одинаковые цифры. НЕ использовать как факт. Пакеты 10+2/20+4/50+6/75 = 495/445/ |\n| EnglishDom | Індивідуальні з носієм мови 2025/2026 [НЕПОДТВЕРЖДЕНО] | 10 | 1130 | грн | 1130 | 1130 | 50 | индивидуально с носителем | есть — бесплатный пробный урок | НЕПОДТВЕРЖДЕНО ПЕРВОИСТОЧНИКОМ: только сводка поисковой выдачи. НЕ использовать как факт. 1130/1060/920 грн за урок |\n\nВНИМАНИЕ К ТАБЛИЦЕ ТАРИФОВ: цены приведены в РАЗНЫХ валютах (колонка «Валюта»). Тарифы EnglishDom — в гривнах (грн), потому что школа работает на украинском рынке; рублёвых тарифов у неё нет. Численно сравнивать гривны с рублями НЕЛЬЗЯ, суммы и средние по разным валютам не считай.\n\n## Сводка по тарифам\n| Школа | Тарифов | Валюта | Мин за занятие | Макс за занятие | Длительность | Форматы | Пробный урок |\n|---|---|---|---|---|---|---|---|\n| Skyeng | 6 | ₽ | 1290 | 3190 | 50 | индивидуально; мини-группа до 6 человек; индивидуально с носителем | есть — бесплатный вводный урок 30 мин; есть — бесплатный вводный урок |\n| Инглекс | 7 | ₽ | 810 | 2290 | 45/60 | индивидуально; индивидуально с носителем | есть — бесплатный вводный урок с преподавателем; есть — бесплатный вводный урок |\n| EnglishDom | 14 | грн | 250 | 1130 | 50 | индивидуально онлайн; индивидуально с носителем; индивидуально премиум; группа до 7 человек | есть — бесплатный пробный урок; есть |\n\n## Отзывы пользователей: частоты (поведенческий источник)\nВсего отзывов: 30. По школам: Skyeng — 13, Инглекс — 9, EnglishDom — 8.\nТональность: негатив — 17, позитив — 12, смешанный — 1.\nПлощадки: Отзовик — 4, irecommend — 16, otzyvru — 3, edu.vbr.ru — 3, mooc.ru — 2, realreviews.io — 1, vidhuk.ua — 1.\nПо месяцам: 2022-01 — 1, 2022-04 — 1, 2022-10 — 1, 2023-06 — 1, 2023-07 — 1, 2023-10 — 1, 2024-01 — 1, 2024-04 — 2, 2024-08 — 1, 2025-01 — 2, 2025-03 — 2, 2025-04 — 1, 2025-06 — 1, 2025-10 — 1, 2025-11 — 3, 2026-04 — 1, 2026-05 — 1, 2026-07 — 1, 2026-08 — 4, 2026-09 — 3.\n\n### Повторяющиеся сигналы (прошли фильтр шума, порог >= 2)\n\n**Преподаватель** — ИНСАЙТ (подтверждён: 10 наблюдений, школ: 3, + подтверждение из обзора рынка)\n  школ: Skyeng, Инглекс, EnglishDom; тональность: позитив (негатив 3, позитив 7, смешанный 0)\n  месяцы: 2026-09, 2025-03, 2023-06, 2026-08, 2025-06, 2024-08, 2024-01, 2022-10\n  - #1 (Skyeng, 2026-09): Занималась немецким: что-то новое узнала, но мало. Главный минус — выраженная незаинтересованность преподавателя, занятие шло формально.\n  - #3 (Skyeng, 2026-09): Курс китайского с преподавателем Анастасией: материал подаётся понятно и последовательно, сложное разбирается подробно, страх перед иероглифами ушёл через несколько занятий.\n  - #10 (Skyeng, 2025-03): Плотно занимается с марта 2024 года, английский потребовался для работы. С преподавателем сложились очень тёплые отношения.\n  - #11 (Skyeng, 2025-03): Брал премиум-тариф и остался доволен подходом: дают выбор преподавателя по интересам, методика на высшем уровне.\n\n**Списания и возвраты** — ИНСАЙТ (подтверждён: 4 наблюдений, школ: 2, + подтверждение из обзора рынка)\n  школ: Skyeng, EnglishDom; тональность: негатив (негатив 3, позитив 0, смешанный 1)\n  месяцы: 2026-08, 2025-10, 2025-11\n  - #4 (Skyeng, 2026-08): Автор направил официальную досудебную претензию. По его словам, школа отказывается возвращать деньги и полностью игнорирует клиента.\n  - #9 (Skyeng, 2025-10): Полгода занималась английским в группе, решила прекратить обучение и вернуть деньги за оплаченный год — возврат средств превратился в проблему.\n  - #23 (EnglishDom, 2026-08): Удобно, но расписание давит»: ожидал идеальной сетки занятий, но вечерние часы быстро разлетаются. При этом контент сильный, разговорная практика постоянная; советует брать пакет с запасом времени.\n  - #25 (EnglishDom, 2025-11): Только негатив: после оплаты два занятия отменили, причём причины называли разные. После просьбы вернуть деньги получала только обещания — средства так и не вернули.\n\n**Платформа и техника** — ИНСАЙТ (подтверждён: 3 наблюдений, школ: 3, + подтверждение из обзора рынка)\n  школ: Skyeng, Инглекс, EnglishDom; тональность: позитив (негатив 1, позитив 2, смешанный 0)\n  месяцы: 2026-05, 2023-10, 2026-04\n  - #6 (Skyeng, 2026-05): Пользуется платформой почти два года, опыт в целом позитивный: личный кабинет простой, нравится учить слова и обсуждать интересные темы.\n  - #21 (Инглекс, 2023-10): За 7–8 уроков упало и качество, и организация: платформа упала на 20-й минуте, урок не компенсировали; преподаватель дважды отменила занятие, о чём школа не знала. По письменным домашним заданиям обра\n  - #24 (EnglishDom, 2026-04): Люблю эту школу!» Занимается уже второй год, хвалит платформу — и для занятий с учителем, и для самостоятельного изучения.\n\n**Результат и прогресс** — ИНСАЙТ (подтверждён: 3 наблюдений, школ: 3, + подтверждение из обзора рынка)\n  школ: Skyeng, Инглекс, EnglishDom; тональность: позитив (негатив 1, позитив 2, смешанный 0)\n  месяцы: 2025-01, 2026-08, 2023-07\n  - #12 (Skyeng, 2025-01): Занимается больше двух лет, начинала с нулевого уровня — сейчас, по её словам, достаточно хороший прогресс и неплохо разговаривает.\n  - #15 (Инглекс, 2026-08): Занимается 4 месяца, преподаватель нравится. Радует своя платформа — уроки, домашка и словарь в одном месте, но главное — видит реальный прогресс.\n  - #28 (EnglishDom, 2023-07): Не советую! Деньги на ветер»: много наслышан о школе из-за рекламы, но обучение не оправдало ожиданий.\n\n**Отмена и перенос занятий** — ИНСАЙТ (подтверждён: 3 наблюдений, школ: 2)\n  школ: Инглекс, EnglishDom; тональность: негатив (негатив 3, позитив 0, смешанный 0)\n  месяцы: 2025-04, 2025-01, 2022-04\n  - #17 (Инглекс, 2025-04): Плюсы — хорошая программа, но неудобное и устаревшее приложение; правила отмены такие, что даже заранее согласованное с преподавателем изменение расписания считается отменой.\n  - #18 (Инглекс, 2025-01): При выборе школы опиралась на возможность бесплатной отмены занятий. С декабря 2024 года школа ввела новые правила, и автор осталась крайне недовольна.\n  - #30 (EnglishDom, 2022-04): Ужасная школа»: баланс перевели в другую школу, уроки постоянно отменяются и об этом даже не предупреждают заранее.\n\n**Навязывание услуг** — НАБЛЮДЕНИЕ (повторяется: 2 упоминаний, у 2 школ)\n  школ: Skyeng, EnglishDom; тональность: негатив (негатив 2, позитив 0, смешанный 0)\n  месяцы: 2026-09, 2024-04\n  - #2 (Skyeng, 2026-09): Оставила личные данные для кабинета на сайте другой школы — и неделю ей звонили по несколько раз с разных номеров, приглашая на урок.\n  - #27 (EnglishDom, 2024-04): Сомнительная контора»: реальный уровень знаний занижают, а после пробного урока выпрашивают покупку полного курса.\n\n**Поддержка** — НАБЛЮДЕНИЕ (повторяется: 2 упоминаний)\n  школ: Skyeng; тональность: негатив (негатив 2, позитив 0, смешанный 0)\n  месяцы: 2025-11\n  - #7 (Skyeng, 2025-11): Контраст до и после оплаты: до старта обучения с клиентом активно общаются, перезванивают, уточняют условия. После — по мнению автора, сплошной игнор и бездействие.\n  - #8 (Skyeng, 2025-11): Крайне разочарована: служба поддержки, по словам автора, не работает вообще, ответы приходится ждать месяцами.\n\n### Сигналы ниже порога (переданы как ГИПОТЕЗЫ, не как выводы)\n- Цена и оплата — упоминаний: 1 (школы: Skyeng)\n- Пробный урок — упоминаний: 1 (школы: Инглекс)\n- Репутация компании — упоминаний: 1 (школы: EnglishDom)\n\n### Единичные факты (ШУМ, в выводы НЕ включать)\n- нет\n\n## Уязвимости конкурентов (повторяющиеся негативные сигналы, >= 2)\n\n**Skyeng** — негативных отзывов 7 из 13 (54%)\n  - Преподаватель — подтверждено 2 отзывами\n  - Списания и возвраты — подтверждено 2 отзывами\n  - Поддержка — подтверждено 2 отзывами\n  - единичные жалобы (не выводы): Навязывание услуг\n  - пример: #1 (Преподаватель): Занималась немецким: что-то новое узнала, но мало. Главный минус — выраженная незаинтересованность преподавателя, занятие шло формально.\n  - пример: #4 (Списания и возвраты): Автор направил официальную досудебную претензию. По его словам, школа отказывается возвращать деньги и полностью игнорирует клиента.\n  - пример: #7 (Поддержка): Контраст до и после оплаты: до старта обучения с клиентом активно общаются, перезванивают, уточняют условия. После — по мнению автора, сплошной игнор и бездействие.\n  - пример: #8 (Поддержка): Крайне разочарована: служба поддержки, по словам автора, не работает вообще, ответы приходится ждать месяцами.\n\n**Инглекс** — негативных отзывов 5 из 9 (56%)\n  - Отмена и перенос занятий — подтверждено 2 отзывами\n  - единичные жалобы (не выводы): Преподаватель, Платформа и техника, Пробный урок\n  - пример: #17 (Отмена и перенос занятий): Плюсы — хорошая программа, но неудобное и устаревшее приложение; правила отмены такие, что даже заранее согласованное с преподавателем изменение расписания считается отменой.\n  - пример: #18 (Отмена и перенос занятий): При выборе школы опиралась на возможность бесплатной отмены занятий. С декабря 2024 года школа ввела новые правила, и автор осталась крайне недовольна.\n\n## Отраслевой обзор рынка (вторичный источник, полный текст)\n# ОБЗОР РЫНКА: онлайн-обучение иностранным языкам в России\nДайджест профильных публикаций и отраслевых исследований. Вторичный источник.\nСобран: 23.09.2026. Период публикаций: 2024 — июнь 2026.\n\nВАЖНО О ДОСТОВЕРНОСТИ: все цифры ниже — из открытых публикаций. Там, где\nисточник даёт оценку, а не измеренный факт, это указано явно. Название источника\nи URL приведены для каждой цифры.\n\n---\n\n## 1. Объём и динамика рынка EdTech в целом\n\n| Показатель | Значение | Год | Источник | Факт / оценка |\n|---|---|---|---|---|\n| Суммарная выручка топ-100 EdTech-компаний РФ | 154 млрд ₽ (+12% г/г) | 2025 | Smart Ranking / Коммерсантъ | оценка аналитиков |\n| Суммарная выручка топ-100 | 144,5 млрд ₽ (+19% г/г) | 2024 | Smart Ranking | оценка аналитиков |\n| Суммарная выручка топ-100 | 122 млрд ₽ (+32% г/г) | 2023 | Smart Ranking | оценка аналитиков |\n| Выручка топ-100 за квартал | 38,2 млрд ₽ (+19,6%) | Q3 2024 | Skillbox Media | оценка аналитиков |\n| Выручка топ-100 за квартал | 34,2 млрд ₽ (+10%) | Q2 2025 | Коммерсантъ | оценка аналитиков |\n| Выручка топ-100 за квартал | ~42 млрд ₽ (+12,2%) | Q3 2025 | Коммерсантъ | оценка аналитиков |\n\nИсточники:\n- https://smartranking.ru/ru/analytics/edtechs/edtech-rynok-vyros-v-2025-godu-na-12/\n- https://www.kommersant.ru/doc/8398823\n- https://www.unkniga.ru/news/edtech-rynok-vyros-v-2024-godu-na-19.html\n- https://skillbox.ru/media/edtech/u-rossiyskogo-edtech-rynka-v-tretem-kvartale-2024-goda-smenilsya-lider/\n- https://www.kommersant.ru/doc/7940500\n- https://www.kommersant.ru/doc/8180766\n\n**Динамика темпов роста топ-100:** +32% (2023) → +19% (2024) → +12% (2025).\nТретий год подряд замедление. Основатель Smart Ranking Дарья Рыжкова:\n«По сути, рынок стагнирует»; «с учётом инфляции рынок находится на грани\nрецессии» (Коммерсантъ, 03.02.2026 и 03.08.2025).\n\nПрогноз участников на 2026 год: рост сегмента 5–10% (Smart Ranking).\n\n---\n\n## 2. Сегмент «Иностранные языки» — что известно точно\n\n| Показатель | Значение | Период | Источник |\n|---|---|---|---|\n| **Доля сегмента «Иностранные языки» в выручке топ-100** | **7%** | Q3 2024 | Skillbox Media |\n| **Динамика сегмента «Иностранные языки»** | **−6,7% г/г** | Q3 2024 | Skillbox Media |\n| Сегмент «Бизнес-образование» (для сравнения) | 3% рынка, −50% г/г | Q3 2024 | Skillbox Media |\n| Детский сегмент | 12,5 млрд ₽ (37% рынка), +16% | Q2 2025 | Skillbox Media |\n| Детский сегмент | 13,7 млрд ₽, +9,4% | Q3 2025 | Коммерсантъ |\n| ДПО (доп. проф. образование) | 52,5 млрд ₽ за год, +6% (было +16,1%) | 2025 | Smart Ranking |\n\nИсточник: https://skillbox.ru/media/edtech/u-rossiyskogo-edtech-rynka-v-tretem-kvartale-2024-goda-smenilsya-lider/\n\nВАЖНОЕ ОГРАНИЧЕНИЕ: рублёвого объёма сегмента английского языка за 2024–2025\nв открытом доступе НЕТ. Есть только доля 7% (Q3 2024) и падение −6,7%.\nТочные цифры — только в платных отчётах (РБК Магазин исследований, 199 000 ₽).\nДоля сегмента иностранных языков за 2025 год в квартальных обзорах не выделялась.\n\n---\n\n## 3. Спрос на английский язык: динамика во времени\n\n**Поисковый интерес (кластер запросов «Яндекс.Вордстат», исследование сети\nHelen Doron, публикация 03.03.2026, агрегатор fb.ru):**\n\n| Год | Динамика интереса к изучению английского |\n|---|---|\n| 2021 | +5,3% |\n| 2022 | −2,2% |\n| 2023 | −10,2% |\n| 2024 | −13,0% |\n| 2025 | **+12,1%** |\n\nТо есть после трёх лет падения в 2025 году интерес к английскому развернулся\nв рост. Запрос на разговорную практику вырос вдвое. Детская аудитория: интерес\nк языковым продуктам +70% (Skyeng + «Билайн Аналитика»).\nИсточник: https://fb.ru/news/languages/2026/3/3/423364\n\nОГОВОРКА: fb.ru — контент-агрегатор, пересказывающий пресс-релизы; первичные\nотчёты Helen Doron и Skyeng публично не выложены. Это динамика ПОИСКОВОГО\nИНТЕРЕСА, а не выручки. Сопоставлять её с выручкой сегмента (7%, −6,7%)\nнапрямую нельзя — это разные метрики.\n\n---\n\n## 4. Средний чек и цены\n\n| Показатель | Значение | Год | Источник | Тип |\n|---|---|---|---|---|\n| Средние затраты россиян на онлайн-обучение | 32 191 ₽ (+~6 тыс. ₽ к 2024) | 2025 | РБК Тренды / «Нетология» (опрос «ОнИн», август 2025, 2 500 чел., 18–64 г.) | измеренный факт |\n| Планируемые затраты на обучение | ~52 тыс. ₽ | 2026 (план) | там же | измеренный факт |\n| Средние затраты на смену профессии | 44 тыс. ₽ | 2025 | там же | измеренный факт |\n| Средняя ставка репетитора за ак. час | 48,7% берут 1001–2000 ₽; 17,9% — >2000 ₽ | 2025 | Forbes Education / «Авито Услуги» + ProgressMe (1 717 педагогов, 10 000 заказчиков) | измеренный факт |\n| Бюджет семьи на репетитора | >60% семей готовы выделять ~10 000 ₽/мес | 2025 | Forbes Education | измеренный факт |\n| Прайс Skyeng (справочник) | от 18 960 ₽ за курс (24 ч.), средняя 790 ₽/ак.час | 2026 | study.ru | данные агрегатора, низкая достоверность |\n\nИсточники:\n- https://trends.rbc.ru/trends/education/692412399a79474b2d95a90f\n- https://www.cnews.ru/news/line/2025-11-21_onlajn-obrazovanie_voshlo\n- https://www.forbes.ru/education/546706-castnyj-sektor-ot-cego-zavisit-zarabotok-repetitorov-v-rossii\n- https://www.study.ru/schools/moskva/skyeng\n\nОГРАНИЧЕНИЕ: средний чек 32 191 ₽ — по ВСЕМУ онлайн-образованию, а не по\nанглийскому языку. Среднего чека именно по языковым курсам в открытом доступе нет.\n\n---\n\n## 5. Концентрация и крупнейшие игроки\n\n| Игрок / показатель | Значение | Период | Источник |\n|---|---|---|---|\n| Доля экосистемы VK (Skillbox, Geekbrains, Учи.ру, Тетрика и др.) | 14,9% | I пол. 2024 | Skillbox Media / Smart Ranking |\n| **Доля экосистемы Skyeng** | **9,9%** | I пол. 2024 | там же |\n| Доля «Синергии» | 7,8% | I пол. 2024 | там же |\n| Доля экосистемы Сбера | 6,8% | I пол. 2024 | там же |\n| Доля экосистемы Яндекса | 5,6% | I пол. 2024 | там же |\n| Концентрация: топ-5 экосистем | 45% рынка | I пол. 2024 | там же |\n| Концентрация: топ-10 компаний | ~55% выручки топ-100 | 2024 | Smart Ranking |\n| **Выручка Skyeng** | **12,8 млрд ₽ (+5,1%), 3-е место** | 2025 | Коммерсантъ |\n| Выручка «Синергии» (лидер) | 16,1 млрд ₽ (+26,3%) | 2025 | Коммерсантъ |\n| Выручка Skillbox Holding (VK) | 12,9 млрд ₽ (+5,3%) | 2025 | Коммерсантъ |\n| Выручка «100балльного репетитора» | 4,4 млрд ₽ (+118,4%) | 2025 | Коммерсантъ |\n\nИсточники:\n- https://skillbox.ru/media/edtech/stalo-izvestno-kakie-doli-rynka-zanimayut-pyat-krupneyshih-ekosistem-rossiyskogo-edtech/\n- https://www.kommersant.ru/doc/8398823\n\nВАЖНО: 9,9% — это доля ВСЕЙ экосистемы Skyeng во всём EdTech (все направления),\nа не доля в сегменте английского языка. Точная доля Skyeng именно в языковом\nсегменте публично не раскрывается. Встречающуюся в интернете цифру «~20% рынка\nязыков у Skyeng» использовать НЕЛЬЗЯ — она не подтверждена (20% была заявленной\nв 2021 году целью Skysmart по рынку школьного онлайн-образования).\n\n---\n\n## 6. Тренды, названные аналитиками рынка\n\n1. **Переход от роста к стагнации.** Темпы роста топ-100 снижаются третий год:\n   +32% → +19% → +12%. Номинальный рост при этом ниже инфляции — аналитики\n   говорят о «грани рецессии».\n   Источник: https://www.kommersant.ru/doc/8398823\n\n2. **ИИ — единственный драйвер роста.** Спрос на машинное обучение +60% г/г,\n   на прикладное использование нейросетей ~+15%. «Навыковые» курсы по ИИ растут\n   в три раза быстрее остальных. Источник: https://www.kommersant.ru/doc/8398823\n\n3. **ИИ-репетиторы: анонсов много, внедрений мало.** 33% компаний планируют\n   адаптивные траектории, 29% — ИИ-тьюторов. Пример эффекта: ИИ-помощник\n   Skillbox дал +20% фиксаций прогресса и −10% времени на домашние задания.\n   Прогноз: к 2026 году в языковом обучении цифровой тьютор станет обязательной\n   частью сервиса. Источник: https://trends.rbc.ru/trends/education/6952218e9a79473ffc6f6b06\n\n4. **ИИ как прямой конкурент, а не дополнение.** Базовые запросы («объясни\n   задачу», «помоги с эссе») учащиеся закрывают через ChatGPT. Chegg объявила\n   о сокращении ~45% сотрудников из-за «новых реалий ИИ».\n   Источник: https://trends.rbc.ru/trends/education/6952218e9a79473ffc6f6b06\n\n5. **Короткие форматы и микрообучение.** 70% курсов длятся не более трёх\n   месяцев; 61% студентов выбирают короткие курсы как основной формат,\n   23% — интенсивы. Источники: https://www.cnews.ru/news/line/2025-11-21_onlajn-obrazovanie_voshlo ;\n   https://www.kommersant.ru/doc/7940500\n\n6. **Мобильные приложения вытесняют школы в самостоятельном обучении.**\n   72% изучающих языки предпочитают приложения для самостоятельных занятий;\n   среди начинающих без репетитора — 70%. Глобальный рынок приложений для\n   изучения языков — $25 млрд (+18% к 2023). CAC приложений в 5 раз ниже, чем\n   у языковых школ. РФ в топ-5 стран по времени в приложениях (45 мин/день).\n   Источник: https://www.vedomosti.ru/press_releases/2026/06/04/yazikovoi-rinok-2026-kak-prilozheniya-zahvatili-70-auditorii-samouchek\n\n7. **Консолидация рынка.** Топ-10 — ~55% выручки, топ-5 экосистем — 45%.\n   В Q3 2025 Smart Ranking формулирует: «главной задачей участников рынка\n   становится сохранение позиций и занятие доли мелких игроков и репетиторов».\n   Источники: https://www.unkniga.ru/news/edtech-rynok-vyros-v-2024-godu-na-19.html ;\n   https://www.kommersant.ru/doc/8180766\n\n8. **Бум репетиторства и самозанятости.** Около трети репетиторов зарабатывают\n   свыше 80 000 ₽/мес; 97,2% дают онлайн-уроки; 67,8% работают только\n   дистанционно. Вакансии онлайн-репетиторов +51% г/г, запросы контактов +126%.\n   Источники: https://www.forbes.ru/education/546706-castnyj-sektor-ot-cego-zavisit-zarabotok-repetitorov-v-rossii ;\n   https://1prime.ru/20250821/repetitor-860989559.html\n\n9. **Рост цен и переход на рассрочку.** Рассрочка стала «двигателем продаж»\n   дорогих курсов. Государство вводит «период охлаждения» для рассрочек свыше\n   50 тыс. ₽. Цикл принятия решения о покупке удлинился с 3–5 до 7–10 дней.\n   Источники: https://www.kommersant.ru/doc/7940500 ; https://www.kommersant.ru/doc/8180766\n\n10. **Выдавливание зарубежных игроков.** Coursera и edX ушли из РФ в 2022 году.\n    Duolingo остаётся доступным, но под давлением: в 2024 удалил контент по\n    требованию Роскомнадзора, 26.03.2026 оштрафован на 2 млн ₽ за нарушение\n    закона о персональных данных. Пользователи языковых приложений в РФ выросли\n    на 35% из-за ухода западных сервисов и сложностей с оплатой.\n    Источники: https://www.vedomosti.ru/press_releases/2026/06/04/yazikovoi-rinok-2026-kak-prilozheniya-zahvatili-70-auditorii-samouchek ;\n    https://www.forbes.ru/education/558155-duolingo-ostrafovali-na-2-mln-rublej-za-narusenie-zakona-o-personal-nyh-dannyh\n\n11. **Смена языковых приоритетов.** Спрос на китайский +89%, на корейский\n    +182% (2023–2025). Китайский генерирует 56% выручки неанглийских языковых\n    направлений. Источник: https://www.vedomosti.ru/press_releases/2026/06/04/yazikovoi-rinok-2026-kak-prilozheniya-zahvatili-70-auditorii-samouchek\n\n12. **Инфобизнес и «массовые» онлайн-школы — самые уязвимые.** В Q3 2025 трафик\n    у них −5% г/г, число лидов −7%, выручка за 9 месяцев 116,5 млрд ₽ (−5%).\n    Впервые зафиксировано падение годовой выручки у GetCourse.\n    Источник: https://trends.rbc.ru/trends/education/6952218e9a79473ffc6f6b06\n\n---\n\n## 7. Регулирование (влияет на продукт и маркетинг)\n\n- **Лицензирование.** Постановление Правительства РФ № 1490 от 18.09.2020\n  (ред. от 27.01.2026), срок продлён до 01.09.2032, вступает в силу с 01.09.2026.\n  П. 11.1: при реализации программ ИСКЛЮЧИТЕЛЬНО дистанционно соискатель лицензии\n  не представляет документы о зданиях, материально-техническом обеспечении и\n  санитарно-эпидемиологическое заключение. То есть онлайн-школам лицензироваться\n  стало проще.\n  Источник: https://www.leocdn.ru/uploadsForSiteId/200273/content/550f9f20-167d-4d07-98c5-23566b398181.pdf\n\n- **Маркировка интернет-рекламы (ЕРИР).** С 01.09.2023 обязательна по ст. 18.1\n  ФЗ-38: токен через ОРД и передача данных в ЕРИР Роскомнадзора.\n  Источник: https://edlegal.ru/blog/zakon-o-reklame-dlya-edtech/\n\n- **Реклама курсов.** Запрещены: гарантии финансового результата и\n  трудоустройства, некорректные сравнения с конкурентами, выдуманные рейтинги,\n  скрытые условия и цены, ложные отзывы (ст. 5 ФЗ-38). Штрафы по ст. 14.3 КоАП\n  для юрлиц — 100 000–500 000 ₽. По 152-ФЗ — до 6 млн ₽.\n  Источник: https://edlegal.ru/blog/zakon-o-reklame-dlya-edtech/\n\n- **Сокращение часов иностранного языка в школах — драйвер спроса на\n  репетиторов.** Приказы Минпросвещения № 729 от 08.10.2025 и № 808 от\n  10.11.2025. С 01.09.2026 в 5 классе иностранный язык сокращается с 3 до\n  2 часов в неделю; с 01.09.2027 — в 6 и 7 классах. Общий объём курса\n  сокращается с 510 до 408 часов.\n  Источник: https://bazanpa.ru/minprosveshcheniia-rossii-pismo-n03-1566-ot20082026-h7227589/\n\n- **Ограничение онлайн-обучения для медиков и фармацевтов.** С 01.03.2026\n  введены ограничения на дистанционные технологии в этом направлении.\n  Это прецедент ограничения онлайн-формата в отдельных отраслях.\n  Источник: https://smartranking.ru/ru/analytics/edtechs/edtech-rynok-vyros-v-2025-godu-na-12/\n\n---\n\n## 8. Противоречия и ограничения данных\n\n1. Рост детского сегмента за 2025: у Smart Ranking на сайте «20%», у\n   Коммерсанта со ссылкой на то же исследование — «22,2%». Расхождение внутри\n   одного источника.\n2. Рынок 2025: номинально +12%, но аналитики называют состояние стагнацией и\n   «гранью рецессии» — номинальный рост и реальное падение сосуществуют.\n3. Динамика языкового сегмента: −6,7% по выручке (Q3 2024) против +12,1% по\n   поисковому интересу (2025). Это РАЗНЫЕ метрики, сравнивать напрямую нельзя.\n4. Средний чек 32 191 ₽ — по всему онлайн-образованию, не по английскому.\n5. Доля Skyeng 9,9% — по всей экосистеме во всём EdTech, не по языковому сегменту.\n6. Три источника, которые не открылись: РБК Компании (401), RG.ru (SSL),\n   T-Bank «Секреты» (SSL).\n\n---\n\n## 9. Чего в открытых источниках НЕТ\n\n- Рублёвый объём сегмента изучения английского языка за 2024–2025 (только доля\n  7% и −6,7% за Q3 2024).\n- Доля сегмента иностранных языков за 2025 год.\n- Точная доля Skyeng именно в сегменте английского языка.\n- Средний чек именно на языковые курсы.\n- Официальная статистика роста цен на языковые курсы за 2025 год.\n",
+  "counts": {
+    "reviews": 30,
+    "tariffs": 27,
+    "observations": 7,
+    "hypotheses": 3,
+    "noise_excluded": 0,
+    "weaknesses": 2
+  },
+  "observations": [
+    {
+      "category": "Преподаватель",
+      "count": 10,
+      "schools": [
+        "Skyeng",
+        "Инглекс",
+        "EnglishDom"
+      ],
+      "platforms": [
+        "Отзовик",
+        "irecommend",
+        "otzyvru",
+        "edu.vbr.ru"
+      ],
+      "months": [
+        "2026-09",
+        "2025-03",
+        "2023-06",
+        "2026-08",
+        "2025-06",
+        "2024-08",
+        "2024-01",
+        "2022-10"
+      ],
+      "types": {
+        "позитив": 7,
+        "негатив": 3,
+        "смешанный": 0
+      },
+      "dominant_sentiment": "позитив",
+      "cross_school": true,
+      "cross_source": true,
+      "examples": [
+        "#1 (Skyeng, 2026-09): Занималась немецким: что-то новое узнала, но мало. Главный минус — выраженная незаинтересованность преподавателя, занятие шло формально.",
+        "#3 (Skyeng, 2026-09): Курс китайского с преподавателем Анастасией: материал подаётся понятно и последовательно, сложное разбирается подробно, страх перед иероглифами ушёл через несколько занятий.",
+        "#10 (Skyeng, 2025-03): Плотно занимается с марта 2024 года, английский потребовался для работы. С преподавателем сложились очень тёплые отношения.",
+        "#11 (Skyeng, 2025-03): Брал премиум-тариф и остался доволен подходом: дают выбор преподавателя по интересам, методика на высшем уровне."
+      ],
+      "schools_negative": [
+        "Skyeng",
+        "Инглекс"
+      ],
+      "level": "ИНСАЙТ (подтверждён: 10 наблюдений, школ: 3, + подтверждение из обзора рынка)"
+    },
+    {
+      "category": "Списания и возвраты",
+      "count": 4,
+      "schools": [
+        "Skyeng",
+        "EnglishDom"
+      ],
+      "platforms": [
+        "irecommend",
+        "realreviews.io",
+        "vidhuk.ua"
+      ],
+      "months": [
+        "2026-08",
+        "2025-10",
+        "2025-11"
+      ],
+      "types": {
+        "позитив": 0,
+        "негатив": 3,
+        "смешанный": 1
+      },
+      "dominant_sentiment": "негатив",
+      "cross_school": true,
+      "cross_source": true,
+      "examples": [
+        "#4 (Skyeng, 2026-08): Автор направил официальную досудебную претензию. По его словам, школа отказывается возвращать деньги и полностью игнорирует клиента.",
+        "#9 (Skyeng, 2025-10): Полгода занималась английским в группе, решила прекратить обучение и вернуть деньги за оплаченный год — возврат средств превратился в проблему.",
+        "#23 (EnglishDom, 2026-08): Удобно, но расписание давит»: ожидал идеальной сетки занятий, но вечерние часы быстро разлетаются. При этом контент сильный, разговорная практика постоянная; советует брать пакет с запасом времени.",
+        "#25 (EnglishDom, 2025-11): Только негатив: после оплаты два занятия отменили, причём причины называли разные. После просьбы вернуть деньги получала только обещания — средства так и не вернули."
+      ],
+      "schools_negative": [
+        "Skyeng",
+        "EnglishDom"
+      ],
+      "level": "ИНСАЙТ (подтверждён: 4 наблюдений, школ: 2, + подтверждение из обзора рынка)"
+    },
+    {
+      "category": "Платформа и техника",
+      "count": 3,
+      "schools": [
+        "Skyeng",
+        "Инглекс",
+        "EnglishDom"
+      ],
+      "platforms": [
+        "irecommend",
+        "mooc.ru"
+      ],
+      "months": [
+        "2026-05",
+        "2023-10",
+        "2026-04"
+      ],
+      "types": {
+        "позитив": 2,
+        "негатив": 1,
+        "смешанный": 0
+      },
+      "dominant_sentiment": "позитив",
+      "cross_school": true,
+      "cross_source": true,
+      "examples": [
+        "#6 (Skyeng, 2026-05): Пользуется платформой почти два года, опыт в целом позитивный: личный кабинет простой, нравится учить слова и обсуждать интересные темы.",
+        "#21 (Инглекс, 2023-10): За 7–8 уроков упало и качество, и организация: платформа упала на 20-й минуте, урок не компенсировали; преподаватель дважды отменила занятие, о чём школа не знала. По письменным домашним заданиям обра",
+        "#24 (EnglishDom, 2026-04): Люблю эту школу!» Занимается уже второй год, хвалит платформу — и для занятий с учителем, и для самостоятельного изучения."
+      ],
+      "schools_negative": [
+        "Инглекс"
+      ],
+      "level": "ИНСАЙТ (подтверждён: 3 наблюдений, школ: 3, + подтверждение из обзора рынка)"
+    },
+    {
+      "category": "Результат и прогресс",
+      "count": 3,
+      "schools": [
+        "Skyeng",
+        "Инглекс",
+        "EnglishDom"
+      ],
+      "platforms": [
+        "irecommend",
+        "mooc.ru"
+      ],
+      "months": [
+        "2025-01",
+        "2026-08",
+        "2023-07"
+      ],
+      "types": {
+        "позитив": 2,
+        "негатив": 1,
+        "смешанный": 0
+      },
+      "dominant_sentiment": "позитив",
+      "cross_school": true,
+      "cross_source": true,
+      "examples": [
+        "#12 (Skyeng, 2025-01): Занимается больше двух лет, начинала с нулевого уровня — сейчас, по её словам, достаточно хороший прогресс и неплохо разговаривает.",
+        "#15 (Инглекс, 2026-08): Занимается 4 месяца, преподаватель нравится. Радует своя платформа — уроки, домашка и словарь в одном месте, но главное — видит реальный прогресс.",
+        "#28 (EnglishDom, 2023-07): Не советую! Деньги на ветер»: много наслышан о школе из-за рекламы, но обучение не оправдало ожиданий."
+      ],
+      "schools_negative": [
+        "EnglishDom"
+      ],
+      "level": "ИНСАЙТ (подтверждён: 3 наблюдений, школ: 3, + подтверждение из обзора рынка)"
+    },
+    {
+      "category": "Отмена и перенос занятий",
+      "count": 3,
+      "schools": [
+        "Инглекс",
+        "EnglishDom"
+      ],
+      "platforms": [
+        "edu.vbr.ru",
+        "irecommend"
+      ],
+      "months": [
+        "2025-04",
+        "2025-01",
+        "2022-04"
+      ],
+      "types": {
+        "позитив": 0,
+        "негатив": 3,
+        "смешанный": 0
+      },
+      "dominant_sentiment": "негатив",
+      "cross_school": true,
+      "cross_source": false,
+      "examples": [
+        "#17 (Инглекс, 2025-04): Плюсы — хорошая программа, но неудобное и устаревшее приложение; правила отмены такие, что даже заранее согласованное с преподавателем изменение расписания считается отменой.",
+        "#18 (Инглекс, 2025-01): При выборе школы опиралась на возможность бесплатной отмены занятий. С декабря 2024 года школа ввела новые правила, и автор осталась крайне недовольна.",
+        "#30 (EnglishDom, 2022-04): Ужасная школа»: баланс перевели в другую школу, уроки постоянно отменяются и об этом даже не предупреждают заранее."
+      ],
+      "schools_negative": [
+        "Инглекс",
+        "EnglishDom"
+      ],
+      "level": "ИНСАЙТ (подтверждён: 3 наблюдений, школ: 2)"
+    },
+    {
+      "category": "Навязывание услуг",
+      "count": 2,
+      "schools": [
+        "Skyeng",
+        "EnglishDom"
+      ],
+      "platforms": [
+        "Отзовик",
+        "irecommend"
+      ],
+      "months": [
+        "2026-09",
+        "2024-04"
+      ],
+      "types": {
+        "позитив": 0,
+        "негатив": 2,
+        "смешанный": 0
+      },
+      "dominant_sentiment": "негатив",
+      "cross_school": true,
+      "cross_source": false,
+      "examples": [
+        "#2 (Skyeng, 2026-09): Оставила личные данные для кабинета на сайте другой школы — и неделю ей звонили по несколько раз с разных номеров, приглашая на урок.",
+        "#27 (EnglishDom, 2024-04): Сомнительная контора»: реальный уровень знаний занижают, а после пробного урока выпрашивают покупку полного курса."
+      ],
+      "schools_negative": [
+        "Skyeng",
+        "EnglishDom"
+      ],
+      "level": "НАБЛЮДЕНИЕ (повторяется: 2 упоминаний, у 2 школ)"
+    },
+    {
+      "category": "Поддержка",
+      "count": 2,
+      "schools": [
+        "Skyeng"
+      ],
+      "platforms": [
+        "irecommend"
+      ],
+      "months": [
+        "2025-11"
+      ],
+      "types": {
+        "позитив": 0,
+        "негатив": 2,
+        "смешанный": 0
+      },
+      "dominant_sentiment": "негатив",
+      "cross_school": false,
+      "cross_source": true,
+      "examples": [
+        "#7 (Skyeng, 2025-11): Контраст до и после оплаты: до старта обучения с клиентом активно общаются, перезванивают, уточняют условия. После — по мнению автора, сплошной игнор и бездействие.",
+        "#8 (Skyeng, 2025-11): Крайне разочарована: служба поддержки, по словам автора, не работает вообще, ответы приходится ждать месяцами."
+      ],
+      "schools_negative": [
+        "Skyeng"
+      ],
+      "level": "НАБЛЮДЕНИЕ (повторяется: 2 упоминаний)"
+    }
+  ],
+  "hypotheses": [
+    {
+      "category": "Цена и оплата",
+      "count": 1,
+      "schools": [
+        "Skyeng"
+      ],
+      "platforms": [
+        "Отзовик"
+      ],
+      "months": [
+        "2026-07"
+      ],
+      "types": {
+        "позитив": 1,
+        "негатив": 0,
+        "смешанный": 0
+      },
+      "dominant_sentiment": "позитив",
+      "cross_school": false,
+      "cross_source": true,
+      "examples": [
+        "#5 (Skyeng, 2026-07): Учил английский раньше, но говорить было сложно — выбрал преподавателя с упором на разговорную речь и доволен результатом. Из минусов указал только одно: хотелось бы подешевле."
+      ],
+      "schools_negative": [],
+      "level": "ГИПОТЕЗА (единичное упоминание, но подтверждено обзором рынка)"
+    },
+    {
+      "category": "Пробный урок",
+      "count": 1,
+      "schools": [
+        "Инглекс"
+      ],
+      "platforms": [
+        "irecommend"
+      ],
+      "months": [
+        "2022-01"
+      ],
+      "types": {
+        "позитив": 0,
+        "негатив": 1,
+        "смешанный": 0
+      },
+      "dominant_sentiment": "негатив",
+      "cross_school": false,
+      "cross_source": false,
+      "examples": [
+        "#22 (Инглекс, 2022-01): Слабая платформа; уровень языка определили неправильно."
+      ],
+      "schools_negative": [
+        "Инглекс"
+      ],
+      "level": "ГИПОТЕЗА (единичное упоминание, подтверждений недостаточно)"
+    },
+    {
+      "category": "Репутация компании",
+      "count": 1,
+      "schools": [
+        "EnglishDom"
+      ],
+      "platforms": [
+        "irecommend"
+      ],
+      "months": [
+        "2024-04"
+      ],
+      "types": {
+        "позитив": 0,
+        "негатив": 1,
+        "смешанный": 0
+      },
+      "dominant_sentiment": "негатив",
+      "cross_school": false,
+      "cross_source": false,
+      "examples": [
+        "#26 (EnglishDom, 2024-04): Хороший преподаватель, но мерзкая контора»: претензия не к обучению, а к публичной политической позиции компании и просьбам о спонсировании."
+      ],
+      "schools_negative": [
+        "EnglishDom"
+      ],
+      "level": "ГИПОТЕЗА (единичное упоминание, подтверждений недостаточно)"
+    }
+  ],
+  "noise": [],
+  "weaknesses": [
+    {
+      "school": "Skyeng",
+      "negative_total": 7,
+      "negative_share": 54,
+      "confirmed": [
+        {
+          "category": "Преподаватель",
+          "mentions": 2
+        },
+        {
+          "category": "Списания и возвраты",
+          "mentions": 2
+        },
+        {
+          "category": "Поддержка",
+          "mentions": 2
+        }
+      ],
+      "single_mentions": [
+        "Навязывание услуг"
+      ],
+      "examples": [
+        "#1 (Преподаватель): Занималась немецким: что-то новое узнала, но мало. Главный минус — выраженная незаинтересованность преподавателя, занятие шло формально.",
+        "#4 (Списания и возвраты): Автор направил официальную досудебную претензию. По его словам, школа отказывается возвращать деньги и полностью игнорирует клиента.",
+        "#7 (Поддержка): Контраст до и после оплаты: до старта обучения с клиентом активно общаются, перезванивают, уточняют условия. После — по мнению автора, сплошной игнор и бездействие.",
+        "#8 (Поддержка): Крайне разочарована: служба поддержки, по словам автора, не работает вообще, ответы приходится ждать месяцами."
+      ]
+    },
+    {
+      "school": "Инглекс",
+      "negative_total": 5,
+      "negative_share": 56,
+      "confirmed": [
+        {
+          "category": "Отмена и перенос занятий",
+          "mentions": 2
+        }
+      ],
+      "single_mentions": [
+        "Преподаватель",
+        "Платформа и техника",
+        "Пробный урок"
+      ],
+      "examples": [
+        "#17 (Отмена и перенос занятий): Плюсы — хорошая программа, но неудобное и устаревшее приложение; правила отмены такие, что даже заранее согласованное с преподавателем изменение расписания считается отменой.",
+        "#18 (Отмена и перенос занятий): При выборе школы опиралась на возможность бесплатной отмены занятий. С декабря 2024 года школа ввела новые правила, и автор осталась крайне недовольна."
+      ]
+    }
+  ],
+  "tariff_summary": [
+    {
+      "school": "Skyeng",
+      "plans": 6,
+      "currency": "₽",
+      "price_per_lesson_min": 1290,
+      "price_per_lesson_max": 3190,
+      "price_from_min": 15120,
+      "price_to_max": 76480,
+      "lesson_minutes": [
+        "50"
+      ],
+      "formats": [
+        "индивидуально",
+        "мини-группа до 6 человек",
+        "индивидуально с носителем"
+      ],
+      "trial": [
+        "есть — бесплатный вводный урок 30 мин",
+        "есть — бесплатный вводный урок"
+      ],
+      "notes": [
+        "На сайте публикуется только цена за урок «от 1 890 ₽»; сумма пакета посчитана как 1890×8. К пакету +1 бонусный урок",
+        "Сумма пакета посчитана как 1690×16. Скидка от 25% к минимальному пакету",
+        "Сумма пакета посчитана как 1390×32. Полная линейка: 8→1890, 16→1690, 32→1390, 64→1290, 96→1190, 128→1090 ₽/урок. 2 бесплатных переноса в месяц",
+        "Сумма пакета посчитана как 2390×32. Линейка Премиум: 8→2690, 16→2390, 32→2390, 64→1890, 96→1690, 128→1590 ₽/урок. Персональный менеджер, разговорные клубы, перенос за 4 часа",
+        "Продаётся поурочно или подпиской, размер пакета на странице не указан. По акции от 987 ₽/урок (−23%). Фиксированное расписание",
+        "Цена «от 3 190 ₽/урок» — минимальная, на большом пакете. Разбивка по размерам пакетов не публикуется. Самый дорогой тариф школы"
+      ],
+      "urls": [
+        "https://skyeng.ru/programs/razgovornyj-anglijskij/",
+        "https://skyeng.ru/price/",
+        "https://skyeng.ru/programs/individualnye-kursy-anglijskogo-yazyka/"
+      ]
+    },
+    {
+      "school": "Инглекс",
+      "plans": 7,
+      "currency": "₽",
+      "price_per_lesson_min": 810,
+      "price_per_lesson_max": 2290,
+      "price_from_min": 16200,
+      "price_to_max": 103200,
+      "lesson_minutes": [
+        "45",
+        "60"
+      ],
+      "formats": [
+        "индивидуально",
+        "индивидуально с носителем"
+      ],
+      "trial": [
+        "есть — бесплатный вводный урок с преподавателем",
+        "есть — бесплатный вводный урок"
+      ],
+      "notes": [
+        "Пакетный прайс 45 мин: 5→2160, 10→1620, 20→1500, 40→1380, 80→1290 ₽. Тариф действует с 26.11.2025",
+        "Скидка 30% к минимальному пакету. Отмены: 1 в месяц при 1–2 занятиях в неделю, 2 — при 3 и более",
+        "Минимальная цена урока на тарифе (−40%), плюс клуб Skills на 30 дней. Рассрочка на 6–10 мес. Возврат за непройденные занятия по запросу",
+        "Пакетный прайс 60 мин: 5→2880, 10→2160, 20→2000, 40→1840, 60→1720 ₽",
+        "Самое дешёвое предложение школы. На Интенсивном курсе отмены занятий НЕДОСТУПНЫ. Малый пакет: 20 тренингов по 1 090 ₽",
+        "Тариф действует с 03.08.2026 только для действующих клиентов. Включает топ-преподавателей, безлимитные переносы, безлимитный клуб Skills"
+      ],
+      "urls": [
+        "https://englex.ru/prices/",
+        "https://englex.ru/courses/native/"
+      ]
+    },
+    {
+      "school": "EnglishDom",
+      "plans": 14,
+      "currency": "грн",
+      "price_per_lesson_min": 250,
+      "price_per_lesson_max": 1130,
+      "price_from_min": 250,
+      "price_to_max": 1130,
+      "lesson_minutes": [
+        "50"
+      ],
+      "formats": [
+        "индивидуально онлайн",
+        "индивидуально с носителем",
+        "индивидуально премиум",
+        "группа до 7 человек"
+      ],
+      "trial": [
+        "есть — бесплатный пробный урок",
+        "есть"
+      ],
+      "notes": [
+        "Цены 2024 года из архива, актуальность НЕ подтверждена. 450 грн за урок. ВАЖНО: школа работает на украинском рынке, рублёвых тарифов нет — школа указывает, что не обучает граждан РФ и Беларуси",
+        "Цены 2024 года из архива, актуальность НЕ подтверждена. 430 грн за урок. Пакетная скидка к цене малого пакета — 4%",
+        "Цены 2024 года из архива, актуальность НЕ подтверждена. 405 грн за урок. Пакет 20 занятий — самый популярный у школы",
+        "Цены 2024 года из архива, актуальность НЕ подтверждена. 380 грн за урок — минимум по школе; скидка 16% к цене малого пакета",
+        "Цены 2024 года из архива. 1100 грн за урок. Цифры подтверждены вторым независимым снимком — промо-лендингом 2024-01",
+        "Цены 2024 года из архива. 1000 грн за урок. Пакетная скидка всего 9% — на порядок меньше, чем у локального преподавателя"
+      ],
+      "urls": [
+        "https://web.archive.org/web/20240222142128/https://www.englishdom.com/ua/prices/",
+        "https://web.archive.org/web/20260619122857/https://www.englishdom.com/ua/group-lessons/",
+        "https://web.archive.org/web/20240123152813/https://promo.englishdom.com/backtoschool23",
+        "https://web.archive.org/web/20210624001824/https://promo.englishdom.com/free-lesson",
+        "https://www.englishdom.com/ua/prices/"
+      ]
+    }
+  ]
+}
