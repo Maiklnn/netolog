@@ -22,7 +22,6 @@
     <list default="true" id="038fd028-92f2-4fcd-ac68-b34b3ce777e1" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Cloude code/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Cloude code/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cloude code/Промты.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Cloude code/Промты.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -113,7 +112,8 @@
       <workItem from="1790204381295" duration="3701000" />
       <workItem from="1790294991389" duration="599000" />
       <workItem from="1790463781272" duration="595000" />
-      <workItem from="1790618573455" duration="1421000" />
+      <workItem from="1790618573455" duration="2770000" />
+      <workItem from="1790950129743" duration="305000" />
     </task>
     <servers />
   </component>
@@ -148,10 +148,10 @@
     <state x="-2541" y="240" key="#SSH_Configurations/0.0.1920.1040/-5360.0.1920.1040/-3440.0.3440.1400@-3440.0.3440.1400" timestamp="1787863311027" />
     <state x="-4858" y="178" key="#SSH_Configurations/0.0.1920.1040/-5360.0.1920.1040/-3440.0.3440.1400@-5360.0.1920.1040" timestamp="1788424323341" />
     <state x="-1456" y="185" key="#SSH_Configurations/1920.0.1920.1040/0.0.1920.1040/-1920.0.1776.1080@-1920.0.1776.1080" timestamp="1783027004762" />
-    <state x="707" y="322" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1788257406440">
+    <state x="707" y="322" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1790733895395">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="707" y="322" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1040/-5360.0.1920.1040/-3440.0.3440.1400@0.0.1920.1040" timestamp="1788257406440" />
+    <state x="707" y="322" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1040/-5360.0.1920.1040/-3440.0.3440.1400@0.0.1920.1040" timestamp="1790733895395" />
     <state x="707" y="322" key="#com.intellij.fileTypes.FileTypeChooser/1920.0.1920.1040/0.0.1920.1040/-1920.0.1776.1080@0.0.1920.1040" timestamp="1783020821445" />
     <state x="707" y="322" key="#com.intellij.fileTypes.FileTypeChooser/1920.0.1920.1040/0.0.1920.1040/-1920.0.1920.1040@0.0.1920.1040" timestamp="1783634250912" />
     <state x="769" y="387" key="webDeployment.PermissionsDialog" timestamp="1787946902594">
