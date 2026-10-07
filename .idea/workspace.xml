@@ -21,7 +21,6 @@
   <component name="ChangeListManager">
     <list default="true" id="038fd028-92f2-4fcd-ac68-b34b3ce777e1" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cloude code/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/Cloude code/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,24 +46,24 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="true" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/ИИ-агенты/02. Автоматизация с ИИ агентами/03. Агент-советник из нескольких агентов/files" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/ИИ-агенты/03. ИИ агенты для маркетинга" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами\03. Агент-советник из нескольких агентов\files" />
-      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами\03. Агент-советник из нескольких агентов" />
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\12. Диплом\files" />
-      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами\02. Сборка аналитического агента\files" />
-      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами\02. Сборка аналитического агента" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами\03. Агент-советник из нескольких агентов\files" />
       <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\12. Диплом\project" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\07. Автоматизация и CI_CD\04. Подъем инфраструктуры в облаке\files\Вспомогательные файлы" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\11. Информационная безопасность\12. Диплом\1. Подготовка к дипломной работе" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Документы\Manual\Нитология\ML\04. SQL и работа с базами данных\06. Производительность представления, индексы и анализ запросов" />
+      <recent name="D:\Документы\Manual\Нитология\ML\04. SQL и работа с базами данных\05. Сложные запросы CTE и оконные функции" />
+      <recent name="D:\Документы\Manual\Нитология\ML\04. SQL и работа с базами данных\04. Управление данными и схемой DDL_DML" />
+      <recent name="D:\Документы\Manual\Нитология\ML\04. SQL и работа с базами данных\03. Соединения таблиц и подзапросы" />
+      <recent name="D:\Документы\Manual\Нитология\ML\04. SQL и работа с базами данных\02. Углублённая работа с типами данных и агрегация" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -113,7 +112,9 @@
       <workItem from="1790294991389" duration="599000" />
       <workItem from="1790463781272" duration="595000" />
       <workItem from="1790618573455" duration="2770000" />
-      <workItem from="1790950129743" duration="305000" />
+      <workItem from="1790950129743" duration="1806000" />
+      <workItem from="1791221081357" duration="2064000" />
+      <workItem from="1791376467568" duration="2599000" />
     </task>
     <servers />
   </component>

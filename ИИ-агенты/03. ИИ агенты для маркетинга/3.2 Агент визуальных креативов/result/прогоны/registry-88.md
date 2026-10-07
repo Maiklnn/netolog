@@ -1,0 +1,111 @@
+# Визуальные креативы: Разговорный онлайн-курс английского «Speaking Up» (уровни B1–B2) (Осенний набор на разговорный курс английского)
+
+Сгенерировано агентом визуальных креативов. Вариантов: 4, из них с правкой: 3.
+
+## V1 — Telegram-канал школы, 1024×1024
+
+**ЦА:** A — Сегмент A — «Держусь на работе». Специалисты и менеджеры 25–35 лет, английский нужен для работы: переписка, созвоны, презентации
+
+**Параметры:** 
+```
+промт (llm + правка): A young professional woman, 30, sits at a bright home desk during an online English lesson, laptop open, headphones on, mid-sentence with a confident smile, soft diffused window light, minimalist interior, palette of deep navy blue and warm orange accents on light grey, realistic commercial photography, rule of thirds, subject on the right half, large empty area on the left half of the frame, no text, no letters, no numbers, no words, no watermark, no logo.. strictly follow the declared style (minimalist: plenty of negative space, one large focal point, two colours plus background, no collages, no frames) and the composition focus (focus on the product: the online lesson in progress), keep the brand palette: deep navy blue #1B3A6B as the base colour, orange accent #FF7A45 used sparingly, light grey background #F5F7FA; the left half of the frame must stay completely free for the headline and button; absolutely no text, no letters, no numbers, no words, no logo, no watermark, no brand marks, no flags, no children, no alcohol, no weapons; sharp focus, natural anatomy, correct hands with exactly five fingers, clean uncluttered composition, professional commercial photography
+стиль: минимализм
+фокус: фокус на продукте (процесс онлайн-урока)
+акцент: на выгоде: разговорная практика для рабочих созвонов
+размер: 512x512 (лёгкий запас: тяжёлый размер не дождался воркера)
+seed: 12345
+генератор: Stable Horde (Deliberate)
+запреты (ответ агента): text, letters, numbers, words, captions, watermark, logo, brand marks, flags, political symbols, coats of arms, maps, Big Ben, red double-decker bus, teacup, royal guard, Tower Bridge, children, teenagers, school supplies, blackboards, real celebrities, recognizable characters, alcohol, tobacco, weapons, blood, gambling, drugs, religious symbols, nudity, medical masks, pandemic symbols, disasters, distorted faces, extra fingers, fused fingers, deformed limbs, generation artifacts, visual noise, collages, frames, gradient stock backgrounds
+```
+**Файл:** `V1-a2.webp`
+
+| Пункт чек-листа | Оценка |
+|---|---|
+| соответствие брифу, бренду, площадке; | нет |
+| релевантность ЦА | да |
+| отсутствие запрещённых элементов | да |
+| техническое качество. | нет |
+
+**Альтернатива:** `V4-a2.webp` — 
+
+**Чем отличается результат:** В минималистичном креативе доминируют холодные тёмно-синие и серые тона, мягкий ровный свет, симметричная композиция и сдержанная мимика — взгляд зрителя сразу приковывает лицо и наушники, а бренд воспринимается как спокойный, премиальный и надёжный. Во втором креативе добавлены тёплые насыщенные акценты (оранжевая столешница, рыжие волосы, сок, зелень), контрастный боковой свет с резкой тенью и открытая улыбка — внимание сначала цепляется за цвет и динамику, а бренд читается как энергичный, дружелюбный и современный.
+
+**Комментарий арт-директора:** На картинке — улыбающаяся женщина 30 лет в наушниках с сомкнутыми под подбородком руками на фоне тёмно-синей стены и белой оконной рамы; сюжет читается как студийный портрет, а не как процесс онлайн-урока, композиция центрирована, левая половина под текст не освобождена, оранжевый акцент из палитры отсутствует.
+
+## V2 — VK, лента сообщества, 1024×1280
+
+**ЦА:** B — Сегмент B — «Возвращаюсь к языку». Взрослые 35–50 лет, учили язык в школе и вузе, сейчас хотят восстановить и заговорить для путешествий
+
+**Параметры:** 
+```
+промт (llm): A cheerful woman around 45, relaxed travel clothes, laughing mid-conversation at an outdoor cafe table, warm golden afternoon light, saturated warm colors, blurred sunlit city street behind her, deep navy and orange accents, realistic commercial photography, vertical 4:5 crop, face centered in the middle of the frame, large empty area across the top third for text, no text, no letters, no numbers, no words, no watermark, no logo.
+стиль: яркий, насыщенный
+фокус: фокус на эмоции (радость общения)
+акцент: на статусе: свобода путешествовать и говорить без барьера
+размер: 512x640 (лёгкий запас: тяжёлый размер не дождался воркера)
+seed: 777
+генератор: Stable Horde (Deliberate)
+запреты (ответ агента): text, letters, numbers, words, captions, watermark, logo, brand marks, flags, political symbols, coats of arms, maps, Big Ben, red double-decker bus, teacup, royal guard, Tower Bridge, children, teenagers, school supplies, blackboards, real celebrities, recognizable characters, alcohol, tobacco, weapons, blood, gambling, drugs, religious symbols, nudity, medical masks, pandemic symbols, disasters, distorted faces, extra fingers, fused fingers, deformed limbs, generation artifacts, visual noise, collages, frames, gradient stock backgrounds
+```
+**Файл:** `V2-a1.webp`
+
+| Пункт чек-листа | Оценка |
+|---|---|
+| соответствие брифу, бренду, площадке; | нет |
+| релевантность ЦА | да |
+| отсутствие запрещённых элементов | да |
+| техническое качество. | да |
+
+**Комментарий арт-директора:** На фото улыбающаяся женщина около 45 лет в оранжевой блузе за столиком уличного кафе на фоне размытой солнечной улицы — эмоция радости общения и возраст точно попадают в сегмент «Возвращаюсь к языку», палитра (оранжевый + тёмно-синий) близка к бренду. Однако верхняя треть кадра не свободна: её занимают голова героини, размытая архитектура и насыщенно-красные навесы, которых нет в палитре бренда, поэтому зона под текст не готова.
+
+## V3 — Яндекс.Директ, графический баннер, 1024×768
+
+**ЦА:** C — Сегмент C — «Готовлюсь к переезду». Специалисты 22–30 лет, готовятся к релокации или работе за рубежом
+
+**Параметры:** 
+```
+промт (llm + правка): A young specialist around 27 packs a suitcase in a bright minimalist apartment, open laptop and passport on the bed beside neatly folded clothes, soft diffused daylight from a window, palette of deep navy blue, warm orange and light grey, realistic commercial photography, horizontal 4:3 composition, subject placed in the right third of the frame, large empty area across the left two thirds for text, no text, no letters, no numbers, no words, no watermark, no logo.. strictly follow the declared style (minimalist: plenty of negative space, one large focal point, two colours plus background, no collages, no frames) and the composition focus (focus on the product: packing and working from anywhere), keep the brand palette: deep navy blue #1B3A6B as the base colour, orange accent #FF7A45 used sparingly, light grey background #F5F7FA; the left two thirds of the frame must stay completely free for the headline, subheading and button; the person in the frame must look like the target audience: specialists aged 22-30 preparing to relocate or to work abroad; the scene must show this situation: need confidence in specific situations: airport, renting a flat, job interview; absolutely no text, no letters, no numbers, no words, no logo, no watermark, no brand marks, no flags, no children, no alcohol, no weapons
+стиль: минимализм
+фокус: фокус на продукте (сборы и работа из любой точки)
+акцент: на выгоде: английский для реальных задач за границей
+размер: 512x384 (лёгкий запас: тяжёлый размер не дождался воркера)
+seed: 4242
+генератор: Stable Horde (Deliberate)
+запреты (ответ агента): text, letters, numbers, words, captions, watermark, logo, brand marks, flags, political symbols, coats of arms, maps, Big Ben, red double-decker bus, teacup, royal guard, Tower Bridge, children, teenagers, school supplies, blackboards, real celebrities, recognizable characters, alcohol, tobacco, weapons, blood, gambling, drugs, religious symbols, nudity, medical masks, pandemic symbols, disasters, distorted faces, extra fingers, fused fingers, deformed limbs, generation artifacts, visual noise, collages, frames, gradient stock backgrounds
+```
+**Файл:** `V3-a2.webp`
+
+| Пункт чек-листа | Оценка |
+|---|---|
+| соответствие брифу, бренду, площадке; | нет |
+| релевантность ЦА | нет |
+| отсутствие запрещённых элементов | да |
+| техническое качество. | да |
+
+**Комментарий арт-директора:** На изображении — минималистичная спальня: тёмно-синий комод с абстрактными постерами, растение, оранжевые свечи, застеленная белая кровать и окно с радиатором. Картинка чистая и аккуратная, но это интерьерный сток, а не сцена сборов: нет человека 22–30 лет, чемодана, ноутбука и паспорта, а левые две трети кадра заняты кроватью и комодом, то есть зона под заголовок, подзаголовок и кнопку фактически отсутствует.
+
+## V4 — Telegram-канал школы, 1024×1024
+
+**ЦА:** A — Сегмент A — «Держусь на работе». Специалисты и менеджеры 25–35 лет, английский нужен для работы: переписка, созвоны, презентации
+
+**Параметры:** 
+```
+промт (llm (замена одного фрагмента в V1) + правка): A young professional woman, 30, sits at a bright home desk during an online English lesson, laptop open, headphones on, mid-sentence with a confident smile, soft diffused window light, bold saturated interior, vivid high-contrast palette of deep navy blue and warm orange on light grey, realistic commercial photography, rule of thirds, subject on the right half, large empty area on the left half of the frame, no text, no letters, no numbers, no words, no watermark, no logo.. strictly follow the declared style (bright and high contrast: bold saturated colour blocking, strong studio lighting, expressive poster mood) and the composition focus (focus on the product: exactly the same scene as the base variant), keep the brand palette: deep navy blue #1B3A6B as the base colour, orange accent #FF7A45 used sparingly, light grey background #F5F7FA; the left half of the frame must stay completely free for the headline and button; absolutely no text, no letters, no numbers, no words, no logo, no watermark, no brand marks, no flags, no children, no alcohol, no weapons; sharp focus, natural anatomy, correct hands with exactly five fingers, clean uncluttered composition, professional commercial photography
+стиль: яркий, контрастный
+фокус: фокус на продукте (тот же сюжет, что у V1)
+акцент: на выгоде (тот же акцент, что у V1)
+размер: 512x512 (лёгкий запас: тяжёлый размер не дождался воркера)
+seed: 12345
+генератор: Stable Horde (AbsoluteReality)
+запреты (ответ агента): text, letters, numbers, words, captions, watermark, logo, brand marks, flags, political symbols, coats of arms, maps, Big Ben, red double-decker bus, teacup, royal guard, Tower Bridge, children, teenagers, school supplies, blackboards, real celebrities, recognizable characters, alcohol, tobacco, weapons, blood, gambling, drugs, religious symbols, nudity, medical masks, pandemic symbols, disasters, distorted faces, extra fingers, fused fingers, deformed limbs, generation artifacts, visual noise, collages, frames, gradient stock backgrounds
+```
+**Файл:** `V4-a2.webp`
+
+| Пункт чек-листа | Оценка |
+|---|---|
+| соответствие брифу, бренду, площадке; | нет |
+| релевантность ЦА | да |
+| отсутствие запрещённых элементов | да |
+| техническое качество. | нет |
+
+**Комментарий арт-директора:** На картинке улыбающаяся рыжеволосая женщина в наушниках за ноутбуком — сюжет онлайн-занятия считывается и попадает в сегмент «держусь на работе», но кадр тёмный и перегруженный: левая половина занята окном, ноутбуком, стаканом и оранжевым столом на переднем плане, а не свободна под текст, палитра ушла в почти чёрный вместо светло-серого #F5F7FA и заявленной яркой контрастной подачи.

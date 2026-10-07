@@ -1,0 +1,111 @@
+# Визуальные креативы: Разговорный онлайн-курс английского «Speaking Up» (уровни B1–B2) (Осенний набор на разговорный курс английского)
+
+Сгенерировано агентом визуальных креативов. Вариантов: 4, из них с правкой: 0.
+
+## V1 — Telegram-канал школы, 1024×1024
+
+**ЦА:** A — Сегмент A — «Держусь на работе». Специалисты и менеджеры 25–35 лет, английский нужен для работы: переписка, созвоны, презентации
+
+**Параметры:** 
+```
+промт (llm): A young professional woman in her early thirties at a home desk, laptop open in front of her, wearing a headset, mid-conversation with a warm confident smile, soft diffused window light, dark blue and orange accents on a light grey background, realistic commercial photography, square one-to-one composition, subject placed in the right half, large empty area on the left half of the frame for headline and button, no text, no letters, no numbers, no words, no watermark, no logo
+стиль: минимализм
+фокус: фокус на продукте (процесс онлайн-урока)
+акцент: на выгоде: разговорная практика для рабочих созвонов
+размер: 1024x1024
+seed: 12345
+генератор: Stable Horde (SDXL 1.0)
+запреты (ответ агента): text, letters, numbers, words, captions, watermark, logo, brand marks, flags, political symbols, coats of arms, maps, Big Ben, red double-decker bus, teacup, royal guard, Tower Bridge, children, teenagers, school supplies, blackboards, real people, celebrities, alcohol, tobacco, weapons, blood, gambling, drugs, religious symbols, nudity, medical masks, pandemic symbols, disasters, distorted faces, extra fingers, fused fingers, deformed limbs, generation artifacts, visual noise, collages, frames, gradient stock backgrounds
+```
+**Файл:** `V1-a1.webp`
+
+| Пункт чек-листа | Оценка |
+|---|---|
+| соответствие брифу, бренду, площадке; | да |
+| релевантность ЦА | да |
+| отсутствие запрещённых элементов | да |
+| техническое качество. | да |
+
+**Альтернатива:** `V4-a1.webp` — 
+
+**Чем отличается результат:** В минималистичном креативе преобладают мягкие пастельные тона и естественный свет, что создаёт спокойное, премиальное и доверительное настроение — зритель сначала считывает профессионализм и надёжность бренда. Яркий контрастный вариант построен на насыщенных оранжево-синих плоскостях и жёстком свете, поэтому взгляд мгновенно цепляется за цвет и эмоцию, а бренд воспринимается как энергичный, доступный и дружелюбный. Таким образом, первый стиль продаёт через качество и статус, второй — через динамику и вовлечённость.
+
+**Комментарий арт-директора:** На кадре — улыбающаяся специалистка около 30 лет в гарнитуре за ноутбуком, имитирующая живой онлайн-разговор; композиция 1:1, героиня смещена в правую половину, левая часть кадра свободна под заголовок и кнопку, палитра выдержана в тёмно-синем и светло-сером. Изображение чистое, резкое, без текста, логотипов и артефактов, соответствует брифу, ЦА и площадке Telegram.
+
+## V2 — VK, лента сообщества, 1024×1280
+
+**ЦА:** B — Сегмент B — «Возвращаюсь к языку». Взрослые 35–50 лет, учили язык в школе и вузе, сейчас хотят восстановить и заговорить для путешествий
+
+**Параметры:** 
+```
+промт (llm): A cheerful woman in her forties laughing mid-sentence at a sunlit outdoor cafe table, relaxed travel clothes, warm golden afternoon light, saturated orange and deep blue tones, blurred city street behind her, realistic commercial photography, vertical four-by-five composition, subject in the middle of the frame, large empty area across the top third for headline and button, no text, no letters, no numbers, no words, no watermark, no logo
+стиль: яркий, насыщенный
+фокус: фокус на эмоции (радость общения)
+акцент: на статусе: свобода путешествовать и говорить без барьера
+размер: 768x960
+seed: 777
+генератор: Stable Horde (SDXL 1.0)
+запреты (ответ агента): text, letters, numbers, words, captions, watermark, logo, brand marks, flags, political symbols, coats of arms, maps, Big Ben, red double-decker bus, teacup, royal guard, Tower Bridge, children, teenagers, school supplies, blackboards, real people, celebrities, alcohol, tobacco, weapons, blood, gambling, drugs, religious symbols, nudity, medical masks, pandemic symbols, disasters, distorted faces, extra fingers, fused fingers, deformed limbs, generation artifacts, visual noise, collages, frames, gradient stock backgrounds
+```
+**Файл:** `V2-a1.webp`
+
+| Пункт чек-листа | Оценка |
+|---|---|
+| соответствие брифу, бренду, площадке; | нет |
+| релевантность ЦА | да |
+| отсутствие запрещённых элементов | да |
+| техническое качество. | да |
+
+**Комментарий арт-директора:** На креативе — улыбающаяся женщина 40+ смеётся в разговоре за столиком солнечного кафе, оранжево-синие тона точно попадают в палитру бренда и в настроение сегмента «Возвращаюсь к языку»; изображение резкое, живое, без текста и запрещённых элементов.
+
+## V3 — Яндекс.Директ, графический баннер, 1024×768
+
+**ЦА:** C — Сегмент C — «Готовлюсь к переезду». Специалисты 22–30 лет, готовятся к релокации или работе за рубежом
+
+**Параметры:** 
+```
+промт (llm): A young man in his late twenties sitting on a packed suitcase in a bright minimal apartment, laptop and headphones on the floor beside him, soft diffused window light, dark blue and orange accents on light grey, simple empty wall background, realistic commercial photography, horizontal four-by-three composition, subject in the right third, large empty area across the left two thirds for headline, subheadline and button, no text, no letters, no numbers, no words, no watermark, no logo
+стиль: минимализм
+фокус: фокус на продукте (сборы и работа из любой точки)
+акцент: на выгоде: английский для реальных задач за границей
+размер: 1024x768
+seed: 4242
+генератор: Stable Horde (SDXL 1.0)
+запреты (ответ агента): text, letters, numbers, words, captions, watermark, logo, brand marks, flags, political symbols, coats of arms, maps, Big Ben, red double-decker bus, teacup, royal guard, Tower Bridge, children, teenagers, school supplies, blackboards, real people, celebrities, alcohol, tobacco, weapons, blood, gambling, drugs, religious symbols, nudity, medical masks, pandemic symbols, disasters, distorted faces, extra fingers, fused fingers, deformed limbs, generation artifacts, visual noise, collages, frames, gradient stock backgrounds
+```
+**Файл:** `V3-a1.webp`
+
+| Пункт чек-листа | Оценка |
+|---|---|
+| соответствие брифу, бренду, площадке; | нет |
+| релевантность ЦА | да |
+| отсутствие запрещённых элементов | да |
+| техническое качество. | да |
+
+**Комментарий арт-директора:** Молодой человек в свитере и джинсах сидит на оранжевом чемодане в пустой серой комнате — образ и настроение в целом попадают в сегмент «готовлюсь к переезду», но композиция и наполнение расходятся с брифом.
+
+## V4 — Telegram-канал школы, 1024×1024
+
+**ЦА:** A — Сегмент A — «Держусь на работе». Специалисты и менеджеры 25–35 лет, английский нужен для работы: переписка, созвоны, презентации
+
+**Параметры:** 
+```
+промт (llm (замена одного фрагмента в V1)): A young professional woman in her early thirties at a home desk, laptop open in front of her, wearing a headset, mid-conversation with a warm confident smile, soft diffused window light, bold saturated dark blue and vivid orange color blocking with strong contrast and energetic highlights, realistic commercial photography, square one-to-one composition, subject placed in the right half, large empty area on the left half of the frame for headline and button, no text, no letters, no numbers, no words, no watermark, no logo
+стиль: яркий, контрастный
+фокус: фокус на продукте (тот же сюжет, что у V1)
+акцент: на выгоде (тот же акцент, что у V1)
+размер: 1024x1024
+seed: 12345
+генератор: Stable Horde (SDXL 1.0)
+запреты (ответ агента): text, letters, numbers, words, captions, watermark, logo, brand marks, flags, political symbols, coats of arms, maps, Big Ben, red double-decker bus, teacup, royal guard, Tower Bridge, children, teenagers, school supplies, blackboards, real people, celebrities, alcohol, tobacco, weapons, blood, gambling, drugs, religious symbols, nudity, medical masks, pandemic symbols, disasters, distorted faces, extra fingers, fused fingers, deformed limbs, generation artifacts, visual noise, collages, frames, gradient stock backgrounds
+```
+**Файл:** `V4-a1.webp`
+
+| Пункт чек-листа | Оценка |
+|---|---|
+| соответствие брифу, бренду, площадке; | н/д |
+| релевантность ЦА | н/д |
+| отсутствие запрещённых элементов | н/д |
+| техническое качество. | н/д |
+
+**Комментарий арт-директора:** —

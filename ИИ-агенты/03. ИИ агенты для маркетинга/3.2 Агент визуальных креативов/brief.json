@@ -1,0 +1,199 @@
+{
+  "brief_version": "1.0",
+  "campaign": "Осенний набор на разговорный курс английского",
+  "created_for": "Практика «Агент визуальных креативов», Нетология",
+  "product": {
+    "name": "Разговорный онлайн-курс английского «Speaking Up» (уровни B1–B2)",
+    "what": "8 недель живых занятий с преподавателем в мини-группе до 4 человек: 2 урока в неделю по 60 минут + разговорный клуб по субботам.",
+    "price": "12 900 ₽ за курс (есть рассрочка на 4 платежа)",
+    "usp": [
+      "говорите с первого занятия, а не учите правила",
+      "мини-группа до 4 человек — преподаватель слышит каждого",
+      "преподаватели с сертификатом CELTA и опытом жизни в англоязычной стране",
+      "расписание подбирается под ваш часовой пояс и рабочий график",
+      "бесплатное пробное занятие и возврат денег в течение 14 дней"
+    ],
+    "cta": "Запишитесь на бесплатное пробное занятие"
+  },
+  "brand": {
+    "name": "LinguaUp",
+    "note": "Условный бренд онлайн-школы (продолжение анализа конкурентов из практики 3.1: Skyeng, Инглекс, EnglishDom). Вымышленное имя выбрано намеренно: реальные логотипы нельзя воспроизводить в генеративной графике.",
+    "positioning": "Онлайн-школа английского для взрослых, где главное — разговорная практика, а не учебники",
+    "tone_of_voice": "дружелюбно, уверенно, без снобизма и без обещаний «английский за месяц»",
+    "palette": {
+      "primary": "#1B3A6B — тёмно-синий (база, доверие)",
+      "accent": "#FF7A45 — оранжевый (акцент, энергия)",
+      "background": "#F5F7FA — светло-серый (воздух)",
+      "text": "#12161C — почти чёрный"
+    },
+    "typography": "гротеск без засечек (Inter, Montserrat): заголовок 700, подзаголовок 300. Заголовок — не больше 6 слов.",
+    "logo_rule": "Логотип только текстовый: «LinguaUp». Ставится дизайнером в макет после генерации — генератор логотипы не рисует. Пропорции не искажать, не растягивать, не давать тени."
+  },
+  "segments": [
+    {
+      "id": "A",
+      "name": "Сегмент A — «Держусь на работе»",
+      "who": "Специалисты и менеджеры 25–35 лет, английский нужен для работы: переписка, созвоны, презентации",
+      "who_en": "specialists and managers aged 25-35 who need English for work: emails, online calls, presentations",
+      "current_level": "Upper-Intermediate, читает легко, но боится говорить вслух",
+      "insight": "Страх выглядеть неуверенно на созвоне с иностранными коллегами",
+      "insight_en": "fear of looking unsure on a call with international colleagues",
+      "job_to_be_done": "уверенно вести рабочий созвон и презентацию на английском",
+      "message": "Заговорите на созвонах без словаря и пауз",
+      "proof": "мини-группа до 4 человек, тренировка реальных рабочих ситуаций"
+    },
+    {
+      "id": "B",
+      "name": "Сегмент B — «Возвращаюсь к языку»",
+      "who": "Взрослые 35–50 лет, учили язык в школе и вузе, сейчас хотят восстановить и заговорить для путешествий",
+      "who_en": "adults aged 35-50 who studied English at school and university and now want to revive it and speak it for travel",
+      "current_level": "Intermediate «на бумаге», разговорной практики нет 10+ лет",
+      "insight": "Стесняются говорить после долгого перерыва, боятся осуждения за ошибки",
+      "insight_en": "shy about speaking after a long break, afraid of being judged for mistakes",
+      "job_to_be_done": "свободно объясняться в поездке и поддержать беседу",
+      "message": "Вспомните язык и заговорите за 8 недель",
+      "proof": "доброжелательная атмосфера, никто не оценивает и не перебивает"
+    },
+    {
+      "id": "C",
+      "name": "Сегмент C — «Готовлюсь к переезду»",
+      "who": "Специалисты 22–30 лет, готовятся к релокации или работе за рубежом",
+      "who_en": "specialists aged 22-30 preparing to relocate or to work abroad",
+      "current_level": "Pre-Intermediate — Intermediate, нужен бытовой и рабочий английский",
+      "insight": "Нужна уверенность в конкретных ситуациях: аэропорт, аренда жилья, собеседование",
+      "insight_en": "need confidence in specific situations: airport, renting a flat, job interview",
+      "job_to_be_done": "решать бытовые и рабочие задачи на английском без переводчика",
+      "message": "Английский, который работает за границей",
+      "proof": "отработка реальных сценариев: аэропорт, офис, собеседование"
+    }
+  ],
+  "placements": [
+    {
+      "id": "P1",
+      "name": "Telegram-канал школы",
+      "size": "1024×1024",
+      "ratio": "1:1",
+      "safe_zone": "64 px по краям",
+      "text_zone": "левая половина кадра — под заголовок и кнопку",
+      "text_zone_en": "the left half of the frame must stay completely free for the headline and button",
+      "reading_context": "лента мобильного телефона, решение о просмотре — 0,5 секунды",
+      "requirements": "один смысловой центр, крупное лицо или крупный предмет, максимум 6 слов текста"
+    },
+    {
+      "id": "P2",
+      "name": "VK, лента сообщества",
+      "size": "1024×1280",
+      "ratio": "4:5",
+      "safe_zone": "80 px по краям",
+      "text_zone": "верхняя треть кадра",
+      "text_zone_en": "the top third of the frame must stay completely free for the headline and button",
+      "reading_context": "вертикальная лента, важен эмоциональный контакт с человеком на фото",
+      "requirements": "вертикальный кроп, смысловой центр — в верхних двух третях, тёплые насыщенные цвета"
+    },
+    {
+      "id": "P3",
+      "name": "Яндекс.Директ, графический баннер",
+      "size": "1024×768",
+      "ratio": "4:3",
+      "safe_zone": "40 px по краям",
+      "text_zone": "левые две трети кадра — под заголовок, подзаголовок и кнопку",
+      "text_zone_en": "the left two thirds of the frame must stay completely free for the headline, subheading and button",
+      "reading_context": "баннер в поисковой выдаче, рядом с текстовыми объявлениями конкурентов",
+      "requirements": "горизонтальная композиция, объект-сюжет в правой трети, простой фон"
+    }
+  ],
+  "visual_language": {
+    "style_base": "минимализм: много воздуха, крупный смысловой центр, два цвета плюс фон, никаких коллажей и рамок",
+    "light": "мягкий рассеянный свет из окна, без жёстких чёрных теней",
+    "composition": "правило третей, пустая зона под текст заложена уже в кадр",
+    "focus": "в базовых вариантах — фокус на продукте/сюжете (ноутбук, урок, чемодан), в альтернативном — на эмоции",
+    "accent": "в базовых вариантах — на выгоде (результат, экономия времени), в альтернативном — на статусе и энергии",
+    "photography": "реалистичная коммерческая фотография, естественные пропорции, без 3D-рендера и без мультяшности",
+    "diversity": "люди разных возрастов и внешности, соответствующие описанию сегмента; без стереотипных образов"
+  },
+  "restrictions": {
+    "forbidden_elements": [
+      "любой текст, буквы, надписи и цифры на изображении — генератор пишет их с ошибками, весь текст накладывается дизайнером",
+      "логотипы LinguaUp и любых других брендов, водяные знаки, подписи генератора",
+      "флаги государств, политическая символика, гербы, карты",
+      "стереотипы об Англии: Биг-Бен, красный двухэтажный автобус, чашка чая, гвардеец, Тауэрский мост",
+      "дети и подростки, школьная атрибутика, школьные доски",
+      "изображения реальных людей, знаменитостей, узнаваемых персонажей",
+      "алкоголь, табак, оружие, кровь, азартные игры, наркотики",
+      "религиозная и политическая тематика, обнажённые тела",
+      "медицинские маски, символика пандемии, изображения катастроф",
+      "искажённые лица, лишние или слипшиеся пальцы, деформированные конечности, артефакты генерации",
+      "мелкий нечитаемый визуальный шум, коллажи, рамки, градиентные «стоковые» подложки"
+    ],
+    "technical_restrictions": [
+      "цветовая модель RGB, без CMYK",
+      "без прозрачности и полупрозрачных слоёв",
+      "безопасные поля: не менее 64 px по краям для 1:1, 80 px для 4:5, 40 px для 4:3",
+      "разрешение — не ниже заявленного размера площадки, апскейл только кратный",
+      "вес файла — до 5 МБ",
+      "никаких рамок и обводок по краю кадра"
+    ]
+  },
+  "plan": [
+    {
+      "id": "V1",
+      "segment": "A",
+      "placement": "P1",
+      "style": "минимализм",
+      "style_en": "minimalist: plenty of negative space, one large focal point, two colours plus background, no collages, no frames",
+      "composition_focus": "фокус на продукте (процесс онлайн-урока)",
+      "focus_en": "focus on the product: the online lesson in progress",
+      "accent": "на выгоде: разговорная практика для рабочих созвонов",
+      "seed": 12345,
+      "fallback_prompt": "Minimalist advertising photograph for an online English speaking school: a young woman in her late twenties at a clean light desk during an online video lesson on a laptop, she smiles confidently, soft diffused daylight from a window, pale grey seamless background, deep navy blue accents in her clothing, large empty area on the left half of the frame, calm professional mood, shallow depth of field, high-end commercial photography, no text, no letters, no numbers, no watermark, no logo"
+    },
+    {
+      "id": "V2",
+      "segment": "B",
+      "placement": "P2",
+      "style": "яркий, насыщенный",
+      "style_en": "bright, saturated, energetic: vivid colour, strong contrast, lively mood",
+      "composition_focus": "фокус на эмоции (радость общения)",
+      "focus_en": "focus on emotion: the joy of talking to people",
+      "accent": "на статусе: свобода путешествовать и говорить без барьера",
+      "seed": 777,
+      "fallback_prompt": "Bright vivid lifestyle photograph: two cheerful adults in their forties laughing while ordering coffee in a sunny European street cafe, relaxed travel mood, saturated warm colours with orange and turquoise accents, golden hour sunlight, dynamic vertical composition with a large empty area in the upper third, premium advertising photography, no text, no letters, no numbers, no watermark, no logo"
+    },
+    {
+      "id": "V3",
+      "segment": "C",
+      "placement": "P3",
+      "style": "минимализм",
+      "style_en": "minimalist: plenty of negative space, one large focal point, two colours plus background, no collages, no frames",
+      "composition_focus": "фокус на продукте (сборы и работа из любой точки)",
+      "focus_en": "focus on the product: packing and working from anywhere",
+      "accent": "на выгоде: английский для реальных задач за границей",
+      "seed": 4242,
+      "fallback_prompt": "Minimalist clean advertising photograph: a neat blue carry-on suitcase, a passport and an open laptop on a light wooden desk, bright airy interior with a large window, light grey and white palette with deep navy blue accents, wide horizontal composition, the suitcase and laptop placed on the right third of the frame, the left two thirds almost empty for a headline, calm professional mood, soft diffused light, high-end commercial photography, no text, no letters, no numbers, no watermark, no logo"
+    },
+    {
+      "id": "V4",
+      "segment": "A",
+      "placement": "P1",
+      "style": "яркий, контрастный",
+      "style_en": "bright and high contrast: bold saturated colour blocking, strong studio lighting, expressive poster mood",
+      "composition_focus": "фокус на продукте (тот же сюжет, что у V1)",
+      "focus_en": "focus on the product: exactly the same scene as the base variant",
+      "accent": "на выгоде (тот же акцент, что у V1)",
+      "seed": 12345,
+      "base_variant": "V1",
+      "changed_parameter": "стиль: минимализм → яркий",
+      "unchanged_parameters": "сегмент ЦА, площадка, размер, композиция, фокус, акцент, сюжет, сид — без изменений",
+      "fallback_prompt": "Bold vivid advertising photograph for an online English speaking school: a young woman in her late twenties at a clean light desk during an online video lesson on a laptop, she smiles confidently, strong saturated orange and deep navy blue colour blocking, high contrast studio lighting, energetic expressive poster mood, large empty area on the left half of the frame, sharp focus, high-end commercial photography, no text, no letters, no numbers, no watermark, no logo"
+    }
+  ],
+  "settings": {
+    "data_dir": "/var/lib/n8n/.n8n-files/visual-creatives",
+    "ollama_url": "http://10.0.2.2:11434",
+    "prompt_agent_model": "deepseek-v4.1-flash:cloud",
+    "vision_model": "deepseek-v4.1-flash:cloud",
+    "vision_temperature": 0.1,
+    "fix_threshold": 2,
+    "fix_note": "Креатив уходит на повторную генерацию, если в чек-листе больше 2 ответов «нет» (то есть 3 или 4)."
+  }
+}

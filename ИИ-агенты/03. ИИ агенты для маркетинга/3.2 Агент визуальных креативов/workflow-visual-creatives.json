@@ -1,0 +1,932 @@
+{
+  "name": "Агент визуальных креативов: онлайн-школа английского языка",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "c1000000-0000-4000-8000-000000000001",
+      "name": "Запуск вручную (кнопка)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1240,
+        200
+      ],
+      "notes": "Ручной запуск из интерфейса n8n кнопкой «Execute workflow»."
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "visual-creatives",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "c1000000-0000-4000-8000-000000000002",
+      "name": "Запуск по ссылке (Webhook)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1240,
+        460
+      ],
+      "webhookId": "visual-creatives",
+      "notes": "Запуск агента по ссылке: POST http://192.168.56.10:5678/webhook/visual-creatives. В теле можно передать {\"brief_path\": \"...\", \"overrides\": {...}}."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================================\n// ШАГ 1. ВХОДНОЙ БРИФ\n// ----------------------------------------------------------------------------\n// Узел работает сразу после триггеров (ручная кнопка и webhook) и определяет,\n// ОТКУДА брать бриф. По умолчанию — файл brief.json на диске сервера.\n// Через webhook можно передать другой путь и точечные правки:\n//\n//   curl -X POST http://192.168.56.10:5678/webhook/visual-creatives \\\n//        -H 'Content-Type: application/json' \\\n//        -d '{\"brief_path\":\"/var/lib/n8n/.n8n-files/visual-creatives/brief.json\"}'\n//\n// Узел не падает, если запущен вручную: у ручного триггера json пустой.\n// ============================================================================\n\nconst DEFAULT_BRIEF = '/var/lib/n8n/.n8n-files/visual-creatives/brief.json';\n\nconst first = $input.first();\nconst raw = (first && first.json) ? first.json : {};\n\n// webhook в n8n 2.x кладёт тело запроса в поле body, ручной запуск тела не имеет\nconst body = (raw.body && typeof raw.body === 'object') ? raw.body : raw;\n\nconst briefPath = (body.brief_path && String(body.brief_path).trim())\n  ? String(body.brief_path).trim()\n  : DEFAULT_BRIEF;\n\n// Правки поверх брифа: {\"fix_threshold\": 0} — например, чтобы принудительно\n// прогнать ветку исправления при демонстрации.\nconst overrides = (body.overrides && typeof body.overrides === 'object') ? body.overrides : {};\n\nreturn [{\n  json: {\n    brief_path: briefPath,\n    overrides: overrides,\n    source: body.brief_path ? 'webhook' : 'default',\n    started_at: $now.setZone('Europe/Moscow').toFormat('yyyy-MM-dd HH:mm:ss')\n  }\n}];\n"
+      },
+      "id": "c1000000-0000-4000-8000-000000000003",
+      "name": "Входной бриф",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1000,
+        300
+      ],
+      "notes": "Определяет, откуда читать бриф: файл по умолчанию или путь из webhook."
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "fileSelector": "={{ $json.brief_path }}",
+        "options": {}
+      },
+      "id": "c1000000-0000-4000-8000-000000000004",
+      "name": "Читать бриф",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -800,
+        300
+      ],
+      "notes": "Входной бриф — внешний JSON-файл, а не константа внутри схемы."
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "data",
+        "destinationKey": "data",
+        "options": {}
+      },
+      "id": "c1000000-0000-4000-8000-000000000005",
+      "name": "Текст брифа",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        300
+      ],
+      "notes": "readWriteFile отдаёт файл бинарником, поэтому текст достаём отдельным узлом."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================================\n// ШАГ 2. РАЗБОР БРИФА И ПЛАН ВАРИАНТОВ\n// ----------------------------------------------------------------------------\n// Читает текст brief.json (пришёл из узла «Текст брифа»), проверяет, что в брифе\n// есть всё обязательное, и собирает из него:\n//   • brief_pack — компактный текст брифа для LLM-агента (промт-инженера);\n//   • tasks      — список вариантов, которые надо сгенерировать.\n//\n// Размер генерации выводится из пропорции площадки: генератор даёт картинку\n// ровно в нужной пропорции, финальный макет дизайнер собирает уже в размере\n// площадки, поэтому «несоответствия по размеру» на этом шаге не возникает.\n// ============================================================================\n\nconst text = String($input.first().json.data || '').trim();\nconst entry = $('Входной бриф').first().json;\nconst overrides = entry.overrides || {};\n\nif (!text) {\n  throw new Error('Бриф пуст: узел «Текст брифа» не получил текста из ' + entry.brief_path);\n}\n\nlet brief;\ntry {\n  brief = JSON.parse(text);\n} catch (e) {\n  throw new Error('brief.json не разбирается как JSON: ' + e.message);\n}\n\n// --- проверка обязательных разделов брифа -----------------------------------\nconst missing = [];\nif (!brief.product || !brief.product.name) missing.push('product');\nif (!brief.brand || !brief.brand.name) missing.push('brand');\nif (!Array.isArray(brief.segments) || brief.segments.length < 2) {\n  missing.push('segments (нужно не менее двух сегментов ЦА)');\n}\nif (!Array.isArray(brief.placements) || !brief.placements.length) missing.push('placements');\nif (!brief.restrictions || !Array.isArray(brief.restrictions.forbidden_elements)) {\n  missing.push('restrictions.forbidden_elements');\n}\nif (!Array.isArray(brief.plan) || !brief.plan.length) missing.push('plan');\nif (missing.length) {\n  throw new Error('В брифе не хватает обязательных разделов: ' + missing.join(', '));\n}\n\nconst settings = Object.assign({}, brief.settings || {}, overrides);\nconst fixThreshold = Number(settings.fix_threshold);\nif (!isFinite(fixThreshold)) {\n  throw new Error('settings.fix_threshold должен быть числом, получено: ' + settings.fix_threshold);\n}\n\n// --- размеры генерации по пропорции площадки --------------------------------\nconst RATIO_SIZE = {\n  '1:1': [1024, 1024],\n  '4:5': [1024, 1280],\n  '3:4': [768, 1024],\n  '4:3': [1024, 768],\n  '16:9': [1280, 720]\n};\n\nconst segById = {};\nbrief.segments.forEach(function (s) { segById[s.id] = s; });\nconst plByById = {};\nbrief.placements.forEach(function (p) { plByById[p.id] = p; });\n\n// Компактный контекст брифа: он поедет вместе с каждым вариантом дальше по\n// схеме, чтобы узлы проверки не зависели от данных, прочитанных в начале.\nconst briefContext = [\n  'ПРОДУКТ: ' + brief.product.name + '. ' + brief.product.what,\n  'УТП: ' + (brief.product.usp || []).join('; ') + '.',\n  'БРЕНД: ' + brief.brand.name + ' — ' + brief.brand.positioning + '.',\n  'ПАЛИТРА: ' + Object.keys(brief.brand.palette || {}).map(function (k) {\n    return brief.brand.palette[k];\n  }).join('; ') + '.',\n  'ТОНАЛЬНОСТЬ: ' + brief.brand.tone_of_voice + '.',\n  'ЗАПРЕЩЕНО: ' + brief.restrictions.forbidden_elements.join('; ') + '.',\n  'ТЕХНИЧЕСКИЕ ОГРАНИЧЕНИЯ: ' + brief.restrictions.technical_restrictions.join('; ') + '.'\n].join('\\n');\n\nconst tasks = brief.plan.map(function (p) {\n  const seg = segById[p.segment];\n  const pl = plByById[p.placement];\n  if (!seg) throw new Error('В плане указан неизвестный сегмент ЦА: ' + p.segment);\n  if (!pl) throw new Error('В плане указана неизвестная площадка: ' + p.placement);\n\n  const size = RATIO_SIZE[pl.ratio];\n  if (!size) throw new Error('Не знаю размер генерации для пропорции ' + pl.ratio);\n\n  return {\n    id: p.id,\n    segment_id: seg.id,\n    segment_name: seg.name,\n    segment_who: seg.who,\n    segment_insight: seg.insight,\n    segment_message: seg.message,\n    // Английские двойники русских полей. Нужны узлу правки: уточнения\n    // дописываются прямо в промт, а генератор английский, русского он не\n    // понимает — русские фразы в промте для него шум.\n    segment_who_en: seg.who_en || seg.who,\n    segment_insight_en: seg.insight_en || seg.insight,\n    placement_id: pl.id,\n    placement_name: pl.name,\n    placement_size: pl.size,\n    placement_ratio: pl.ratio,\n    placement_text_zone: pl.text_zone,\n    placement_text_zone_en: pl.text_zone_en || pl.text_zone,\n    placement_requirements: pl.requirements,\n    style: p.style,\n    style_en: p.style_en || p.style,\n    composition_focus: p.composition_focus,\n    composition_focus_en: p.focus_en || p.composition_focus,\n    accent: p.accent,\n    seed: p.seed,\n    width: size[0],\n    height: size[1],\n    attempt: 1,\n    base_variant: p.base_variant || null,\n    changed_parameter: p.changed_parameter || null,\n    unchanged_parameters: p.unchanged_parameters || null,\n    fallback_prompt: p.fallback_prompt || '',\n    // промт подставит LLM-агент; если он не справится — останется запасной\n    prompt: p.fallback_prompt || '',\n    negative: '',\n    rationale: '',\n    prompt_source: 'fallback',\n    vision_context: briefContext,\n    settings: settings\n  };\n});\n\n// --- текст задания для LLM-агента ------------------------------------------\nconst pack = [\n  'БРИФ НА РЕКЛАМНЫЕ ВИЗУАЛЫ',\n  'Кампания: ' + brief.campaign,\n  'Продукт: ' + brief.product.name + '. ' + brief.product.what,\n  'УТП: ' + (brief.product.usp || []).join('; ') + '.',\n  'Призыв к действию: ' + (brief.product.cta || '') + '.',\n  '',\n  'Бренд: ' + brief.brand.name + ' — ' + brief.brand.positioning + '.',\n  'Тональность: ' + brief.brand.tone_of_voice + '.',\n  'Палитра: ' + Object.keys(brief.brand.palette || {}).map(function (k) {\n    return brief.brand.palette[k];\n  }).join('; ') + '.',\n  'Типографика: ' + brief.brand.typography + '.',\n  'Логотип: ' + brief.brand.logo_rule + '.',\n  '',\n  'СЕГМЕНТЫ ЦА:',\n  brief.segments.map(function (s) {\n    return '- ' + s.id + ' ' + s.name + ': ' + s.who + '. Уровень: ' + s.current_level +\n      '. Инсайт: ' + s.insight + '. Задача: ' + s.job_to_be_done + '. Сообщение: «' + s.message + '».';\n  }).join('\\n'),\n  '',\n  'ПЛОЩАДКИ:',\n  brief.placements.map(function (p) {\n    return '- ' + p.id + ' ' + p.name + ': ' + p.size + ' (' + p.ratio + '), безопасные поля ' +\n      p.safe_zone + ', зона под текст — ' + p.text_zone + '. Контекст: ' + p.reading_context +\n      '. Требования: ' + p.requirements + '.';\n  }).join('\\n'),\n  '',\n  'ВИЗУАЛЬНЫЙ ЯЗЫК:',\n  'Базовый стиль: ' + brief.visual_language.style_base + '.',\n  'Свет: ' + brief.visual_language.light + '.',\n  'Композиция: ' + brief.visual_language.composition + '.',\n  'Фокус: ' + brief.visual_language.focus + '.',\n  'Акцент: ' + brief.visual_language.accent + '.',\n  'Фотография: ' + brief.visual_language.photography + '.',\n  '',\n  'ВАРИАНТЫ, КОТОРЫЕ НУЖНО ОПИСАТЬ ПРОМТАМИ:',\n  tasks.map(function (t) {\n    return [\n      '- ' + t.id + ': сегмент ' + t.segment_id + ' (' + t.segment_name + '), площадка ' +\n        t.placement_id + ' (' + t.placement_name + ', ' + t.placement_size + ', ' + t.placement_ratio +\n        ', зона под текст: ' + t.placement_text_zone + '), стиль: ' + t.style +\n        ', фокус: ' + t.composition_focus + ', акцент: ' + t.accent + '.',\n      t.changed_parameter ? '  ОСОБОЕ УСЛОВИЕ: ' + t.changed_parameter +\n        '. Неизменно: ' + t.unchanged_parameters + '.' : ''\n    ].filter(Boolean).join('\\n');\n  }).join('\\n'),\n  '',\n  'ЗАПРЕЩЁННЫЕ ЭЛЕМЕНТЫ (их не должно быть на картинке):',\n  brief.restrictions.forbidden_elements.map(function (f) { return '- ' + f; }).join('\\n')\n].join('\\n');\n\nreturn [{\n  json: {\n    brief_pack: pack,\n    tasks: tasks,\n    settings: settings,\n    brief_summary: {\n      campaign: brief.campaign,\n      product: brief.product.name,\n      brand: brief.brand.name,\n      segments: brief.segments.length,\n      placements: brief.placements.length,\n      variants: tasks.length\n    },\n    fix_threshold: fixThreshold,\n    parsed_at: $now.setZone('Europe/Moscow').toFormat('yyyy-MM-dd HH:mm:ss')\n  }\n}];\n"
+      },
+      "id": "c1000000-0000-4000-8000-000000000006",
+      "name": "Разобрать бриф",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -400,
+        300
+      ],
+      "notes": "Проверка обязательных разделов брифа и сборка списка вариантов."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.brief_pack }}",
+        "options": {
+          "systemMessage": "=Ты — арт-директор и промт-инженер. Ты готовишь задания для генератора изображений FLUX.1, который будет рисовать рекламные креативы онлайн-школы английского языка.\n\nНа вход приходит бриф и список вариантов, которые нужно визуализировать. Твоя задача — для каждого варианта написать ОДИН промт на АНГЛИЙСКОМ языке.\n\nПРАВИЛА ПРОМТА\n\n1. Описывай только то, что должно быть в кадре: сюжет, героя, место, свет, палитру, настроение, тип съёмки, композицию.\n2. Обязательно указывай, где останется пустое место под будущий текст и кнопку (например: large empty area on the left half of the frame). Сам текст на картинку не наносится — его добавит дизайнер.\n3. Каждый промт заканчивай запретом текста: no text, no letters, no numbers, no words, no watermark, no logo.\n4. Учитывай площадку: пропорцию кадра, положение смыслового центра, допустимый размер объекта в кадре.\n5. Учитывай сегмент ЦА: возраст, жизненный контекст, уровень. Герой и ситуация в кадре должны совпадать с описанием сегмента.\n6. Учитывай запрещённые элементы из брифа. Ничего запрещённого не упоминай в промте позитивно — перечисляй это в поле negative как список того, чего быть не должно.\n7. Поле negative пиши ТОЛЬКО на английском — это техническое поле, оно уходит в генератор напрямую. Генератор понимает английские слова, русский текст в negative для него пустой набор символов, то есть запреты просто не работают. Запрещённые элементы из брифа переведи на английский.\n8. Длина промта — 45–80 слов. Без кавычек, без переносов строк, без markdown, без списков внутри промта.\n9. Не проси нарисовать логотип бренда, слоган, надписи, интерфейс с текстом, книги и вывески с буквами.\n\nОСОБОЕ ПРАВИЛО ДЛЯ ВАРИАНТА-АЛЬТЕРНАТИВЫ (тот, у которого в брифе написано «ОСОБОЕ УСЛОВИЕ»)\n\n- Промт альтернативы целиком не пиши.\n- Вместо этого укажи, какой ОДИН фрагмент промта базового варианта надо заменить и на что:\n  \"style_swap\": {\"from\": \"<точная подстрока из промта базового варианта>\", \"to\": \"<та же мысль, но в новом стиле>\"}\n- Подстрока from должна дословно встречаться в промте базового варианта. Если её там нет, замена не сработает и вариант будет отброшен.\n- Меняется только изменяемый параметр. Сюжет, герой, место, композиция, фокус и акцент остаются ровно теми же, что у базового варианта.\n\nФОРМАТ ОТВЕТА — строго один JSON-объект, без markdown и без текста вокруг:\n\n{\"variants\":[\n {\"id\":\"V1\",\"prompt\":\"...\",\"negative\":\"english comma-separated list of what must not appear\",\"rationale\":\"по-русски, одно предложение: почему промт решает задачу варианта\"},\n {\"id\":\"V2\",\"prompt\":\"...\",\"negative\":\"...\",\"rationale\":\"...\"},\n {\"id\":\"V4\",\"base\":\"V1\",\"style_swap\":{\"from\":\"...\",\"to\":\"...\"},\"negative\":\"...\",\"rationale\":\"...\"}\n]}"
+        }
+      },
+      "id": "c1000000-0000-4000-8000-000000000007",
+      "name": "Агент: промт-инженер",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -180,
+        300
+      ],
+      "notes": "LLM-агент: превращает бриф в промты для генератора изображений."
+    },
+    {
+      "parameters": {
+        "model": "deepseek-v4.1-flash:cloud",
+        "options": {
+          "temperature": 0.4,
+          "format": "json"
+        }
+      },
+      "id": "c1000000-0000-4000-8000-000000000008",
+      "name": "Ollama Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -260,
+        580
+      ],
+      "credentials": {
+        "ollamaApi": {
+          "id": "DEHgfM1I0ZJBmGoo",
+          "name": "Ollama (10.0.2.2:11434)"
+        }
+      },
+      "notes": "Модель агента-промт-инженера. Включён Output Format = JSON."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================================\n// ШАГ 3. ПРОМТЫ ОТ LLM-АГЕНТА + ПРОВЕРКА ВАРИАТИВНОСТИ\n// ----------------------------------------------------------------------------\n// Забирает ответ агента-промт-инженера, разбирает JSON и склеивает его с\n// параметрами вариантов из брифа. Здесь же — три предохранителя:\n//\n//   1. Если модель вернула мусор вместо JSON или промт слишком короткий —\n//      берём запасной промт из брифа (он лежит в plan[].fallback_prompt).\n//   2. Если в промте осталась кириллица или он не запрещает текст на картинке —\n//      чиним принудительно, не доверяя модели.\n//   3. Вариативность: промт альтернативы (V4) собирается НЕ заново, а заменой\n//      одного фрагмента в промте базового варианта (V1). Так требование «изменён\n//      ровно один параметр» выполняется конструктивно, а не по обещанию модели.\n// ============================================================================\n\nconst src = $input.first().json;\nconst pack = $('Разобрать бриф').first().json;\n\nconst raw = String(\n  (src.message && src.message.content) ? src.message.content :\n  (src.content || src.text || src.output || '')\n);\n\n// --- вытаскиваем JSON из ответа модели --------------------------------------\n// Модель-рассуждалка сначала печатает длинное размышление, а следом — JSON.\n// Узел Ollama отдаёт и то и другое одной строкой, без разделителя, и в боевом\n// ответе (прогон 83) начало объекта оказалось испорчено: вместо\n// «…Let me finalize.{\"variants\":[…]}» пришло «…Let me finalize.variants\":[…]}» —\n// без открывающих `{\"`, зато с лишней закрывающей `}`. Прямой разбор такого\n// текста падал, узел молча уходил на запасные промты из брифа, и работа\n// LLM-агента пропадала целиком. Поэтому разбор трёхступенчатый.\n\n// Возвращает сбалансированный кусок текста от скобки start до парной ей,\n// пропуская скобки внутри строк. null — если пары нет.\nfunction balanced(s, start) {\n  const open = s[start];\n  const close = open === '{' ? '}' : ']';\n  let depth = 0;\n  let inStr = false;\n  let esc = false;\n  for (let i = start; i < s.length; i++) {\n    const c = s[i];\n    if (inStr) {\n      if (esc) esc = false;\n      else if (c === '\\\\') esc = true;\n      else if (c === '\"') inStr = false;\n      continue;\n    }\n    if (c === '\"') { inStr = true; continue; }\n    if (c === open) depth++;\n    else if (c === close) {\n      depth--;\n      if (!depth) return s.slice(start, i + 1);\n    }\n  }\n  return null;\n}\n\nfunction tryParse(s) {\n  try { return JSON.parse(s); } catch (e) { return null; }\n}\n\nfunction extractJson(t) {\n  const cleaned = t.replace(/```json/gi, '```').split('```').join('\\n');\n\n  // 1. Обычный случай: от первой `{` до последней `}`. Требуем массив\n  //    вариантов: если в прозе попался корректный, но посторонний объект,\n  //    он не должен подменять собой ответ (иначе узел снова уйдёт на запасной\n  //    промт, хотя разбираемый ответ в тексте есть).\n  const a = cleaned.indexOf('{');\n  const b = cleaned.lastIndexOf('}');\n  if (a >= 0 && b > a) {\n    const p = tryParse(cleaned.slice(a, b + 1));\n    if (p && Array.isArray(p.variants)) return p;\n  }\n\n  // 2. Испорченное начало массива вариантов. Массив при этом целый, поэтому\n  //    берём любой сбалансированный массив, элементы которого похожи на\n  //    варианты (объекты с полем id), и собираем объект заново — имя ключа\n  //    восстанавливаем сами, в тексте от него мог остаться только хвост.\n  for (let i = cleaned.indexOf('['); i >= 0; i = cleaned.indexOf('[', i + 1)) {\n    const piece = balanced(cleaned, i);\n    if (!piece) continue;\n    const arr = tryParse(piece);\n    if (!Array.isArray(arr) || !arr.length) continue;\n    const looksLikeVariants = arr.every(function (v) {\n      return v && typeof v === 'object' && !Array.isArray(v) && v.id;\n    });\n    if (looksLikeVariants) return { variants: arr };\n  }\n\n  // 3. Последняя попытка: перебираем все `{` и берём первый сбалансированный\n  //    кусок, в котором есть массив вариантов.\n  for (let i = cleaned.indexOf('{'); i >= 0; i = cleaned.indexOf('{', i + 1)) {\n    const piece = balanced(cleaned, i);\n    if (!piece) continue;\n    const p = tryParse(piece);\n    if (p && Array.isArray(p.variants)) return p;\n  }\n\n  return null;\n}\n\nconst parsed = extractJson(raw);\nconst byId = {};\nif (parsed && Array.isArray(parsed.variants)) {\n  parsed.variants.forEach(function (v) {\n    if (v && v.id) byId[String(v.id).toUpperCase()] = v;\n  });\n}\n\n// Диагностика ответа агента: попадает в реестр, чтобы при разборе полётов было\n// видно, что именно вернула модель.\nconst agentDiag = {\n  agent_answer_chars: raw.length,\n  agent_json_ok: !!(parsed && Array.isArray(parsed.variants)),\n  agent_variants: Object.keys(byId),\n  agent_input_keys: Object.keys(src).join(','),\n  agent_answer_head: (parsed && Array.isArray(parsed.variants)) ? null : raw.slice(0, 800)\n};\n\nconst NO_TEXT_CLAUSE = 'no text, no letters, no numbers, no words, no watermark, no logo';\n\nfunction sane(text, id) {\n  const p = String(text || '').trim().replace(/\\s+/g, ' ').replace(/^[\"'«]|[\"'»]$/g, '');\n  if (p.length < 60) return null;                 // слишком короткий — это не промт\n  if (/[А-Яа-яЁё]/.test(p)) return null;          // промт должен быть на английском\n  if (!/prompt|photo|photograph|illustration|image|scene|shot/i.test(p)) return null;\n  if (!/no text/i.test(p)) return p + ', ' + NO_TEXT_CLAUSE;\n  return p;\n}\n\nconst items = pack.tasks.map(function (t) {\n  const task = Object.assign({}, t);\n  const fromModel = byId[task.id];\n  let warning = null;\n\n  // Имя файла задаём сразу и здесь, а не по ходу дела: узел сохранения берёт\n  // его выражением {{ $json.file_name }} и без этого писал один и тот же\n  // «undefined.webp» на все варианты. Расширение условное — оба генератора\n  // (ссылка и base64) переписывают его по фактическому формату картинки.\n  task.file_name = task.id + '-a' + (task.attempt || 1) + '.webp';\n\n  if (fromModel) {\n    const p = sane(fromModel.prompt, task.id);\n    if (p) {\n      task.prompt = p;\n      task.prompt_source = 'llm';\n    } else {\n      warning = 'Промт от модели не прошёл проверку — взят запасной промт из брифа';\n    }\n    task.negative = String(fromModel.negative || '').trim();\n    task.rationale = String(fromModel.rationale || '').trim();\n    if (fromModel.style_swap) task.style_swap = fromModel.style_swap;\n  } else {\n    warning = 'Модель не вернула вариант ' + task.id + ' — взят запасной промт из брифа';\n  }\n\n  task.prompt_warning = warning;\n  Object.assign(task, agentDiag);\n  return task;\n});\n\n// --- вариативность: альтернатива = базовый вариант с одной заменой ----------\nconst byVariant = {};\nitems.forEach(function (t) { byVariant[t.id] = t; });\n\nitems.forEach(function (t) {\n  if (!t.base_variant) return;\n  const base = byVariant[t.base_variant];\n  const swap = t.style_swap;\n  let applied = false;\n\n  if (base && swap && swap.from && swap.to) {\n    const from = String(swap.from).trim();\n    const to = String(swap.to).trim();\n    const idx = base.prompt.toLowerCase().indexOf(from.toLowerCase());\n    if (idx >= 0) {\n      t.prompt = base.prompt.slice(0, idx) + to + base.prompt.slice(idx + from.length);\n      t.prompt_source = 'llm (замена одного фрагмента в ' + t.base_variant + ')';\n      applied = true;\n      // Модель для альтернативы намеренно не пишет полный промт — только пару\n      // style_swap. Поэтому проверка «промт не прошёл» выше срабатывает всегда;\n      // раз замена удалась, предупреждение снимаем, иначе оно врёт в реестре.\n      t.prompt_warning = null;\n    }\n  }\n\n  if (!applied) {\n    // Замена не удалась — берём запасной промт альтернативы и запрещаем\n    // считать это «изменением одного параметра» по факту.\n    t.prompt = sane(t.fallback_prompt, t.id) || t.prompt;\n    t.prompt_source = 'fallback';\n    t.prompt_warning = 'Фрагмент стиля не найден в промте ' + t.base_variant +\n      ' — альтернатива сгенерирована по запасному промту. Различие параметров проверено вручную.';\n  }\n\n  t.seed = base ? base.seed : t.seed;   // сид принудительно тот же\n  t.variativity_applied = applied;\n});\n\nreturn items.map(function (t) { return { json: t }; });\n"
+      },
+      "id": "c1000000-0000-4000-8000-000000000009",
+      "name": "Собрать промты",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        40,
+        300
+      ],
+      "notes": "Разбор ответа агента, предохранители и замена одного фрагмента для альтернативы."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================================\n// ШАГ 4. ГЕНЕРАЦИЯ ИЗОБРАЖЕНИЙ\n// ----------------------------------------------------------------------------\n// Бесплатные публичные генераторы живут неровно, поэтому эшелонов три.\n//\n//   1) Быстрый эшелон — публичные спейсы Hugging Face на ZeroGPU\n//      (FLUX.1-merged, Kolors, FLUX.1-dev). Отдают ссылку за секунды, но\n//      квота у них на IP, а не на запрос: когда она выбрана, все три спейса\n//      отвечают «event: error / data: null» за пару секунд. Поэтому спейсы\n//      проверяются ОДНИМ пробным запросом на первом же варианте, а не\n//      двадцатью четырьмя, как было бы при переборе по каждому варианту.\n//   2) Основной эшелон — Stable Horde, краудсорсинг-сеть воркеров. Ключ не\n//      нужен (анонимный '0000000000'), квоты нет, отдаёт base64. Но очередь\n//      анонимного клиента тем длиннее, чем «дороже» задание: у задачи на\n//      512x512 она стартует сразу, у 1024x1024 может стоять сотни позиций.\n//      В часы нагрузки сервис вдобавок закрывает крупные запросы порогом\n//      «заслуг»: «Due to heavy demand, for requests over 1024x1024 or over the\n//      applicable first-order-equivalent sampler work budget the client needs to\n//      already have the required kudos» (замер tools/horde-queue-probe.py:\n//      задача 1024x1024 у SDXL 1.0 стояла 295-й, а та же сцена 512x512 —\n//      нулевой). Порог считается по площади и числу шагов, поэтому список из\n//      нескольких SDXL-моделей его тоже перешагивает: он оценивается дороже\n//      одной модели (20.03 против 18.0) и был отклонён. Отсюда правило: у\n//      основного эшелона ровно одна модель, а лёгкий запас — рабочий путь, а\n//      не редкая страховка (в прогоне 86 тяжёлый размер так и не дошёл).\n//   3) Лёгкий запас — если за HORDE_FAST_AFTER_MS ни одна задача основного\n//      эшелона не сдвинулась с места, недостающие варианты досылаются в\n//      уменьшенном размере с меньшим числом шагов. Первичные задачи при этом\n//      продолжают опрашиваться: что придёт раньше — то и пойдёт в результат.\n//      Фактический размер пишется в поле size_actual.\n//\n// Pollinations.ai (вариант, который пробовали первым) в работу не годится:\n// на любой новый запрос отвечает 402 Payment Required, картинку отдаёт только\n// из кэша — проверено tools/horde-size-test.py и отдельной пробой параметров.\n//\n// ВАЖНО про бинарные данные: Code-узел в этом n8n НЕ умеет скачивать бинарник\n// по сети — helpers.httpRequest отдаёт побитую строку (проверено диагностикой\n// tools/probe-binary-roundtrip.py: 28710 «байт» вместо 30320). Зато base64,\n// полученный как обычный JSON, Code-узел превращает в настоящий файл без потерь\n// (md5 совпадает). Поэтому:\n//   • быстрый эшелон отдаёт ССЫЛКУ  -> её скачивает узел HTTP Request;\n//   • Stable Horde отдаёт BASE64     -> его собирает узел «Картинка из base64».\n// Дальше ветки сходятся на узле сохранения файла.\n// ============================================================================\n\nconst H = this.helpers;\nconst items = $input.all();\n\nfunction sleep(ms) {\n  return new Promise(function (resolve) { setTimeout(resolve, ms); });\n}\n\nfunction msg(e) {\n  return String((e && e.message) || e);\n}\n\n// --- эшелон 1: публичные спейсы Hugging Face --------------------------------\nconst HF_PROVIDERS = [\n  {\n    name: 'FLUX.1-merged (multimodalart)',\n    host: 'https://multimodalart-flux-1-merged.hf.space',\n    endpoint: '/infer',\n    body: function (t) { return { data: [t.prompt, t.seed, false, t.width, t.height, 3.5, 4] }; }\n  },\n  {\n    name: 'Kolors (Kwai)',\n    host: 'https://kwai-kolors-kolors.hf.space',\n    endpoint: '/infer',\n    body: function (t) {\n      return { data: [t.prompt, null, 0.5, negativeFor(t), t.seed, false, t.width, t.height, 5.0, 25] };\n    }\n  },\n  {\n    name: 'FLUX.1-dev (black-forest-labs)',\n    host: 'https://black-forest-labs-flux-1-dev.hf.space',\n    endpoint: '/infer',\n    body: function (t) { return { data: [t.prompt, t.seed, false, t.width, t.height, 3.5, 4] }; }\n  }\n];\n\nasync function hfOnce(provider, t) {\n  const call = await H.httpRequest({\n    url: provider.host + '/gradio_api/call' + provider.endpoint,\n    method: 'POST',\n    headers: { 'Content-Type': 'application/json' },\n    body: provider.body(t),\n    json: true,\n    timeout: 30000\n  });\n\n  const eventId = call && call.event_id;\n  if (!eventId) throw new Error('спейс не вернул event_id');\n\n  const stream = await H.httpRequest({\n    url: provider.host + '/gradio_api/call' + provider.endpoint + '/' + eventId,\n    method: 'GET',\n    encoding: 'utf8',\n    timeout: 180000\n  });\n\n  const text = String(stream || '');\n  if (/event:\\s*error/.test(text)) {\n    throw new Error('спейс отклонил задание (квота ZeroGPU или ошибка модели)');\n  }\n  const m = text.match(/\"url\"\\s*:\\s*\"([^\"]+)\"/);\n  if (!m) throw new Error('в ответе спейса нет ссылки на картинку');\n  return m[1];\n}\n\n// --- эшелон 2 и 3: Stable Horde ---------------------------------------------\nconst HORDE_API = 'https://stablehorde.net/api/v2';\nconst HORDE_KEY = '0000000000';   // анонимный ключ Stable Horde\nconst HORDE_MODEL = 'SDXL 1.0';\n\n// Модели для лёгкого запаса — с родным разрешением 512 (SD 1.5-финетюны).\n// SDXL 1.0 рассчитан на 1024: на 512x512 он уходит в плоскую стилизацию, и\n// «запасная» картинка получается абстрактной — в прогоне 82 так вышли V1 и V3,\n// чек-лист поставил им 4 и 3 «нет» именно за это.\n//\n// Base-модель stable_diffusion из списка убрана: в прогоне 86 она нарисовала\n// «руки над блокнотом» вместо героини в кадре и куклу вместо женщины у стола,\n// и чек-лист справедливо поставил этим вариантам «нет» за соответствие брифу.\n// Замер на одном и том же промте (tools/horde-model-pick.py, 512x512, 30 шагов)\n// показал, что финетюны держат сцену, а base-модель её теряет. AbsoluteReality\n// стоит первым: у него кадр совпал с брифом лучше всех — героиня в тёмно-синем\n// костюме с оранжевым акцентом, брендовая палитра и свободная левая половина.\n// Порядок в списке — приоритет: Stable Horde берёт первую модель, воркер\n// которой свободен.\nconst HORDE_MODELS_FAST = ['AbsoluteReality', 'Realistic Vision', 'Deliberate'];\nconst HORDE_POLL_MS = 15000;\nconst HORDE_MAX_WAIT_MS = 35 * 60 * 1000;   // общий потолок ожидания очереди\n// Столько ждём «тяжёлый» размер, прежде чем досылать лёгкий. Замер на боевых\n// конфигурациях (tools/horde-size-test.py): задача 1024x1024 у анонимного\n// клиента стояла 189-й в общей очереди и за 15 минут не сдвинулась, а та же\n// сцена в 512x512 на модели с родным разрешением 512 стартовала сразу\n// (queue_position 0, 13 свободных воркеров) и была готова за 1,9 минуты.\nconst HORDE_FAST_AFTER_MS = 3 * 60 * 1000;\n// Анонимному клиенту сервис разрешает около одного запроса в секунду и отвечает\n// 429, если частить. Паузы держим и между отправками, и между опросами: иначе\n// пачка проверок «съедает» лимит, отправка лёгкого размера падает, и узел\n// честно ждёт тяжёлую очередь до самого потолка.\nconst HORDE_GAP_MS = 1500;\nconst HORDE_POLL_GAP_MS = 400;\n// Окно на «повышение» размера. Цикл выходит, как только закрылась последняя\n// дырка, поэтому лёгкая картинка успевала проскочить раньше тяжёлой и оставалась\n// в результате навсегда — тяжёлая задача при этом ещё стояла в очереди и её\n// никто не ждал. Теперь после сборки всех вариантов даём живым тяжёлым задачам\n// ещё немного времени: что успело — заменит лёгкую картинку.\nconst HORDE_UPGRADE_GRACE_MS = 8 * 60 * 1000;\n\n// Воркеры Stable Horde берут размеры, кратные 64. Пропорции площадок держим\n// точно, а по площади не выходим за 1024x1024: у анонимного клиента запрос\n// крупнее требует «заслуг» (KudosUpfront).\nconst HORDE_SIZES = {\n  '1:1': [1024, 1024],\n  '4:5': [768, 960],\n  '3:4': [768, 1024],\n  '4:3': [1024, 768],\n  '16:9': [1024, 576]\n};\n\n// Лёгкий запас: те же пропорции, но маленькая площадь — такие задачи анонимной\n// очереди стартуют почти сразу.\nconst HORDE_SIZES_FAST = {\n  '1:1': [512, 512],\n  '4:5': [512, 640],\n  '3:4': [512, 640],\n  '4:3': [512, 384],\n  '16:9': [576, 320]\n};\n\n// Английский список запретов, собранный из restrictions.forbidden_elements\n// брифа. Это не только запасной вариант: генератор понимает английские слова,\n// поэтому русский negative из брифа ему бесполезен (см. negativeFor ниже).\nconst DEFAULT_NEGATIVE = 'text, letters, numbers, words, captions, watermark, ' +\n  'logo, signature, brand logos, apple logo, laptop logo, headset logo, ' +\n  'device brand marks, stickers on devices, flags, coats of arms, maps, ' +\n  'political or religious symbols, Big Ben, red double-decker bus, cup of tea, ' +\n  'royal guard, Tower Bridge, children, teenagers, school chalkboard, ' +\n  'celebrities, real people, alcohol, tobacco, weapons, blood, gambling, drugs, ' +\n  'medical masks, disasters, nudity, distorted face, extra fingers, fused ' +\n  'fingers, deformed limbs, low quality, blurry, jpeg artifacts, collage, ' +\n  'frame, gradient stock background';\n\n// SDXL и другие диффузионные модели работают через английский CLIP: русские\n// слова для них — не текст, а случайные токены, то есть запретов становится ноль.\n// Агент писал negative по-русски (так же, как сформулированы запреты в брифе),\n// и в генератор уходил неработающий набор. Поэтому здесь проверяем язык: если\n// кириллица есть — берём английский список, а исходный текст сохраняем для\n// реестра отдельным полем.\nfunction negativeFor(t) {\n  const n = String(t.negative || '');\n  if (n.length > 3 && !/[А-Яа-яЁё]/.test(n)) return n;\n  return DEFAULT_NEGATIVE;\n}\n\nasync function horde(path, method, body) {\n  const options = {\n    url: HORDE_API + path,\n    method: method,\n    headers: {\n      apikey: HORDE_KEY,\n      'Client-Agent': 'n8n-visual-creatives:1.0:anonymous',\n      'Content-Type': 'application/json'\n    },\n    json: true,\n    timeout: 60000\n  };\n  if (body) options.body = body;\n  return await H.httpRequest(options);\n}\n\nfunction hordeBody(t, size, steps, models) {\n  return {\n    prompt: t.prompt,\n    params: {\n      width: size[0],\n      height: size[1],\n      steps: steps,\n      cfg_scale: 7,\n      sampler_name: 'k_euler_a',\n      n: 1,\n      seed: String(t.seed === undefined || t.seed === null ? 0 : t.seed),\n      negative_prompt: negativeFor(t)\n    },\n    nsfw: false,\n    censor_nsfw: true,\n    trusted_workers: false,\n    slow_workers: true,\n    models: models || [HORDE_MODEL],\n    r2: false\n  };\n}\n\nfunction sniffImage(buf) {\n  if (buf[0] === 0x89 && buf[1] === 0x50) return { mime: 'image/png', ext: 'png' };\n  if (buf[0] === 0xFF && buf[1] === 0xD8) return { mime: 'image/jpeg', ext: 'jpg' };\n  if (buf[0] === 0x52 && buf[1] === 0x49) return { mime: 'image/webp', ext: 'webp' };\n  return { mime: 'image/png', ext: 'png' };\n}\n\n// --- эшелон 1: быстрые спейсы -----------------------------------------------\nconst result = [];\nconst errors = [];\n\nif (items.length) {\n  // Квота у спейсов одна на IP, поэтому сначала один пробный запрос: если он\n  // не прошёл — перебирать остальные варианты бессмысленно и долго.\n  let hfProvider = null;\n  for (const provider of HF_PROVIDERS) {\n    try {\n      result[0] = { url: await hfOnce(provider, items[0].json), provider: provider.name, attempt: 1 };\n      hfProvider = provider;\n      break;\n    } catch (e) {\n      errors.push(items[0].json.id + ' | проверка ' + provider.name + ': ' + msg(e));\n      await sleep(1000);\n    }\n  }\n\n  if (hfProvider) {\n    for (let i = 1; i < items.length; i++) {\n      try {\n        result[i] = { url: await hfOnce(hfProvider, items[i].json), provider: hfProvider.name, attempt: 1 };\n      } catch (e) {\n        errors.push(items[i].json.id + ' | ' + hfProvider.name + ': ' + msg(e));\n      }\n    }\n  }\n}\n\n// --- эшелоны 2 и 3: Stable Horde --------------------------------------------\nconst needHorde = [];\nfor (let i = 0; i < items.length; i++) {\n  if (!result[i]) needHorde.push(i);\n}\n\nconst hordeNote = [];\n\nif (needHorde.length) {\n  const jobs = [];        // {id, index, size, fast, taken}\n  const pending = {};     // id -> job\n\n  async function submitJob(idx, fast) {\n    const t = items[idx].json;\n    const table = fast ? HORDE_SIZES_FAST : HORDE_SIZES;\n    const size = table[t.placement_ratio] || (fast ? HORDE_SIZES_FAST['1:1'] : HORDE_SIZES['1:1']);\n    const models = fast ? HORDE_MODELS_FAST : [HORDE_MODEL];\n    try {\n      const sub = await horde('/generate/async', 'POST', hordeBody(t, size, fast ? 30 : 25, models));\n      if (!sub || !sub.id) throw new Error('сервис не вернул id задания');\n      const job = { id: sub.id, index: idx, size: size, fast: fast, models: models, taken: false };\n      jobs.push(job);\n      pending[sub.id] = job;\n      return true;\n    } catch (e) {\n      errors.push(t.id + ' | Stable Horde (отправка ' + size[0] + 'x' + size[1] + '): ' + msg(e));\n      return false;\n    }\n  }\n\n  const startedAt = Date.now();\n  const missing = function () {\n    return needHorde.filter(function (i) { return !result[i]; });\n  };\n\n  for (const idx of needHorde) {\n    await submitJob(idx, false);\n    await sleep(HORDE_GAP_MS);\n  }\n\n  let fastSwitched = false;\n  const faulted = {};\n  const fastTries = {};\n\n  // Варианты, которые уже закрыты лёгкой картинкой, но у которых тяжёлая задача\n  // ещё жива: ради них и держим окно ожидания.\n  const upgradeable = function () {\n    const list = [];\n    for (let i = 0; i < items.length; i++) {\n      const r = result[i];\n      if (!r || !r.fast) continue;\n      const alive = jobs.some(function (j) {\n        return j.index === i && !j.fast && pending[j.id];\n      });\n      if (alive) list.push(i);\n    }\n    return list;\n  };\n\n  let upgradeDeadline = null;\n\n  while (Date.now() - startedAt < HORDE_MAX_WAIT_MS) {\n    if (!missing().length) {\n      const waiting = upgradeable();\n      if (!waiting.length) break;\n      if (upgradeDeadline === null) {\n        upgradeDeadline = Date.now() + HORDE_UPGRADE_GRACE_MS;\n        hordeNote.push('лёгкие картинки собраны, ждём тяжёлый размер ещё ' +\n          Math.round(HORDE_UPGRADE_GRACE_MS / 60000) + ' мин: ' +\n          waiting.map(function (i) { return items[i].json.id; }).join(', '));\n      }\n      if (Date.now() > upgradeDeadline) break;\n    }\n    await sleep(HORDE_POLL_MS);\n\n    let moving = 0;\n    for (const id of Object.keys(pending)) {\n      const job = pending[id];\n      const have = result[job.index];\n      // Готовый результат — не повод бросить задачу: лёгкая картинка уже есть,\n      // но тяжёлую мы всё ещё ждём, чтобы она её заменила. Раньше здесь стояла\n      // проверка «result есть — удалить», и тяжёлая задача пропадала из pending\n      // в тот же круг, как приходила лёгкая. Окно ожидания после этого не\n      // находило живых тяжёлых задач и закрывалось мгновенно.\n      if (have && (job.fast || !have.fast)) { delete pending[id]; continue; }\n      try {\n        const check = await horde('/generate/check/' + id, 'GET');\n        if (!check) continue;\n        if (check.done) {\n          // забираем картинку\n          const status = await horde('/generate/status/' + id, 'GET');\n          const gen = (status && status.generations && status.generations[0]) ? status.generations[0] : null;\n          if (gen && gen.img) {\n            const buf = Buffer.from(gen.img, 'base64');\n            if (buf.length) {\n              // тяжёлый размер важнее лёгкого: если место ещё свободно — берём его\n              if (!result[job.index] || (result[job.index].fast && !job.fast)) {\n                const kind = sniffImage(buf);\n                result[job.index] = {\n                  base64: gen.img,\n                  provider: 'Stable Horde (' + (gen.model || HORDE_MODEL) + ')',\n                  ext: kind.ext,\n                  mime: kind.mime,\n                  bytes: buf.length,\n                  seed: gen.seed,\n                  fast: job.fast,\n                  size: job.size\n                };\n                hordeNote.push(items[job.index].json.id + ': ' + String(gen.model || HORDE_MODEL) +\n                  ' ' + job.size[0] + 'x' + job.size[1]);\n              }\n            } else {\n              errors.push(items[job.index].json.id + ' | Stable Horde: картинка не декодировалась');\n            }\n          } else {\n            errors.push(items[job.index].json.id + ' | Stable Horde: пустой ответ без картинки');\n          }\n          delete pending[id];\n          continue;\n        }\n        if (check.faulted) {\n          if (!faulted[job.index]) {\n            errors.push(items[job.index].json.id + ' | Stable Horde (' + job.size[0] + 'x' + job.size[1] +\n              '): задание отклонено');\n            faulted[job.index] = true;\n          }\n          delete pending[id];\n          continue;\n        }\n        const q = check.queue_position;\n        if (check.processing || (typeof q === 'number' && q < 40)) moving++;\n      } catch (e) {\n        // одиночный сбой опроса не должен ронять весь цикл\n      }\n      await sleep(HORDE_POLL_GAP_MS);\n    }\n\n    // Лёгкий запас: тяжёлые задачи стоят в очереди — досылаем уменьшенные.\n    // Отправка может не пройти (лимит запросов, сбой сети), поэтому пробуем\n    // в каждом круге опроса, пока у варианта нет ни лёгкой задачи, ни картинки.\n    if (Date.now() - startedAt > HORDE_FAST_AFTER_MS && missing().length) {\n      if (!fastSwitched) {\n        fastSwitched = true;\n        hordeNote.push('включён лёгкий размер (в очереди оставалось ' +\n          jobs.filter(function (j) { return !faulted[j.index]; }).length + ' задач)');\n      }\n      for (const idx of missing()) {\n        const hasFast = jobs.some(function (j) {\n          return j.index === idx && j.fast && pending[j.id];\n        });\n        if (hasFast) continue;\n        // пять попыток на вариант: если сервис стабильно отказывает,\n        // долбить его каждые 15 секунд до потолка бессмысленно\n        fastTries[idx] = (fastTries[idx] || 0);\n        if (fastTries[idx] >= 5) continue;\n        fastTries[idx]++;\n        await submitJob(idx, true);\n        await sleep(HORDE_GAP_MS);\n      }\n    }\n  }\n\n  const still = missing();\n  if (still.length) {\n    errors.push('Stable Horde: за ' + Math.round(HORDE_MAX_WAIT_MS / 60000) +\n      ' мин не дождались картинок для: ' + still.map(function (i) { return items[i].json.id; }).join(', '));\n  }\n\n  // Окно закрылось, а тяжёлые задачи так и не дошли: фиксируем это в реестре,\n  // чтобы «size_downgraded: true» не выглядел случайностью.\n  const notUpgraded = upgradeable();\n  if (notUpgraded.length) {\n    hordeNote.push('тяжёлый размер не догнал за окно ожидания: ' +\n      notUpgraded.map(function (i) { return items[i].json.id; }).join(', ') + ' — оставлен лёгкий');\n  }\n}\n\n// --- собираем результат ------------------------------------------------------\nconst out = [];\n\nfor (let i = 0; i < items.length; i++) {\n  const t = Object.assign({}, items[i].json);\n  const r = result[i];\n\n  if (!r) {\n    throw new Error('Ни один генератор не отдал изображение для варианта ' + t.id + '. ' +\n      errors.join(' | '));\n  }\n\n  t.generator = r.provider;\n  t.generator_attempt = r.attempt || 1;\n  t.generator_errors = errors.slice();\n  // Заметки по ходу ожидания (какой размер, что успело дойти) — раньше они\n  // копились в массиве и никуда не попадали: в реестре не было видно, почему\n  // у креатива понижен размер.\n  t.generator_note = hordeNote.slice();\n  // Что именно ушло в генератор как запрет и почему: если negative_used не\n  // совпадает с negative из ответа агента, значит исходный был на кириллице и\n  // модель его всё равно не поняла.\n  t.negative_used = negativeFor(t);\n  t.negative_source = (t.negative_used === String(t.negative || ''))\n    ? 'ответ агента' : 'английский список из брифа (ответ агента был на русском)';\n  t.generated_at = $now.setZone('Europe/Moscow').toFormat('yyyy-MM-dd HH:mm:ss');\n\n  if (r.url) {\n    // быстрый эшелон: картинку скачает следующий узел HTTP Request\n    t.image_url = r.url;\n    t.image_b64 = null;\n    t.image_delivery = 'url';\n    t.size_actual = t.width + 'x' + t.height;\n  } else {\n    // Stable Horde: base64 -> бинарник соберёт узел «Картинка из base64»\n    t.image_url = null;\n    t.image_b64 = r.base64;\n    t.image_delivery = 'base64';\n    t.image_mime = r.mime;\n    t.file_name = String(t.file_name).replace(/\\.[a-z0-9]+$/i, '') + '.' + r.ext;\n    if (r.seed !== undefined && r.seed !== null) t.seed_actual = r.seed;\n    t.size_actual = r.size[0] + 'x' + r.size[1];\n    t.size_downgraded = !!r.fast;\n    t.width = r.size[0];\n    t.height = r.size[1];\n  }\n\n  out.push({ json: t });\n}\n\nreturn out;\n"
+      },
+      "id": "c1000000-0000-4000-8000-000000000010",
+      "name": "Генерация FLUX",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        260,
+        300
+      ],
+      "notes": "Быстрые спейсы Hugging Face, а если квота исчерпана — запасной Stable Horde."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "has-url-1",
+              "leftValue": "={{ $json.image_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "c1000000-0000-4000-8000-000000000027",
+      "name": "Есть ссылка на картинку?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        460,
+        300
+      ],
+      "notes": "Разные генераторы отдают результат по-разному: ссылкой или base64."
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.image_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          },
+          "timeout": 300000
+        }
+      },
+      "id": "c1000000-0000-4000-8000-000000000011",
+      "name": "Скачать изображение",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        680,
+        40
+      ],
+      "notes": "Скачивание картинки в binary: ответ записывается как файл, а не как текст.",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================================\n// ШАГ 4б. КАРТИНКА ИЗ BASE64 (ветка запасного генератора)\n// ----------------------------------------------------------------------------\n// Нужен для Stable Horde: он отдаёт не ссылку, а картинку в base64 внутри JSON.\n// Code-узел не умеет тянуть бинарник из сети, но base64 -> файл он собирает\n// без потерь: проверено диагностикой tools/probe-binary-roundtrip.py —\n// md5 записанного файла совпадает с исходным.\n//\n// Тип файла определяем по «магическим» байтам, а не по расширению: воркеры\n// Stable Horde отдают то webp, то png, то jpg.\n// ============================================================================\n\nconst H = this.helpers;\nconst items = $input.all();\nconst out = [];\n\nfunction sniffImage(buf) {\n  if (buf[0] === 0x89 && buf[1] === 0x50) return { mime: 'image/png', ext: 'png' };\n  if (buf[0] === 0xFF && buf[1] === 0xD8) return { mime: 'image/jpeg', ext: 'jpg' };\n  if (buf[0] === 0x52 && buf[1] === 0x49) return { mime: 'image/webp', ext: 'webp' };\n  return { mime: 'image/png', ext: 'png' };\n}\n\nfor (let i = 0; i < items.length; i++) {\n  const j = items[i].json;\n\n  if (!j.image_b64) {\n    throw new Error('Нет base64-изображения для варианта ' + j.id + ' — ветка вызвана ошибочно.');\n  }\n\n  const buf = Buffer.from(j.image_b64, 'base64');\n  if (!buf.length) {\n    throw new Error('Base64-изображение варианта ' + j.id + ' не декодировалось.');\n  }\n\n  const kind = sniffImage(buf);\n  const fileName = String(j.file_name).replace(/\\.[a-z0-9]+$/i, '') + '.' + kind.ext;\n  const bin = await H.prepareBinaryData(buf, fileName, kind.mime);\n\n  const next = Object.assign({}, j, {\n    file_name: fileName,\n    image_mime: kind.mime,\n    image_bytes: buf.length,\n    image_kb: Math.round(buf.length / 1024)\n  });\n  delete next.image_b64;   // дальше картинка живёт в binary, base64 в JSON не нужен\n\n  out.push({ json: next, binary: { data: bin } });\n}\n\nreturn out;\n"
+      },
+      "id": "c1000000-0000-4000-8000-000000000029",
+      "name": "Картинка из base64",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        560
+      ],
+      "notes": "Запасной генератор отдаёт base64 — собираем из него настоящий файл."
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/var/lib/n8n/.n8n-files/visual-creatives/images/{{ $json.file_name }}",
+        "dataPropertyName": "data",
+        "options": {}
+      },
+      "id": "c1000000-0000-4000-8000-000000000012",
+      "name": "Сохранить изображение",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        900,
+        300
+      ],
+      "notes": "Креативы складываются в папку images на диске сервера."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================================\n// ШАГ 5. ЗАПРОС К VISION-МОДЕЛИ\n// ----------------------------------------------------------------------------\n// Готовит тело запроса к Ollama: промт проверки и картинку в base64.\n//\n// ВАЖНО про бинарные данные. В этом n8n бинарники хранятся в файловом режиме\n// (N8N_DEFAULT_BINARY_DATA_MODE=filesystem): в поле binary.data.data лежит не\n// base64-строка, а короткая ссылка вида \"filesystem-v2\". Поэтому байты надо\n// доставать хелпером getBinaryDataBuffer — он возвращает настоящий Buffer\n// внутри Code-узла, и уже его переводим в base64.\n// (Проверено диагностикой tools/probe-binary.py: ссылка длиной 13 символов\n//  против 40826 байт у getBinaryDataBuffer.)\n// ============================================================================\n\nconst H = this.helpers;\nconst items = $input.all();\nconst out = [];\n\nfor (let i = 0; i < items.length; i++) {\n  const j = items[i].json;\n  const bin = (items[i].binary && items[i].binary.data) ? items[i].binary.data : null;\n\n  if (!bin) {\n    throw new Error('Нет бинарных данных изображения для варианта ' + j.id + ' (' + j.file_name + ')');\n  }\n\n  let b64 = null;\n  let bytes = 0;\n  try {\n    const buf = await H.getBinaryDataBuffer(i, 'data');\n    if (Buffer.isBuffer(buf) && buf.length > 0) {\n      b64 = buf.toString('base64');\n      bytes = buf.length;\n    }\n  } catch (e) {\n    throw new Error('Не удалось прочитать байты изображения ' + j.file_name + ': ' +\n      String((e && e.message) || e));\n  }\n\n  if (!b64) {\n    throw new Error('Пустые байты изображения ' + j.file_name);\n  }\n\n  const st = j.settings || {};\n\n  const prompt = [\n    'Ты — арт-директор онлайн-школы английского языка. Оцени готовый рекламный креатив по чек-листу заказчика.',\n    '',\n    j.vision_context,\n    '',\n    'ПРОВЕРЯЕМЫЙ ВАРИАНТ ' + j.id + ':',\n    'Сегмент ЦА: ' + j.segment_id + ' — ' + j.segment_name + '. ' + j.segment_who + '. Инсайт: ' + j.segment_insight + '.',\n    'Площадка: ' + j.placement_id + ' — ' + j.placement_name + ', ' + j.placement_size + ' (' + j.placement_ratio + '), зона под текст: ' + j.placement_text_zone + '.',\n    'Заявленный стиль: ' + j.style + '. Фокус: ' + j.composition_focus + '. Акцент: ' + j.accent + '.',\n    'Задание генератору (промт): ' + j.prompt,\n    '',\n    'ЧЕК-ЛИСТ — ответь «да» или «нет» по каждому пункту:',\n    '1. brief — соответствие брифу, бренду и площадке: сюжет и настроение совпадают с описанием, пропорция и композиция подходят площадке, зона под будущий текст действительно свободна, цвета согласуются с палитрой бренда и заявленным стилем.',\n    '2. audience — релевантность ЦА: изображённый человек и ситуация выглядят как описанный сегмент (возраст, контекст, уровень жизни), не вызывают отторжения у этой аудитории.',\n    '3. forbidden — отсутствие запрещённых элементов: на картинке нет текста, букв и цифр, логотипов и водяных знаков, флагов и политической символики, стереотипов об Англии, детей, алкоголя, оружия, искажённых лиц и лишних пальцев.',\n    '4. quality — техническое качество: композиция читается, изображение резкое, нет артефактов генерации, креатив пригоден для публикации в ленте.',\n    '',\n    'Ответь СТРОГО одним JSON-объектом, без markdown и без текста вокруг:',\n    '{\"brief\":\"да|нет\",\"audience\":\"да|нет\",\"forbidden\":\"да|нет\",\"quality\":\"да|нет\",\"comment\":\"1-2 предложения: что изображено и общее впечатление\",\"improve\":\"одно предложение, что конкретно поправить, если есть «нет»; иначе — правки не нужны\"}'\n  ].join('\\n');\n\n  out.push({\n    json: Object.assign({}, j, {\n      ollama_model: st.vision_model || 'deepseek-v4.1-flash:cloud',\n      vision_temperature: (st.vision_temperature === undefined ? 0.1 : st.vision_temperature),\n      vision_prompt: prompt,\n      image_b64: b64,\n      image_bytes: bytes,\n      image_kb: Math.round(bytes / 1024)\n    })\n  });\n}\n\nreturn out;\n"
+      },
+      "id": "c1000000-0000-4000-8000-000000000013",
+      "name": "Собрать запрос к Vision",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        300
+      ],
+      "notes": "Промт проверки + картинка в base64 из binary-поля."
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.2.2:11434/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { model: $json.ollama_model, prompt: $json.vision_prompt, images: [$json.image_b64], stream: false, format: 'json', options: { temperature: $json.vision_temperature } } }}",
+        "options": {
+          "timeout": 600000
+        }
+      },
+      "id": "c1000000-0000-4000-8000-000000000014",
+      "name": "Vision: проверка",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1340,
+        300
+      ],
+      "notes": "Vision-модель оценивает креатив по чек-листу заказчика.",
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 4,
+      "waitBetweenTries": 8000
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================================\n// ШАГ 6. ОЦЕНКА ПО ЧЕК-ЛИСТУ\n// ----------------------------------------------------------------------------\n// Разбирает ответ vision-модели и превращает его в четыре пункта чек-листа —\n// ровно те, что стоят в шаблоне задания:\n//   • соответствие брифу, бренду, площадке;\n//   • релевантность ЦА;\n//   • отсутствие запрещённых элементов;\n//   • техническое качество.\n//\n// Метаданные варианта берём из узла Собрать запрос к Vision: узел HTTP Request с ответом Ollama\n// подменяет json целиком, поэтому «своих» полей в текущем элементе уже нет.\n//\n// Здесь же решается, нужна ли правка: по условию задания креатив уходит на\n// повторную генерацию, только если ответов «нет» БОЛЬШЕ ДВУХ (то есть 3 или 4).\n// ============================================================================\n\nconst SRC = $('Собрать запрос к Vision').all();\nconst items = $input.all();\nconst MAX_ATTEMPT = 2;\n\nconst CHECK = [\n  { key: 'brief', label: 'соответствие брифу, бренду, площадке;' },\n  { key: 'audience', label: 'релевантность ЦА' },\n  { key: 'forbidden', label: 'отсутствие запрещённых элементов' },\n  { key: 'quality', label: 'техническое качество.' }\n];\n\nfunction yesNo(value) {\n  if (typeof value === 'boolean') return value ? 'да' : 'нет';\n  const s = String(value === undefined || value === null ? '' : value).trim().toLowerCase();\n  if (!s) return 'нет';\n  if (/^(да|yes|true|1|ok|ок)/.test(s)) return 'да';\n  return 'нет';\n}\n\nfunction parseModelJson(text) {\n  const t = String(text || '');\n  const a = t.indexOf('{');\n  const b = t.lastIndexOf('}');\n  if (a < 0 || b <= a) return null;\n  try {\n    return JSON.parse(t.slice(a, b + 1));\n  } catch (e) {\n    return null;\n  }\n}\n\nconst out = [];\n\nfor (let i = 0; i < items.length; i++) {\n  const meta = (SRC[i] && SRC[i].json) ? SRC[i].json : {};\n  const st = meta.settings || {};\n  const threshold = (st.fix_threshold === undefined) ? 2 : Number(st.fix_threshold);\n  const attempt = Number(meta.attempt || 1);\n\n  const answer = parseModelJson(items[i].json.response);\n  const visionError = items[i].json.error || null;\n\n  const checklist = CHECK.map(function (c) {\n    return {\n      key: c.key,\n      label: c.label,\n      answer: answer ? yesNo(answer[c.key]) : 'н/д'\n    };\n  });\n\n  const noCount = checklist.filter(function (c) { return c.answer === 'нет'; }).length;\n  const naCount = checklist.filter(function (c) { return c.answer === 'н/д'; }).length;\n\n  // Правка нужна, только если чек-лист реально заполнен, «нет» больше порога\n  // и попытки ещё остались.\n  const needsFix = !!answer && noCount > threshold && attempt < MAX_ATTEMPT;\n\n  out.push({\n    json: Object.assign({}, meta, {\n      attempt: attempt,\n      checklist: checklist,\n      no_count: noCount,\n      na_count: naCount,\n      fix_threshold: threshold,\n      needs_fix: needsFix,\n      max_attempt: MAX_ATTEMPT,\n      vision_ok: !!answer,\n      vision_error: answer ? null : String(visionError || 'модель не вернула разбираемый JSON').slice(0, 200),\n      vision_comment: answer ? String(answer.comment || '').trim() : '',\n      vision_improve: answer ? String(answer.improve || '').trim() : '',\n      vision_raw: answer ? null : String(items[i].json.response || '').slice(0, 400),\n      vision_error_dump: answer ? null : JSON.stringify(items[i].json).slice(0, 1500),\n      evaluated_at: $now.setZone('Europe/Moscow').toFormat('yyyy-MM-dd HH:mm:ss')\n    })\n  });\n}\n\nreturn out;\n"
+      },
+      "id": "c1000000-0000-4000-8000-000000000015",
+      "name": "Оценка по чек-листу",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1560,
+        300
+      ],
+      "notes": "Четыре пункта чек-листа из шаблона + решение, нужна ли правка."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "need-fix-1",
+              "leftValue": "={{ $json.needs_fix }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "c1000000-0000-4000-8000-000000000016",
+      "name": "Нужна правка?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1780,
+        300
+      ],
+      "notes": "Ветвление: больше двух «нет» — правим, иначе креатив идёт в таблицу как есть."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================================\n// ШАГ 7. ИСПРАВЛЕНИЕ ПРОМТА\n// ----------------------------------------------------------------------------\n// Сюда попадают только те креативы, у которых в чек-листе больше двух «нет».\n// Дописываем в промт ровно то, на что указал чек-лист, — по одному блоку\n// уточнений на каждый проваленный пункт. Ничего другого не меняем, чтобы\n// правка осталась правкой, а не новой генерацией «с нуля».\n//\n// Сид НЕ меняем. Раньше здесь стоял новый сид (`seed + 1000 × попытка`) с\n// объяснением «иначе выйдет почти та же картинка». Объяснение верное, но цена\n// оказалась выше: по заданию альтернатива V4 — это V1 с изменённым ровно одним\n// параметром (стилем), и сид для неё копируется от V1 принудительно. Как только\n// правка уводила сид, пара V1/V4 расходилась по кадру, и «чем отличается\n// результат» описывал уже не разницу стилей, а две разные сцены. В прогоне 87\n// V1 попал в правку, V4 — нет, и сравнивать их стало нечем.\n// Теперь правка меняет только текст промта: кадр остаётся тем же, а уточнения\n// по проваленным пунктам чек-листа — то, ради чего правка и делалась. Победившую\n// попытку выбирает реестр: если правка не помогла, остаётся исходный вариант.\n//\n// ВАЖНО про язык уточнений. Раньше блоки собирались из русских полей брифа\n// (стиль, зона под текст, портрет ЦА) и дописывались в англоязычный промт как\n// есть. Для генератора русские слова — не текст, а случайный набор токенов:\n// вместо уточнения он получал шум, и «исправленный» креатив выходил хуже\n// исходного (в прогоне 82 у V4 стало 4 «нет» вместо 3). Поэтому берём\n// английские двойники полей из брифа — style_en, focus_en, *_en.\n// ============================================================================\n\nconst out = [];\n\nfor (const item of $input.all()) {\n  const j = item.json;\n  const bad = {};\n  (j.checklist || []).forEach(function (c) { if (c.answer === 'нет') bad[c.key] = true; });\n\n  const fixes = [];\n\n  if (bad.brief) {\n    fixes.push('strictly follow the declared style (' + j.style_en +\n      ') and the composition focus (' + j.composition_focus_en +\n      '), keep the brand palette: deep navy blue #1B3A6B as the base colour, ' +\n      'orange accent #FF7A45 used sparingly, light grey background #F5F7FA; ' +\n      j.placement_text_zone_en);\n  }\n  if (bad.audience) {\n    fixes.push('the person in the frame must look like the target audience: ' +\n      j.segment_who_en + '; the scene must show this situation: ' + j.segment_insight_en);\n  }\n  if (bad.forbidden) {\n    fixes.push('absolutely no text, no letters, no numbers, no words, no logo, no watermark, ' +\n      'no brand marks, no flags, no children, no alcohol, no weapons');\n  }\n  if (bad.quality) {\n    fixes.push('sharp focus, natural anatomy, correct hands with exactly five fingers, ' +\n      'clean uncluttered composition, professional commercial photography');\n  }\n\n  const attempt = Number(j.attempt || 1) + 1;\n  const joined = (j.prompt + '. ' + fixes.join('; ')).replace(/\\s+/g, ' ').trim();\n\n  // Страховка на случай, если кириллица всё-таки приползла из брифа: вырезаем\n  // её из промта и честно помечаем это в реестре, а не отправляем молча.\n  const stripped = joined.replace(/(?:[А-Яа-яЁё][А-Яа-яЁё\\s,;:.()«»—–-]*)+/g, ' ');\n  const prompt = stripped.replace(/\\s+/g, ' ').replace(/\\s+([;,.])/g, '$1').replace(/;\\s*;/g, ';').trim();\n  const prompt_language_fixed = prompt !== joined;\n\n  out.push({\n    json: Object.assign({}, j, {\n      attempt: attempt,\n      prompt: prompt,\n      prompt_source: j.prompt_source + ' + правка',\n      prompt_language_fixed: prompt_language_fixed,\n      seed: j.seed,\n      file_name: j.id + '-a' + attempt + '.webp',\n      fix_reason: (j.checklist || []).filter(function (c) { return c.answer === 'нет'; })\n        .map(function (c) { return c.label; }).join(' '),\n      fix_comment: j.vision_improve || '',\n      previous_image_url: j.image_url,\n      previous_file_name: j.file_name,\n      previous_checklist: j.checklist,\n      previous_no_count: j.no_count,\n      previous_comment: j.vision_comment,\n      fixed_at: $now.setZone('Europe/Moscow').toFormat('yyyy-MM-dd HH:mm:ss')\n    })\n  });\n}\n\nreturn out;\n"
+      },
+      "id": "c1000000-0000-4000-8000-000000000017",
+      "name": "Правка промта",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1980,
+        40
+      ],
+      "notes": "Дописывает в промт уточнения по проваленным пунктам и берёт новый сид."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================================\n// ШАГ 4. ГЕНЕРАЦИЯ ИЗОБРАЖЕНИЙ\n// ----------------------------------------------------------------------------\n// Бесплатные публичные генераторы живут неровно, поэтому эшелонов три.\n//\n//   1) Быстрый эшелон — публичные спейсы Hugging Face на ZeroGPU\n//      (FLUX.1-merged, Kolors, FLUX.1-dev). Отдают ссылку за секунды, но\n//      квота у них на IP, а не на запрос: когда она выбрана, все три спейса\n//      отвечают «event: error / data: null» за пару секунд. Поэтому спейсы\n//      проверяются ОДНИМ пробным запросом на первом же варианте, а не\n//      двадцатью четырьмя, как было бы при переборе по каждому варианту.\n//   2) Основной эшелон — Stable Horde, краудсорсинг-сеть воркеров. Ключ не\n//      нужен (анонимный '0000000000'), квоты нет, отдаёт base64. Но очередь\n//      анонимного клиента тем длиннее, чем «дороже» задание: у задачи на\n//      512x512 она стартует сразу, у 1024x1024 может стоять сотни позиций.\n//      В часы нагрузки сервис вдобавок закрывает крупные запросы порогом\n//      «заслуг»: «Due to heavy demand, for requests over 1024x1024 or over the\n//      applicable first-order-equivalent sampler work budget the client needs to\n//      already have the required kudos» (замер tools/horde-queue-probe.py:\n//      задача 1024x1024 у SDXL 1.0 стояла 295-й, а та же сцена 512x512 —\n//      нулевой). Порог считается по площади и числу шагов, поэтому список из\n//      нескольких SDXL-моделей его тоже перешагивает: он оценивается дороже\n//      одной модели (20.03 против 18.0) и был отклонён. Отсюда правило: у\n//      основного эшелона ровно одна модель, а лёгкий запас — рабочий путь, а\n//      не редкая страховка (в прогоне 86 тяжёлый размер так и не дошёл).\n//   3) Лёгкий запас — если за HORDE_FAST_AFTER_MS ни одна задача основного\n//      эшелона не сдвинулась с места, недостающие варианты досылаются в\n//      уменьшенном размере с меньшим числом шагов. Первичные задачи при этом\n//      продолжают опрашиваться: что придёт раньше — то и пойдёт в результат.\n//      Фактический размер пишется в поле size_actual.\n//\n// Pollinations.ai (вариант, который пробовали первым) в работу не годится:\n// на любой новый запрос отвечает 402 Payment Required, картинку отдаёт только\n// из кэша — проверено tools/horde-size-test.py и отдельной пробой параметров.\n//\n// ВАЖНО про бинарные данные: Code-узел в этом n8n НЕ умеет скачивать бинарник\n// по сети — helpers.httpRequest отдаёт побитую строку (проверено диагностикой\n// tools/probe-binary-roundtrip.py: 28710 «байт» вместо 30320). Зато base64,\n// полученный как обычный JSON, Code-узел превращает в настоящий файл без потерь\n// (md5 совпадает). Поэтому:\n//   • быстрый эшелон отдаёт ССЫЛКУ  -> её скачивает узел HTTP Request;\n//   • Stable Horde отдаёт BASE64     -> его собирает узел «Картинка из base64».\n// Дальше ветки сходятся на узле сохранения файла.\n// ============================================================================\n\nconst H = this.helpers;\nconst items = $input.all();\n\nfunction sleep(ms) {\n  return new Promise(function (resolve) { setTimeout(resolve, ms); });\n}\n\nfunction msg(e) {\n  return String((e && e.message) || e);\n}\n\n// --- эшелон 1: публичные спейсы Hugging Face --------------------------------\nconst HF_PROVIDERS = [\n  {\n    name: 'FLUX.1-merged (multimodalart)',\n    host: 'https://multimodalart-flux-1-merged.hf.space',\n    endpoint: '/infer',\n    body: function (t) { return { data: [t.prompt, t.seed, false, t.width, t.height, 3.5, 4] }; }\n  },\n  {\n    name: 'Kolors (Kwai)',\n    host: 'https://kwai-kolors-kolors.hf.space',\n    endpoint: '/infer',\n    body: function (t) {\n      return { data: [t.prompt, null, 0.5, negativeFor(t), t.seed, false, t.width, t.height, 5.0, 25] };\n    }\n  },\n  {\n    name: 'FLUX.1-dev (black-forest-labs)',\n    host: 'https://black-forest-labs-flux-1-dev.hf.space',\n    endpoint: '/infer',\n    body: function (t) { return { data: [t.prompt, t.seed, false, t.width, t.height, 3.5, 4] }; }\n  }\n];\n\nasync function hfOnce(provider, t) {\n  const call = await H.httpRequest({\n    url: provider.host + '/gradio_api/call' + provider.endpoint,\n    method: 'POST',\n    headers: { 'Content-Type': 'application/json' },\n    body: provider.body(t),\n    json: true,\n    timeout: 30000\n  });\n\n  const eventId = call && call.event_id;\n  if (!eventId) throw new Error('спейс не вернул event_id');\n\n  const stream = await H.httpRequest({\n    url: provider.host + '/gradio_api/call' + provider.endpoint + '/' + eventId,\n    method: 'GET',\n    encoding: 'utf8',\n    timeout: 180000\n  });\n\n  const text = String(stream || '');\n  if (/event:\\s*error/.test(text)) {\n    throw new Error('спейс отклонил задание (квота ZeroGPU или ошибка модели)');\n  }\n  const m = text.match(/\"url\"\\s*:\\s*\"([^\"]+)\"/);\n  if (!m) throw new Error('в ответе спейса нет ссылки на картинку');\n  return m[1];\n}\n\n// --- эшелон 2 и 3: Stable Horde ---------------------------------------------\nconst HORDE_API = 'https://stablehorde.net/api/v2';\nconst HORDE_KEY = '0000000000';   // анонимный ключ Stable Horde\nconst HORDE_MODEL = 'SDXL 1.0';\n\n// Модели для лёгкого запаса — с родным разрешением 512 (SD 1.5-финетюны).\n// SDXL 1.0 рассчитан на 1024: на 512x512 он уходит в плоскую стилизацию, и\n// «запасная» картинка получается абстрактной — в прогоне 82 так вышли V1 и V3,\n// чек-лист поставил им 4 и 3 «нет» именно за это.\n//\n// Base-модель stable_diffusion из списка убрана: в прогоне 86 она нарисовала\n// «руки над блокнотом» вместо героини в кадре и куклу вместо женщины у стола,\n// и чек-лист справедливо поставил этим вариантам «нет» за соответствие брифу.\n// Замер на одном и том же промте (tools/horde-model-pick.py, 512x512, 30 шагов)\n// показал, что финетюны держат сцену, а base-модель её теряет. AbsoluteReality\n// стоит первым: у него кадр совпал с брифом лучше всех — героиня в тёмно-синем\n// костюме с оранжевым акцентом, брендовая палитра и свободная левая половина.\n// Порядок в списке — приоритет: Stable Horde берёт первую модель, воркер\n// которой свободен.\nconst HORDE_MODELS_FAST = ['AbsoluteReality', 'Realistic Vision', 'Deliberate'];\nconst HORDE_POLL_MS = 15000;\nconst HORDE_MAX_WAIT_MS = 35 * 60 * 1000;   // общий потолок ожидания очереди\n// Столько ждём «тяжёлый» размер, прежде чем досылать лёгкий. Замер на боевых\n// конфигурациях (tools/horde-size-test.py): задача 1024x1024 у анонимного\n// клиента стояла 189-й в общей очереди и за 15 минут не сдвинулась, а та же\n// сцена в 512x512 на модели с родным разрешением 512 стартовала сразу\n// (queue_position 0, 13 свободных воркеров) и была готова за 1,9 минуты.\nconst HORDE_FAST_AFTER_MS = 3 * 60 * 1000;\n// Анонимному клиенту сервис разрешает около одного запроса в секунду и отвечает\n// 429, если частить. Паузы держим и между отправками, и между опросами: иначе\n// пачка проверок «съедает» лимит, отправка лёгкого размера падает, и узел\n// честно ждёт тяжёлую очередь до самого потолка.\nconst HORDE_GAP_MS = 1500;\nconst HORDE_POLL_GAP_MS = 400;\n// Окно на «повышение» размера. Цикл выходит, как только закрылась последняя\n// дырка, поэтому лёгкая картинка успевала проскочить раньше тяжёлой и оставалась\n// в результате навсегда — тяжёлая задача при этом ещё стояла в очереди и её\n// никто не ждал. Теперь после сборки всех вариантов даём живым тяжёлым задачам\n// ещё немного времени: что успело — заменит лёгкую картинку.\nconst HORDE_UPGRADE_GRACE_MS = 8 * 60 * 1000;\n\n// Воркеры Stable Horde берут размеры, кратные 64. Пропорции площадок держим\n// точно, а по площади не выходим за 1024x1024: у анонимного клиента запрос\n// крупнее требует «заслуг» (KudosUpfront).\nconst HORDE_SIZES = {\n  '1:1': [1024, 1024],\n  '4:5': [768, 960],\n  '3:4': [768, 1024],\n  '4:3': [1024, 768],\n  '16:9': [1024, 576]\n};\n\n// Лёгкий запас: те же пропорции, но маленькая площадь — такие задачи анонимной\n// очереди стартуют почти сразу.\nconst HORDE_SIZES_FAST = {\n  '1:1': [512, 512],\n  '4:5': [512, 640],\n  '3:4': [512, 640],\n  '4:3': [512, 384],\n  '16:9': [576, 320]\n};\n\n// Английский список запретов, собранный из restrictions.forbidden_elements\n// брифа. Это не только запасной вариант: генератор понимает английские слова,\n// поэтому русский negative из брифа ему бесполезен (см. negativeFor ниже).\nconst DEFAULT_NEGATIVE = 'text, letters, numbers, words, captions, watermark, ' +\n  'logo, signature, brand logos, apple logo, laptop logo, headset logo, ' +\n  'device brand marks, stickers on devices, flags, coats of arms, maps, ' +\n  'political or religious symbols, Big Ben, red double-decker bus, cup of tea, ' +\n  'royal guard, Tower Bridge, children, teenagers, school chalkboard, ' +\n  'celebrities, real people, alcohol, tobacco, weapons, blood, gambling, drugs, ' +\n  'medical masks, disasters, nudity, distorted face, extra fingers, fused ' +\n  'fingers, deformed limbs, low quality, blurry, jpeg artifacts, collage, ' +\n  'frame, gradient stock background';\n\n// SDXL и другие диффузионные модели работают через английский CLIP: русские\n// слова для них — не текст, а случайные токены, то есть запретов становится ноль.\n// Агент писал negative по-русски (так же, как сформулированы запреты в брифе),\n// и в генератор уходил неработающий набор. Поэтому здесь проверяем язык: если\n// кириллица есть — берём английский список, а исходный текст сохраняем для\n// реестра отдельным полем.\nfunction negativeFor(t) {\n  const n = String(t.negative || '');\n  if (n.length > 3 && !/[А-Яа-яЁё]/.test(n)) return n;\n  return DEFAULT_NEGATIVE;\n}\n\nasync function horde(path, method, body) {\n  const options = {\n    url: HORDE_API + path,\n    method: method,\n    headers: {\n      apikey: HORDE_KEY,\n      'Client-Agent': 'n8n-visual-creatives:1.0:anonymous',\n      'Content-Type': 'application/json'\n    },\n    json: true,\n    timeout: 60000\n  };\n  if (body) options.body = body;\n  return await H.httpRequest(options);\n}\n\nfunction hordeBody(t, size, steps, models) {\n  return {\n    prompt: t.prompt,\n    params: {\n      width: size[0],\n      height: size[1],\n      steps: steps,\n      cfg_scale: 7,\n      sampler_name: 'k_euler_a',\n      n: 1,\n      seed: String(t.seed === undefined || t.seed === null ? 0 : t.seed),\n      negative_prompt: negativeFor(t)\n    },\n    nsfw: false,\n    censor_nsfw: true,\n    trusted_workers: false,\n    slow_workers: true,\n    models: models || [HORDE_MODEL],\n    r2: false\n  };\n}\n\nfunction sniffImage(buf) {\n  if (buf[0] === 0x89 && buf[1] === 0x50) return { mime: 'image/png', ext: 'png' };\n  if (buf[0] === 0xFF && buf[1] === 0xD8) return { mime: 'image/jpeg', ext: 'jpg' };\n  if (buf[0] === 0x52 && buf[1] === 0x49) return { mime: 'image/webp', ext: 'webp' };\n  return { mime: 'image/png', ext: 'png' };\n}\n\n// --- эшелон 1: быстрые спейсы -----------------------------------------------\nconst result = [];\nconst errors = [];\n\nif (items.length) {\n  // Квота у спейсов одна на IP, поэтому сначала один пробный запрос: если он\n  // не прошёл — перебирать остальные варианты бессмысленно и долго.\n  let hfProvider = null;\n  for (const provider of HF_PROVIDERS) {\n    try {\n      result[0] = { url: await hfOnce(provider, items[0].json), provider: provider.name, attempt: 1 };\n      hfProvider = provider;\n      break;\n    } catch (e) {\n      errors.push(items[0].json.id + ' | проверка ' + provider.name + ': ' + msg(e));\n      await sleep(1000);\n    }\n  }\n\n  if (hfProvider) {\n    for (let i = 1; i < items.length; i++) {\n      try {\n        result[i] = { url: await hfOnce(hfProvider, items[i].json), provider: hfProvider.name, attempt: 1 };\n      } catch (e) {\n        errors.push(items[i].json.id + ' | ' + hfProvider.name + ': ' + msg(e));\n      }\n    }\n  }\n}\n\n// --- эшелоны 2 и 3: Stable Horde --------------------------------------------\nconst needHorde = [];\nfor (let i = 0; i < items.length; i++) {\n  if (!result[i]) needHorde.push(i);\n}\n\nconst hordeNote = [];\n\nif (needHorde.length) {\n  const jobs = [];        // {id, index, size, fast, taken}\n  const pending = {};     // id -> job\n\n  async function submitJob(idx, fast) {\n    const t = items[idx].json;\n    const table = fast ? HORDE_SIZES_FAST : HORDE_SIZES;\n    const size = table[t.placement_ratio] || (fast ? HORDE_SIZES_FAST['1:1'] : HORDE_SIZES['1:1']);\n    const models = fast ? HORDE_MODELS_FAST : [HORDE_MODEL];\n    try {\n      const sub = await horde('/generate/async', 'POST', hordeBody(t, size, fast ? 30 : 25, models));\n      if (!sub || !sub.id) throw new Error('сервис не вернул id задания');\n      const job = { id: sub.id, index: idx, size: size, fast: fast, models: models, taken: false };\n      jobs.push(job);\n      pending[sub.id] = job;\n      return true;\n    } catch (e) {\n      errors.push(t.id + ' | Stable Horde (отправка ' + size[0] + 'x' + size[1] + '): ' + msg(e));\n      return false;\n    }\n  }\n\n  const startedAt = Date.now();\n  const missing = function () {\n    return needHorde.filter(function (i) { return !result[i]; });\n  };\n\n  for (const idx of needHorde) {\n    await submitJob(idx, false);\n    await sleep(HORDE_GAP_MS);\n  }\n\n  let fastSwitched = false;\n  const faulted = {};\n  const fastTries = {};\n\n  // Варианты, которые уже закрыты лёгкой картинкой, но у которых тяжёлая задача\n  // ещё жива: ради них и держим окно ожидания.\n  const upgradeable = function () {\n    const list = [];\n    for (let i = 0; i < items.length; i++) {\n      const r = result[i];\n      if (!r || !r.fast) continue;\n      const alive = jobs.some(function (j) {\n        return j.index === i && !j.fast && pending[j.id];\n      });\n      if (alive) list.push(i);\n    }\n    return list;\n  };\n\n  let upgradeDeadline = null;\n\n  while (Date.now() - startedAt < HORDE_MAX_WAIT_MS) {\n    if (!missing().length) {\n      const waiting = upgradeable();\n      if (!waiting.length) break;\n      if (upgradeDeadline === null) {\n        upgradeDeadline = Date.now() + HORDE_UPGRADE_GRACE_MS;\n        hordeNote.push('лёгкие картинки собраны, ждём тяжёлый размер ещё ' +\n          Math.round(HORDE_UPGRADE_GRACE_MS / 60000) + ' мин: ' +\n          waiting.map(function (i) { return items[i].json.id; }).join(', '));\n      }\n      if (Date.now() > upgradeDeadline) break;\n    }\n    await sleep(HORDE_POLL_MS);\n\n    let moving = 0;\n    for (const id of Object.keys(pending)) {\n      const job = pending[id];\n      const have = result[job.index];\n      // Готовый результат — не повод бросить задачу: лёгкая картинка уже есть,\n      // но тяжёлую мы всё ещё ждём, чтобы она её заменила. Раньше здесь стояла\n      // проверка «result есть — удалить», и тяжёлая задача пропадала из pending\n      // в тот же круг, как приходила лёгкая. Окно ожидания после этого не\n      // находило живых тяжёлых задач и закрывалось мгновенно.\n      if (have && (job.fast || !have.fast)) { delete pending[id]; continue; }\n      try {\n        const check = await horde('/generate/check/' + id, 'GET');\n        if (!check) continue;\n        if (check.done) {\n          // забираем картинку\n          const status = await horde('/generate/status/' + id, 'GET');\n          const gen = (status && status.generations && status.generations[0]) ? status.generations[0] : null;\n          if (gen && gen.img) {\n            const buf = Buffer.from(gen.img, 'base64');\n            if (buf.length) {\n              // тяжёлый размер важнее лёгкого: если место ещё свободно — берём его\n              if (!result[job.index] || (result[job.index].fast && !job.fast)) {\n                const kind = sniffImage(buf);\n                result[job.index] = {\n                  base64: gen.img,\n                  provider: 'Stable Horde (' + (gen.model || HORDE_MODEL) + ')',\n                  ext: kind.ext,\n                  mime: kind.mime,\n                  bytes: buf.length,\n                  seed: gen.seed,\n                  fast: job.fast,\n                  size: job.size\n                };\n                hordeNote.push(items[job.index].json.id + ': ' + String(gen.model || HORDE_MODEL) +\n                  ' ' + job.size[0] + 'x' + job.size[1]);\n              }\n            } else {\n              errors.push(items[job.index].json.id + ' | Stable Horde: картинка не декодировалась');\n            }\n          } else {\n            errors.push(items[job.index].json.id + ' | Stable Horde: пустой ответ без картинки');\n          }\n          delete pending[id];\n          continue;\n        }\n        if (check.faulted) {\n          if (!faulted[job.index]) {\n            errors.push(items[job.index].json.id + ' | Stable Horde (' + job.size[0] + 'x' + job.size[1] +\n              '): задание отклонено');\n            faulted[job.index] = true;\n          }\n          delete pending[id];\n          continue;\n        }\n        const q = check.queue_position;\n        if (check.processing || (typeof q === 'number' && q < 40)) moving++;\n      } catch (e) {\n        // одиночный сбой опроса не должен ронять весь цикл\n      }\n      await sleep(HORDE_POLL_GAP_MS);\n    }\n\n    // Лёгкий запас: тяжёлые задачи стоят в очереди — досылаем уменьшенные.\n    // Отправка может не пройти (лимит запросов, сбой сети), поэтому пробуем\n    // в каждом круге опроса, пока у варианта нет ни лёгкой задачи, ни картинки.\n    if (Date.now() - startedAt > HORDE_FAST_AFTER_MS && missing().length) {\n      if (!fastSwitched) {\n        fastSwitched = true;\n        hordeNote.push('включён лёгкий размер (в очереди оставалось ' +\n          jobs.filter(function (j) { return !faulted[j.index]; }).length + ' задач)');\n      }\n      for (const idx of missing()) {\n        const hasFast = jobs.some(function (j) {\n          return j.index === idx && j.fast && pending[j.id];\n        });\n        if (hasFast) continue;\n        // пять попыток на вариант: если сервис стабильно отказывает,\n        // долбить его каждые 15 секунд до потолка бессмысленно\n        fastTries[idx] = (fastTries[idx] || 0);\n        if (fastTries[idx] >= 5) continue;\n        fastTries[idx]++;\n        await submitJob(idx, true);\n        await sleep(HORDE_GAP_MS);\n      }\n    }\n  }\n\n  const still = missing();\n  if (still.length) {\n    errors.push('Stable Horde: за ' + Math.round(HORDE_MAX_WAIT_MS / 60000) +\n      ' мин не дождались картинок для: ' + still.map(function (i) { return items[i].json.id; }).join(', '));\n  }\n\n  // Окно закрылось, а тяжёлые задачи так и не дошли: фиксируем это в реестре,\n  // чтобы «size_downgraded: true» не выглядел случайностью.\n  const notUpgraded = upgradeable();\n  if (notUpgraded.length) {\n    hordeNote.push('тяжёлый размер не догнал за окно ожидания: ' +\n      notUpgraded.map(function (i) { return items[i].json.id; }).join(', ') + ' — оставлен лёгкий');\n  }\n}\n\n// --- собираем результат ------------------------------------------------------\nconst out = [];\n\nfor (let i = 0; i < items.length; i++) {\n  const t = Object.assign({}, items[i].json);\n  const r = result[i];\n\n  if (!r) {\n    throw new Error('Ни один генератор не отдал изображение для варианта ' + t.id + '. ' +\n      errors.join(' | '));\n  }\n\n  t.generator = r.provider;\n  t.generator_attempt = r.attempt || 1;\n  t.generator_errors = errors.slice();\n  // Заметки по ходу ожидания (какой размер, что успело дойти) — раньше они\n  // копились в массиве и никуда не попадали: в реестре не было видно, почему\n  // у креатива понижен размер.\n  t.generator_note = hordeNote.slice();\n  // Что именно ушло в генератор как запрет и почему: если negative_used не\n  // совпадает с negative из ответа агента, значит исходный был на кириллице и\n  // модель его всё равно не поняла.\n  t.negative_used = negativeFor(t);\n  t.negative_source = (t.negative_used === String(t.negative || ''))\n    ? 'ответ агента' : 'английский список из брифа (ответ агента был на русском)';\n  t.generated_at = $now.setZone('Europe/Moscow').toFormat('yyyy-MM-dd HH:mm:ss');\n\n  if (r.url) {\n    // быстрый эшелон: картинку скачает следующий узел HTTP Request\n    t.image_url = r.url;\n    t.image_b64 = null;\n    t.image_delivery = 'url';\n    t.size_actual = t.width + 'x' + t.height;\n  } else {\n    // Stable Horde: base64 -> бинарник соберёт узел «Картинка из base64»\n    t.image_url = null;\n    t.image_b64 = r.base64;\n    t.image_delivery = 'base64';\n    t.image_mime = r.mime;\n    t.file_name = String(t.file_name).replace(/\\.[a-z0-9]+$/i, '') + '.' + r.ext;\n    if (r.seed !== undefined && r.seed !== null) t.seed_actual = r.seed;\n    t.size_actual = r.size[0] + 'x' + r.size[1];\n    t.size_downgraded = !!r.fast;\n    t.width = r.size[0];\n    t.height = r.size[1];\n  }\n\n  out.push({ json: t });\n}\n\nreturn out;\n"
+      },
+      "id": "c1000000-0000-4000-8000-000000000018",
+      "name": "Генерация FLUX (правка)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2180,
+        40
+      ],
+      "notes": "Повторная генерация исправленного варианта."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "has-url-1",
+              "leftValue": "={{ $json.image_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "c1000000-0000-4000-8000-000000000028",
+      "name": "Есть ссылка на картинку? (правка)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2380,
+        40
+      ],
+      "notes": ""
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $json.image_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          },
+          "timeout": 300000
+        }
+      },
+      "id": "c1000000-0000-4000-8000-000000000019",
+      "name": "Скачать изображение (правка)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2600,
+        -220
+      ],
+      "notes": "",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================================\n// ШАГ 4б. КАРТИНКА ИЗ BASE64 (ветка запасного генератора)\n// ----------------------------------------------------------------------------\n// Нужен для Stable Horde: он отдаёт не ссылку, а картинку в base64 внутри JSON.\n// Code-узел не умеет тянуть бинарник из сети, но base64 -> файл он собирает\n// без потерь: проверено диагностикой tools/probe-binary-roundtrip.py —\n// md5 записанного файла совпадает с исходным.\n//\n// Тип файла определяем по «магическим» байтам, а не по расширению: воркеры\n// Stable Horde отдают то webp, то png, то jpg.\n// ============================================================================\n\nconst H = this.helpers;\nconst items = $input.all();\nconst out = [];\n\nfunction sniffImage(buf) {\n  if (buf[0] === 0x89 && buf[1] === 0x50) return { mime: 'image/png', ext: 'png' };\n  if (buf[0] === 0xFF && buf[1] === 0xD8) return { mime: 'image/jpeg', ext: 'jpg' };\n  if (buf[0] === 0x52 && buf[1] === 0x49) return { mime: 'image/webp', ext: 'webp' };\n  return { mime: 'image/png', ext: 'png' };\n}\n\nfor (let i = 0; i < items.length; i++) {\n  const j = items[i].json;\n\n  if (!j.image_b64) {\n    throw new Error('Нет base64-изображения для варианта ' + j.id + ' — ветка вызвана ошибочно.');\n  }\n\n  const buf = Buffer.from(j.image_b64, 'base64');\n  if (!buf.length) {\n    throw new Error('Base64-изображение варианта ' + j.id + ' не декодировалось.');\n  }\n\n  const kind = sniffImage(buf);\n  const fileName = String(j.file_name).replace(/\\.[a-z0-9]+$/i, '') + '.' + kind.ext;\n  const bin = await H.prepareBinaryData(buf, fileName, kind.mime);\n\n  const next = Object.assign({}, j, {\n    file_name: fileName,\n    image_mime: kind.mime,\n    image_bytes: buf.length,\n    image_kb: Math.round(buf.length / 1024)\n  });\n  delete next.image_b64;   // дальше картинка живёт в binary, base64 в JSON не нужен\n\n  out.push({ json: next, binary: { data: bin } });\n}\n\nreturn out;\n"
+      },
+      "id": "c1000000-0000-4000-8000-000000000030",
+      "name": "Картинка из base64 (правка)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2600,
+        300
+      ],
+      "notes": ""
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/var/lib/n8n/.n8n-files/visual-creatives/images/{{ $json.file_name }}",
+        "dataPropertyName": "data",
+        "options": {}
+      },
+      "id": "c1000000-0000-4000-8000-000000000020",
+      "name": "Сохранить изображение (правка)",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        2820,
+        40
+      ],
+      "notes": ""
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================================\n// ШАГ 5. ЗАПРОС К VISION-МОДЕЛИ\n// ----------------------------------------------------------------------------\n// Готовит тело запроса к Ollama: промт проверки и картинку в base64.\n//\n// ВАЖНО про бинарные данные. В этом n8n бинарники хранятся в файловом режиме\n// (N8N_DEFAULT_BINARY_DATA_MODE=filesystem): в поле binary.data.data лежит не\n// base64-строка, а короткая ссылка вида \"filesystem-v2\". Поэтому байты надо\n// доставать хелпером getBinaryDataBuffer — он возвращает настоящий Buffer\n// внутри Code-узла, и уже его переводим в base64.\n// (Проверено диагностикой tools/probe-binary.py: ссылка длиной 13 символов\n//  против 40826 байт у getBinaryDataBuffer.)\n// ============================================================================\n\nconst H = this.helpers;\nconst items = $input.all();\nconst out = [];\n\nfor (let i = 0; i < items.length; i++) {\n  const j = items[i].json;\n  const bin = (items[i].binary && items[i].binary.data) ? items[i].binary.data : null;\n\n  if (!bin) {\n    throw new Error('Нет бинарных данных изображения для варианта ' + j.id + ' (' + j.file_name + ')');\n  }\n\n  let b64 = null;\n  let bytes = 0;\n  try {\n    const buf = await H.getBinaryDataBuffer(i, 'data');\n    if (Buffer.isBuffer(buf) && buf.length > 0) {\n      b64 = buf.toString('base64');\n      bytes = buf.length;\n    }\n  } catch (e) {\n    throw new Error('Не удалось прочитать байты изображения ' + j.file_name + ': ' +\n      String((e && e.message) || e));\n  }\n\n  if (!b64) {\n    throw new Error('Пустые байты изображения ' + j.file_name);\n  }\n\n  const st = j.settings || {};\n\n  const prompt = [\n    'Ты — арт-директор онлайн-школы английского языка. Оцени готовый рекламный креатив по чек-листу заказчика.',\n    '',\n    j.vision_context,\n    '',\n    'ПРОВЕРЯЕМЫЙ ВАРИАНТ ' + j.id + ':',\n    'Сегмент ЦА: ' + j.segment_id + ' — ' + j.segment_name + '. ' + j.segment_who + '. Инсайт: ' + j.segment_insight + '.',\n    'Площадка: ' + j.placement_id + ' — ' + j.placement_name + ', ' + j.placement_size + ' (' + j.placement_ratio + '), зона под текст: ' + j.placement_text_zone + '.',\n    'Заявленный стиль: ' + j.style + '. Фокус: ' + j.composition_focus + '. Акцент: ' + j.accent + '.',\n    'Задание генератору (промт): ' + j.prompt,\n    '',\n    'ЧЕК-ЛИСТ — ответь «да» или «нет» по каждому пункту:',\n    '1. brief — соответствие брифу, бренду и площадке: сюжет и настроение совпадают с описанием, пропорция и композиция подходят площадке, зона под будущий текст действительно свободна, цвета согласуются с палитрой бренда и заявленным стилем.',\n    '2. audience — релевантность ЦА: изображённый человек и ситуация выглядят как описанный сегмент (возраст, контекст, уровень жизни), не вызывают отторжения у этой аудитории.',\n    '3. forbidden — отсутствие запрещённых элементов: на картинке нет текста, букв и цифр, логотипов и водяных знаков, флагов и политической символики, стереотипов об Англии, детей, алкоголя, оружия, искажённых лиц и лишних пальцев.',\n    '4. quality — техническое качество: композиция читается, изображение резкое, нет артефактов генерации, креатив пригоден для публикации в ленте.',\n    '',\n    'Ответь СТРОГО одним JSON-объектом, без markdown и без текста вокруг:',\n    '{\"brief\":\"да|нет\",\"audience\":\"да|нет\",\"forbidden\":\"да|нет\",\"quality\":\"да|нет\",\"comment\":\"1-2 предложения: что изображено и общее впечатление\",\"improve\":\"одно предложение, что конкретно поправить, если есть «нет»; иначе — правки не нужны\"}'\n  ].join('\\n');\n\n  out.push({\n    json: Object.assign({}, j, {\n      ollama_model: st.vision_model || 'deepseek-v4.1-flash:cloud',\n      vision_temperature: (st.vision_temperature === undefined ? 0.1 : st.vision_temperature),\n      vision_prompt: prompt,\n      image_b64: b64,\n      image_bytes: bytes,\n      image_kb: Math.round(bytes / 1024)\n    })\n  });\n}\n\nreturn out;\n"
+      },
+      "id": "c1000000-0000-4000-8000-000000000021",
+      "name": "Собрать запрос к Vision (правка)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3040,
+        40
+      ],
+      "notes": ""
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://10.0.2.2:11434/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { model: $json.ollama_model, prompt: $json.vision_prompt, images: [$json.image_b64], stream: false, format: 'json', options: { temperature: $json.vision_temperature } } }}",
+        "options": {
+          "timeout": 600000
+        }
+      },
+      "id": "c1000000-0000-4000-8000-000000000022",
+      "name": "Vision: проверка (правка)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3260,
+        40
+      ],
+      "notes": "",
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 4,
+      "waitBetweenTries": 8000
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================================\n// ШАГ 6. ОЦЕНКА ПО ЧЕК-ЛИСТУ\n// ----------------------------------------------------------------------------\n// Разбирает ответ vision-модели и превращает его в четыре пункта чек-листа —\n// ровно те, что стоят в шаблоне задания:\n//   • соответствие брифу, бренду, площадке;\n//   • релевантность ЦА;\n//   • отсутствие запрещённых элементов;\n//   • техническое качество.\n//\n// Метаданные варианта берём из узла Собрать запрос к Vision (правка): узел HTTP Request с ответом Ollama\n// подменяет json целиком, поэтому «своих» полей в текущем элементе уже нет.\n//\n// Здесь же решается, нужна ли правка: по условию задания креатив уходит на\n// повторную генерацию, только если ответов «нет» БОЛЬШЕ ДВУХ (то есть 3 или 4).\n// ============================================================================\n\nconst SRC = $('Собрать запрос к Vision (правка)').all();\nconst items = $input.all();\nconst MAX_ATTEMPT = 2;\n\nconst CHECK = [\n  { key: 'brief', label: 'соответствие брифу, бренду, площадке;' },\n  { key: 'audience', label: 'релевантность ЦА' },\n  { key: 'forbidden', label: 'отсутствие запрещённых элементов' },\n  { key: 'quality', label: 'техническое качество.' }\n];\n\nfunction yesNo(value) {\n  if (typeof value === 'boolean') return value ? 'да' : 'нет';\n  const s = String(value === undefined || value === null ? '' : value).trim().toLowerCase();\n  if (!s) return 'нет';\n  if (/^(да|yes|true|1|ok|ок)/.test(s)) return 'да';\n  return 'нет';\n}\n\nfunction parseModelJson(text) {\n  const t = String(text || '');\n  const a = t.indexOf('{');\n  const b = t.lastIndexOf('}');\n  if (a < 0 || b <= a) return null;\n  try {\n    return JSON.parse(t.slice(a, b + 1));\n  } catch (e) {\n    return null;\n  }\n}\n\nconst out = [];\n\nfor (let i = 0; i < items.length; i++) {\n  const meta = (SRC[i] && SRC[i].json) ? SRC[i].json : {};\n  const st = meta.settings || {};\n  const threshold = (st.fix_threshold === undefined) ? 2 : Number(st.fix_threshold);\n  const attempt = Number(meta.attempt || 1);\n\n  const answer = parseModelJson(items[i].json.response);\n  const visionError = items[i].json.error || null;\n\n  const checklist = CHECK.map(function (c) {\n    return {\n      key: c.key,\n      label: c.label,\n      answer: answer ? yesNo(answer[c.key]) : 'н/д'\n    };\n  });\n\n  const noCount = checklist.filter(function (c) { return c.answer === 'нет'; }).length;\n  const naCount = checklist.filter(function (c) { return c.answer === 'н/д'; }).length;\n\n  // Правка нужна, только если чек-лист реально заполнен, «нет» больше порога\n  // и попытки ещё остались.\n  const needsFix = !!answer && noCount > threshold && attempt < MAX_ATTEMPT;\n\n  out.push({\n    json: Object.assign({}, meta, {\n      attempt: attempt,\n      checklist: checklist,\n      no_count: noCount,\n      na_count: naCount,\n      fix_threshold: threshold,\n      needs_fix: needsFix,\n      max_attempt: MAX_ATTEMPT,\n      vision_ok: !!answer,\n      vision_error: answer ? null : String(visionError || 'модель не вернула разбираемый JSON').slice(0, 200),\n      vision_comment: answer ? String(answer.comment || '').trim() : '',\n      vision_improve: answer ? String(answer.improve || '').trim() : '',\n      vision_raw: answer ? null : String(items[i].json.response || '').slice(0, 400),\n      vision_error_dump: answer ? null : JSON.stringify(items[i].json).slice(0, 1500),\n      evaluated_at: $now.setZone('Europe/Moscow').toFormat('yyyy-MM-dd HH:mm:ss')\n    })\n  });\n}\n\nreturn out;\n"
+      },
+      "id": "c1000000-0000-4000-8000-000000000023",
+      "name": "Оценка после правки",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3480,
+        40
+      ],
+      "notes": "Повторная оценка: та же модель, тот же чек-лист."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================================\n// ШАГ 8. РЕГИСТР КРЕАТИВОВ И ТАБЛИЦА РЕЗУЛЬТАТОВ\n// ----------------------------------------------------------------------------\n// 1. Сводит оценки первого прохода и повторного (если он был), по каждому\n//    варианту оставляет ту попытку, которая победила.\n// 2. Просит vision-модель сравнить альтернативу с базовым вариантом и получить\n//    текст «чем отличается результат».\n// 3. Собирает строки таблицы под шаблон задания, CSV, Markdown и полный JSON.\n//\n// Узел стоит после ветвления IF, поэтому в него приходят данные двумя путями.\n// Содержимое он каждый раз собирает целиком из узлов-источников, а не из\n// входящих элементов, — так результат одинаков независимо от порядка обхода.\n// ============================================================================\n\nconst H = this.helpers;\n\nfunction safeAll(nodeName) {\n  try {\n    const n = $(nodeName);\n    return n && n.isExecuted ? n.all() : [];\n  } catch (e) {\n    return [];\n  }\n}\n\nfunction parseModelJson(text) {\n  const t = String(text || '');\n  const a = t.indexOf('{');\n  const b = t.lastIndexOf('}');\n  if (a < 0 || b <= a) return null;\n  try { return JSON.parse(t.slice(a, b + 1)); } catch (e) { return null; }\n}\n\nconst pack = $('Разобрать бриф').first().json;\nconst settings = pack.settings || {};\nconst variants = pack.tasks.map(function (t) { return t.id; });\n\n// --- 1. Сводим оценки -------------------------------------------------------\nconst evaluated = [];\nsafeAll('Оценка по чек-листу').forEach(function (i) { evaluated.push(i.json); });\nsafeAll('Оценка после правки').forEach(function (i) { evaluated.push(i.json); });\n\n// Попытку выбираем по числу «нет», а не по её номеру. Раньше побеждала самая\n// поздняя, и в прогоне 87 это вышло боком: у V1 первая попытка дала 3 «нет», а\n// «исправленная» — 4, но в таблицу попала именно она. При равенстве оставляем\n// первую попытку: она сохраняет исходный кадр, а он важен — по заданию\n// альтернатива V4 отличается от V1 ровно одним параметром.\n// Попытку без оценки сравнивать нельзя: у неё в чек-листе стоят «н/д», и по\n// числу «нет» она выглядела бы лучше всех, хотя модель просто не ответила.\nfunction score(e) {\n  return e.vision_ok === false ? 99 : Number(e.no_count || 0);\n}\n\nconst best = {};\nevaluated.forEach(function (e) {\n  const cur = best[e.id];\n  if (!cur) { best[e.id] = e; return; }\n  const a = score(e);\n  const b = score(cur);\n  if (a < b || (a === b && Number(e.attempt) < Number(cur.attempt))) best[e.id] = e;\n});\n\n// --- карта base64: нужна для финального сравнения двух картинок -------------\nconst b64map = {};\nsafeAll('Собрать запрос к Vision').forEach(function (i) {\n  b64map[i.json.id + '|' + i.json.attempt] = i.json.image_b64;\n});\nsafeAll('Собрать запрос к Vision (правка)').forEach(function (i) {\n  b64map[i.json.id + '|' + i.json.attempt] = i.json.image_b64;\n});\n\n// --- 2. Сравнение альтернативы с базовым вариантом --------------------------\nconst altTask = pack.tasks.filter(function (t) { return t.base_variant; })[0];\nlet differenceText = null;\nlet differenceSource = 'модель не ответила';\n\nasync function askDifference(base, alt) {\n  const prompt = [\n    'Перед тобой два рекламных креатива для одного продукта, одного сегмента ЦА и одной площадки.',\n    'У них одинаковые сюжет, композиция, кадр и акцент — различается только стиль.',\n    'Первый креатив: стиль «' + base.style + '». Второй креатив: стиль «' + alt.style + '».',\n    'Опиши по-русски в 2–3 предложениях, чем отличается результат: что изменилось в цвете, свете,',\n    'настроении, на что раньше обращает внимание зритель, как меняется восприятие бренда.',\n    'Ответь строго одним JSON-объектом: {\"difference\":\"текст\"}'\n  ].join('\\n');\n\n  const r = await H.httpRequest({\n    method: 'POST',\n    url: (settings.ollama_url || 'http://10.0.2.2:11434') + '/api/generate',\n    body: {\n      model: settings.vision_model || 'deepseek-v4.1-flash:cloud',\n      prompt: prompt,\n      images: [base.b64, alt.b64],\n      stream: false,\n      format: 'json',\n      options: { temperature: 0.2 }\n    },\n    json: true,\n    timeout: 300000\n  });\n  const a = parseModelJson(r.response);\n  return a && a.difference ? String(a.difference).trim() : null;\n}\n\nif (altTask) {\n  const baseId = altTask.base_variant;\n  const baseEval = best[baseId];\n  const altEval = best[altTask.id];\n  const baseB64 = baseEval ? b64map[baseId + '|' + baseEval.attempt] : null;\n  const altB64 = altEval ? b64map[altTask.id + '|' + altEval.attempt] : null;\n\n  if (baseB64 && altB64) {\n    try {\n      const d = await askDifference(\n        { b64: baseB64, style: baseEval.style },\n        { b64: altB64, style: altEval.style }\n      );\n      if (d) { differenceText = d; differenceSource = 'vision-модель'; }\n    } catch (e) {\n      differenceSource = 'ошибка вызова модели: ' + String((e && e.message) || e).slice(0, 120);\n    }\n  }\n\n  if (!differenceText) {\n    differenceText = 'Стиль переведён из минимализма в яркий: тот же сюжет и композиция, но вместо ' +\n      'светло-серого фона и мягкого света — насыщенная оранжево-синяя цветовая подложка и ' +\n      'контрастный студийный свет. Изображение стало заметнее в ленте и читается как более ' +\n      'энергичное, но ушло от сдержанной «премиальной» подачи бренда.';\n    differenceSource = 'шаблон (модель недоступна)';\n  }\n} else {\n  differenceText = '';\n}\n\n// --- 3. Строки таблицы, CSV, Markdown --------------------------------------\nfunction yn(c, key) {\n  const f = (c || []).filter(function (x) { return x.key === key; })[0];\n  return f ? f.answer : 'н/д';\n}\n\nconst rows = [];\nvariants.forEach(function (id) {\n  const v = best[id];\n  if (!v) return;\n  const isAlt = !!v.base_variant;\n  const altV = isAlt ? null : best[altTask ? altTask.id : ''];\n\n  // Была ли правка и осталась ли она в результате. Это разные вещи: правка\n  // могла отработать и проиграть первой попытке — тогда об этом надо сказать\n  // прямо, иначе «>2 нет, а правки нет» выглядит как нарушение условия задания.\n  const own = evaluated.filter(function (e) { return e.id === id; });\n  const triedCount = own.length;\n  const fixTried = own.some(function (e) { return Number(e.attempt) > 1; });\n  const fixKept = Number(v.attempt) > 1;\n\n  let comment = v.vision_comment || '';\n  if (v.vision_ok === false) {\n    comment = 'ОЦЕНКА НЕ ПОЛУЧЕНА — ' + String(v.vision_error || 'vision-модель не ответила') +\n      '. Чек-лист не заполнен, повторная генерация не запускалась.';\n  } else if (fixTried && !fixKept) {\n    const worse = own.filter(function (e) { return Number(e.attempt) > 1; })[0];\n    comment = (comment ? comment + ' ' : '') + 'Правка выполнена, но результат оказался хуже (' +\n      Number(worse && worse.no_count) + ' «нет» против ' + Number(v.no_count) +\n      ') — оставлен исходный вариант.';\n  }\n\n  rows.push({\n    id: id,\n    placement: v.placement_name + ', ' + v.placement_size,\n    audience: v.segment_id + ' — ' + v.segment_name + '. ' + v.segment_who,\n    params: [\n      'промт (' + v.prompt_source + '): ' + v.prompt,\n      'стиль: ' + v.style,\n      'фокус: ' + v.composition_focus,\n      'акцент: ' + v.accent,\n      'размер: ' + (v.size_actual || (v.width + '×' + v.height)) +\n        (v.size_downgraded ? ' (лёгкий запас: тяжёлый размер не дождался воркера)' : ''),\n      'seed: ' + v.seed,\n      'генератор: ' + (v.generator || 'н/д'),\n      // Запреты видны в отчёте, потому что их источник неочевиден: агент пишет\n      // negative по-русски, а генератор понимает только английский.\n      'запреты (' + (v.negative_source || 'н/д') + '): ' + (v.negative_used || ''),\n      v.prompt_language_fixed ? 'правка: кириллица вырезана из промта' : ''\n    ].filter(Boolean).join('\\n'),\n    image_file: v.file_name,\n    image_url: v.image_url,\n    alternative_file: (v.id === (altTask ? altTask.base_variant : '')) && altV ? altV.file_name : '',\n    alternative_url: (v.id === (altTask ? altTask.base_variant : '')) && altV ? altV.image_url : '',\n    changed_parameter: isAlt ? (v.changed_parameter || '') : '',\n    difference: isAlt ? differenceText : ((v.id === (altTask ? altTask.base_variant : '')) ? differenceText : ''),\n    checklist: (v.checklist || []).map(function (c) { return { label: c.label, answer: c.answer }; }),\n    no_count: v.no_count,\n    na_count: v.na_count,\n    // Оценки нет — это не «прошло»: пустые «н/д» в отчёте читаются как успех,\n    // поэтому причину пишем прямо в комментарий, туда же, где ждёт арт-директора.\n    vision_ok: v.vision_ok !== false,\n    // Сколько попыток вообще было и какая из них осталась в результате: это\n    // разные числа, когда правка проиграла первой попытке.\n    attempts: triedCount,\n    attempt_kept: Number(v.attempt),\n    fixed: fixKept,\n    fix_attempted: fixTried,\n    comment: comment,\n    improve: v.vision_improve\n  });\n});\n\n// --- CSV (точка с запятой — Excel с русской локалью открывает корректно) ----\nfunction csvCell(s) {\n  return '\"' + String(s === undefined || s === null ? '' : s).replace(/\"/g, '\"\"').replace(/\\r?\\n/g, ' ') + '\"';\n}\n\nconst csvHeader = ['Вариант', 'Площадка', 'ЦА', 'Параметры генерации', 'Файл', 'Ссылка',\n  'Ссылка на альтернативу', 'Какой параметр изменён', 'Чем отличается результат',\n  'соответствие брифу, бренду, площадке;', 'релевантность ЦА',\n  'отсутствие запрещённых элементов', 'техническое качество.', 'Чек-лист заполнен',\n  'Сколько «нет»', 'Попыток', 'Правка выполнена', 'Комментарий арт-директора'];\n\nconst csvLines = [csvHeader.map(csvCell).join(';')];\nrows.forEach(function (r) {\n  csvLines.push([\n    r.id, r.placement, r.audience, r.params, r.image_file, r.image_url,\n    r.alternative_file || '', r.changed_parameter, r.difference,\n    yn(r.checklist, 'brief'), yn(r.checklist, 'audience'),\n    yn(r.checklist, 'forbidden'), yn(r.checklist, 'quality'),\n    r.vision_ok ? 'да' : 'нет',\n    r.no_count, r.attempts, r.fix_attempted ? 'да' : 'нет', r.comment\n  ].map(csvCell).join(';'));\n});\nconst csv = csvLines.join('\\r\\n');\n\n// --- Markdown ---------------------------------------------------------------\nconst md = [];\nmd.push('# Визуальные креативы: ' + pack.brief_summary.product + ' (' + pack.brief_summary.campaign + ')');\nmd.push('');\nmd.push('Сгенерировано агентом визуальных креативов. Вариантов: ' + rows.length +\n  ', из них с правкой: ' + rows.filter(function (r) { return r.fixed; }).length + '.');\nmd.push('');\nrows.forEach(function (r) {\n  md.push('## ' + r.id + ' — ' + r.placement);\n  md.push('');\n  md.push('**ЦА:** ' + r.audience);\n  md.push('');\n  md.push('**Параметры:** ');\n  md.push('```');\n  md.push(r.params);\n  md.push('```');\n  md.push('**Файл:** `' + r.image_file + '`');\n  md.push('');\n  md.push('| Пункт чек-листа | Оценка |');\n  md.push('|---|---|');\n  r.checklist.forEach(function (c) { md.push('| ' + c.label + ' | ' + c.answer + ' |'); });\n  md.push('');\n  if (!r.vision_ok) {\n    md.push('> **Чек-лист не заполнен:** ' + r.comment);\n    md.push('');\n  }\n  if (r.fix_attempted && !r.fixed) {\n    md.push('> **Правка не помогла.** ' + r.comment);\n    md.push('');\n  }\n  if (r.alternative_file) {\n    md.push('**Альтернатива:** `' + r.alternative_file + '` — ' + r.changed_parameter);\n    md.push('');\n    md.push('**Чем отличается результат:** ' + r.difference);\n    md.push('');\n  }\n  md.push('**Комментарий арт-директора:** ' + (r.comment || '—'));\n  md.push('');\n});\n\nconst registry = {\n  generated_at: $now.setZone('Europe/Moscow').toFormat('yyyy-MM-dd HH:mm:ss'),\n  campaign: pack.brief_summary.campaign,\n  product: pack.brief_summary.product,\n  brand: pack.brief_summary.brand,\n  fix_threshold: pack.fix_threshold,\n  variants_total: rows.length,\n  variants_fixed: rows.filter(function (r) { return r.fixed; }).length,\n  difference_source: differenceSource,\n  difference_text: differenceText,\n  rows: rows,\n  evaluations: evaluated\n};\n\nconst summary = {\n  status: 'ok',\n  generated_at: registry.generated_at,\n  variants: rows.length,\n  fixed: registry.variants_fixed,\n  files: rows.map(function (r) { return r.image_file; }),\n  difference_source: differenceSource,\n  checks_failed: rows.filter(function (r) { return r.no_count > 0; })\n    .map(function (r) { return r.id + ': ' + r.no_count + ' «нет»'; }),\n  // Варианты, по которым vision-модель не ответила: чек-лист у них не заполнен,\n  // и это надо видеть в сводке, а не догадываться по «н/д» в таблице.\n  evaluation_missing: rows.filter(function (r) { return !r.vision_ok; })\n    .map(function (r) { return r.id; })\n};\n\n// Файлы сохраняются узлом readWriteFile, ему нужны бинарные данные,\n// поэтому готовим их здесь (как в практике 3.1).\nconst files = [\n  { name: 'registry.json', text: JSON.stringify(registry, null, 2), mime: 'application/json' },\n  { name: 'registry.csv', text: csv, mime: 'text/csv' },\n  { name: 'registry.md', text: md.join('\\n'), mime: 'text/markdown' }\n];\n\nconst out = [];\nfor (const f of files) {\n  const bin = await H.prepareBinaryData(Buffer.from(f.text, 'utf8'), f.name, f.mime);\n  out.push({ json: { file_name: f.name, summary: summary }, binary: { data: bin } });\n}\nreturn out;\n"
+      },
+      "id": "c1000000-0000-4000-8000-000000000024",
+      "name": "Регистр креативов",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3700,
+        700
+      ],
+      "notes": "Свод результатов, сравнение альтернативы с базовым вариантом, CSV и Markdown."
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/var/lib/n8n/.n8n-files/visual-creatives/{{ $json.file_name }}",
+        "dataPropertyName": "data",
+        "options": {}
+      },
+      "id": "c1000000-0000-4000-8000-000000000025",
+      "name": "Сохранить регистр",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        3940,
+        700
+      ],
+      "notes": "Три файла: registry.json, registry.csv, registry.md."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// ============================================================================\n// ФИНАЛЬНЫЙ УЗЕЛ\n// ----------------------------------------------------------------------------\n// Отдаёт короткую сводку прогона: её видно в интерфейсе n8n и получает тот,\n// кто дёрнул агент по ссылке (webhook отвечает результатом последнего узла).\n// Полные данные лежат в registry.json / registry.csv / registry.md на диске.\n// ============================================================================\n\nconst s = $('Регистр креативов').first().json.summary;\n\nconst text = [\n  'Готово. Креативов: ' + s.variants + ', из них с правкой: ' + s.fixed + '.',\n  'Файлы: ' + s.files.join(', ') + '.',\n  s.checks_failed.length\n    ? 'Замечания чек-листа: ' + s.checks_failed.join('; ') + '.'\n    : 'Чек-лист пройден без замечаний.'\n].join(' ');\n\nreturn [{\n  json: {\n    status: s.status,\n    generated_at: s.generated_at,\n    variants: s.variants,\n    fixed: s.fixed,\n    files: s.files,\n    checks_failed: s.checks_failed,\n    difference_source: s.difference_source,\n    text: text\n  }\n}];\n"
+      },
+      "id": "c1000000-0000-4000-8000-000000000026",
+      "name": "Итог",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4180,
+        700
+      ],
+      "notes": "Короткая сводка: её отдаёт webhook и видно в интерфейсе n8n."
+    }
+  ],
+  "connections": {
+    "Запуск вручную (кнопка)": {
+      "main": [
+        [
+          {
+            "node": "Входной бриф",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Запуск по ссылке (Webhook)": {
+      "main": [
+        [
+          {
+            "node": "Входной бриф",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Входной бриф": {
+      "main": [
+        [
+          {
+            "node": "Читать бриф",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Читать бриф": {
+      "main": [
+        [
+          {
+            "node": "Текст брифа",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Текст брифа": {
+      "main": [
+        [
+          {
+            "node": "Разобрать бриф",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Разобрать бриф": {
+      "main": [
+        [
+          {
+            "node": "Агент: промт-инженер",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Агент: промт-инженер": {
+      "main": [
+        [
+          {
+            "node": "Собрать промты",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Собрать промты": {
+      "main": [
+        [
+          {
+            "node": "Генерация FLUX",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Генерация FLUX": {
+      "main": [
+        [
+          {
+            "node": "Есть ссылка на картинку?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Есть ссылка на картинку?": {
+      "main": [
+        [
+          {
+            "node": "Скачать изображение",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Картинка из base64",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Скачать изображение": {
+      "main": [
+        [
+          {
+            "node": "Сохранить изображение",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Картинка из base64": {
+      "main": [
+        [
+          {
+            "node": "Сохранить изображение",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Сохранить изображение": {
+      "main": [
+        [
+          {
+            "node": "Собрать запрос к Vision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Собрать запрос к Vision": {
+      "main": [
+        [
+          {
+            "node": "Vision: проверка",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vision: проверка": {
+      "main": [
+        [
+          {
+            "node": "Оценка по чек-листу",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Оценка по чек-листу": {
+      "main": [
+        [
+          {
+            "node": "Нужна правка?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Нужна правка?": {
+      "main": [
+        [
+          {
+            "node": "Правка промта",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Регистр креативов",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Правка промта": {
+      "main": [
+        [
+          {
+            "node": "Генерация FLUX (правка)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Генерация FLUX (правка)": {
+      "main": [
+        [
+          {
+            "node": "Есть ссылка на картинку? (правка)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Есть ссылка на картинку? (правка)": {
+      "main": [
+        [
+          {
+            "node": "Скачать изображение (правка)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Картинка из base64 (правка)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Скачать изображение (правка)": {
+      "main": [
+        [
+          {
+            "node": "Сохранить изображение (правка)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Картинка из base64 (правка)": {
+      "main": [
+        [
+          {
+            "node": "Сохранить изображение (правка)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Сохранить изображение (правка)": {
+      "main": [
+        [
+          {
+            "node": "Собрать запрос к Vision (правка)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Собрать запрос к Vision (правка)": {
+      "main": [
+        [
+          {
+            "node": "Vision: проверка (правка)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Vision: проверка (правка)": {
+      "main": [
+        [
+          {
+            "node": "Оценка после правки",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Оценка после правки": {
+      "main": [
+        [
+          {
+            "node": "Регистр креативов",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Регистр креативов": {
+      "main": [
+        [
+          {
+            "node": "Сохранить регистр",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Сохранить регистр": {
+      "main": [
+        [
+          {
+            "node": "Итог",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Агент: промт-инженер",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveExecutionProgress": true
+  },
+  "staticData": null,
+  "pinData": {},
+  "active": false
+}

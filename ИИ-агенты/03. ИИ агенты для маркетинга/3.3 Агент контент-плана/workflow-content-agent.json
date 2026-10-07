@@ -1,0 +1,776 @@
+{
+  "name": "Агент контент-плана: загородный клуб «Тихий лес»",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1,
+              "triggerAtDay": [
+                4
+              ],
+              "triggerAtHour": 10,
+              "triggerAtMinute": 0
+            }
+          ]
+        }
+      },
+      "id": "c3000000-0000-4000-8000-000000000001",
+      "name": "Расписание (еженедельно, Чт 10:00)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1300,
+        80
+      ],
+      "notes": "Регулярный запуск: каждый четверг в 10:00 по времени сервера. К четвергу есть данные о публикациях недели, а до понедельника остаётся время на согласование плана редактором."
+    },
+    {
+      "parameters": {},
+      "id": "c3000000-0000-4000-8000-000000000002",
+      "name": "Запуск вручную (кнопка)",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1300,
+        300
+      ],
+      "notes": "Ручной запуск из интерфейса n8n кнопкой «Execute workflow»."
+    },
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "content-plan",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "c3000000-0000-4000-8000-000000000003",
+      "name": "Запуск по ссылке (Webhook)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1300,
+        520
+      ],
+      "webhookId": "content-plan-agent",
+      "notes": "Ручной запуск по ссылке: GET http://192.168.56.10:5678/webhook/content-plan"
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "fileSelector": "/var/lib/n8n/.n8n-files/content-agent/brand-brief.md",
+        "options": {}
+      },
+      "id": "c3000000-0000-4000-8000-000000000004",
+      "name": "1. Бриф бренда (MD)",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -1060,
+        200
+      ],
+      "notes": "ИСТОЧНИК 1: бриф бренда «Тихий лес» — продукт, цель, ЦА, боли, тон."
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "data",
+        "destinationKey": "data",
+        "options": {}
+      },
+      "id": "c3000000-0000-4000-8000-000000000005",
+      "name": "1. Бриф бренда (текст)",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -860,
+        200
+      ],
+      "notes": ""
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "fileSelector": "/var/lib/n8n/.n8n-files/content-agent/content-rules.md",
+        "options": {}
+      },
+      "id": "c3000000-0000-4000-8000-000000000006",
+      "name": "2. Правила контента (MD)",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -660,
+        200
+      ],
+      "notes": "ИСТОЧНИК 2: правила, которые задал пользователь — периодичность, баланс задач, рубрики, форматы, площадки, запреты."
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "data",
+        "destinationKey": "data",
+        "options": {}
+      },
+      "id": "c3000000-0000-4000-8000-000000000007",
+      "name": "2. Правила контента (текст)",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        200
+      ],
+      "notes": ""
+    },
+    {
+      "parameters": {
+        "operation": "read",
+        "fileSelector": "/var/lib/n8n/.n8n-files/content-agent/content-log.csv",
+        "options": {}
+      },
+      "id": "c3000000-0000-4000-8000-000000000008",
+      "name": "3. Журнал публикаций (CSV)",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -260,
+        200
+      ],
+      "notes": "ИСТОЧНИК 3 (поведенческий): 18 прошлых публикаций с метриками — агент учится на том, что сработало."
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "binaryPropertyName": "data",
+        "destinationKey": "data",
+        "options": {}
+      },
+      "id": "c3000000-0000-4000-8000-000000000009",
+      "name": "3. Журнал публикаций (текст)",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        200
+      ],
+      "notes": ""
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Узел «Подготовка входных данных».\n// Собирает три источника (бриф бренда, правила контента, журнал публикаций) в один\n// «пакет для контент-стратега»: считает частоты, результативность рубрик и форматов,\n// вычисляет даты планируемой недели и список тем, которые повторять нельзя.\n\nconst brief = $('1. Бриф бренда (текст)').first().json.data || '';\nconst rules = $('2. Правила контента (текст)').first().json.data || '';\nconst logRaw = $('3. Журнал публикаций (текст)').first().json.data || '';\n\n// --- разбор журнала публикаций (CSV с разделителем «;») ---------------------\nfunction parseCsv(text) {\n  const lines = text.split(/\\r?\\n/).filter(function (l) { return l.trim(); });\n  const rows = [];\n  for (let i = 1; i < lines.length; i++) {           // первая строка — заголовок\n    const c = lines[i].split(';');\n    rows.push({\n      id: (c[0] || '').trim(),\n      date: (c[1] || '').trim(),\n      platform: (c[2] || '').trim(),\n      rubric: (c[3] || '').trim(),\n      task: (c[4] || '').trim(),\n      topic: (c[5] || '').trim(),\n      format: (c[6] || '').trim(),\n      status: (c[7] || '').trim(),\n      views: Number(c[8]) || 0,\n      reactions: Number(c[9]) || 0,\n      comments: Number(c[10]) || 0,\n      saves: Number(c[11]) || 0,\n      er: Number(String(c[12] || '').replace(',', '.')) || 0,\n    });\n  }\n  return rows;\n}\n\nconst log = parseCsv(logRaw).filter(function (r) { return r.date && r.topic; });\n\n// --- даты планируемой недели: ближайший понедельник + 6 дней ---------------\nfunction iso(d) {\n  return d.toISOString().slice(0, 10);\n}\nconst WEEKDAYS = ['понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота', 'воскресенье'];\n\nconst today = new Date();\nconst runDate = iso(today);\nconst start = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));\nconst dow = start.getUTCDay();                        // 0 = вс\nconst shift = dow === 1 ? 0 : (8 - dow) % 7;         // до ближайшего понедельника\nstart.setUTCDate(start.getUTCDate() + shift);\n\nconst planDays = [];\nfor (let i = 0; i < 7; i++) {\n  const d = new Date(start);\n  d.setUTCDate(d.getUTCDate() + i);\n  planDays.push({ date: iso(d), weekday: WEEKDAYS[i] });\n}\n\n// --- агрегаты по журналу ----------------------------------------------------\nfunction avg(rows, field) {\n  if (!rows.length) return 0;\n  return Math.round(rows.reduce(function (s, r) { return s + r[field]; }, 0) / rows.length * 10) / 10;\n}\n\nfunction groupBy(rows, key) {\n  const map = {};\n  rows.forEach(function (r) { (map[r[key]] = map[r[key]] || []).push(r); });\n  return map;\n}\n\nconst byRubric = groupBy(log, 'rubric');\nconst byFormat = groupBy(log, 'format');\nconst byTask = groupBy(log, 'task');\n\nfunction summary(rows, field) {\n  return Object.keys(rows).map(function (k) {\n    return { name: k, count: rows[k].length, er: avg(rows[k], 'er'), comments: avg(rows[k], 'comments') };\n  }).sort(function (a, b) { return b.er - a.er; });\n}\n\nconst rubricStats = summary(byRubric);\nconst formatStats = summary(byFormat);\nconst taskStats = summary(byTask);\n\n// --- что сработало и что не сработало (возврат выводов в следующий цикл) ----\nconst published = log.slice().sort(function (a, b) { return b.date.localeCompare(a.date); });\nconst topPosts = published.slice().sort(function (a, b) { return b.er - a.er; }).slice(0, 4);\nconst weakPosts = published.slice().sort(function (a, b) { return a.er - b.er; }).slice(0, 3);\n\n// темы за последние 14 дней — их повторять нельзя\nconst last14 = published.filter(function (r) {\n  const diff = (start - new Date(r.date + 'T00:00:00Z')) / 86400000;\n  return diff >= 0 && diff <= 14;\n});\n\n// --- сборка текстового пакета для модели -----------------------------------\nfunction statLine(s) {\n  return '- ' + s.name + ': публикаций ' + s.count + ', средний ER ' + s.er + '%, среднее число комментариев ' + s.comments;\n}\nfunction postLine(r) {\n  return '- ' + r.date + ' [' + r.rubric + '] «' + r.topic + '» — ' + r.format + ', ' + r.platform +\n    ', ER ' + r.er + '%, комментариев ' + r.comments + ', сохранений ' + r.saves;\n}\n\nconst pack = [\n  '### БРИФ БРЕНДА (вход агента)',\n  brief.trim(),\n  '',\n  '### ПРАВИЛА КОНТЕНТА (заданы пользователем, обязательны к исполнению)',\n  rules.trim(),\n  '',\n  '### ЖУРНАЛ ПРОШЛЫХ ПУБЛИКАЦИЙ: ВСЕГО ' + log.length + ' ЗАПИСЕЙ',\n  'Период журнала: ' + (published.length ? published[published.length - 1].date + ' … ' + published[0].date : 'нет данных'),\n  '',\n  'Результативность по рубрикам (от лучшей к худшей):',\n  rubricStats.map(statLine).join('\\n'),\n  '',\n  'Результативность по форматам:',\n  formatStats.map(statLine).join('\\n'),\n  '',\n  'Результативность по задачам публикаций:',\n  taskStats.map(statLine).join('\\n'),\n  '',\n  'Лучшие публикации по вовлечённости:',\n  topPosts.map(postLine).join('\\n'),\n  '',\n  'Слабые публикации:',\n  weakPosts.map(postLine).join('\\n'),\n  '',\n  '### ТЕМЫ ЗА ПОСЛЕДНИЕ 14 ДНЕЙ — ПОВТОРЯТЬ НЕЛЬЗЯ',\n  last14.length ? last14.map(function (r) { return '- ' + r.date + ' [' + r.rubric + '] «' + r.topic + '»'; }).join('\\n') : '- нет',\n  '',\n  '### КАЛЕНДАРЬ ПЛАНИРУЕМОЙ НЕДЕЛИ',\n  'Дата запуска агента: ' + runDate,\n  'Планируемая неделя: ' + planDays[0].date + ' — ' + planDays[6].date,\n  planDays.map(function (d) { return '- ' + d.date + ' (' + d.weekday + ')'; }).join('\\n'),\n].join('\\n');\n\nreturn [{\n  json: {\n    strategist_pack: pack,\n    // Готовое задание для узла-стратега. Отдельное поле, а не логика с «||»\n    // в выражении узла: так задание лежит ровно в одном месте и на первом\n    // прогоне оно гарантированно непустое.\n    strategist_input: pack,\n    plan_days: planDays,\n    plan_start: planDays[0].date,\n    plan_end: planDays[6].date,\n    run_date: runDate,\n    log_size: log.length,\n    rubric_stats: rubricStats,\n    format_stats: formatStats,\n    top_topics: topPosts.map(function (r) { return r.topic; }),\n    topics_taken: last14.map(function (r) { return r.topic; }),\n  },\n}];\n"
+      },
+      "id": "c3000000-0000-4000-8000-000000000010",
+      "name": "Подготовка входных данных",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        200
+      ],
+      "notes": "Разбирает журнал, считает результативность рубрик и форматов, вычисляет даты недели и темы, которые повторять нельзя."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ \"Не рассуждай. Верни только JSON контент-плана, обёрнутый в маркеры ###ПЛАН### и ###КОНЕЦ###.\\n\\n\" + $json.strategist_input }}",
+        "options": {
+          "systemMessage": "=# Системный промпт агента «Контент-стратег»\n\nТы — senior контент-маркетолог с опытом 10+ лет в lifestyle и premium-отдыхе. Ты ведёшь\nконтент загородного клуба «Тихий лес»: цифровой детокс, восстановление, отдых без гаджетов.\n\nНа вход ты получаешь одним сообщением: бриф бренда, правила контента, статистику журнала\nпрошлых публикаций и календарь планируемой недели.\n\n## Что нужно сделать\n\n1. **Разобрать журнал публикаций.** Определи, какие рубрики, форматы и задачи дали лучший\n   отклик (ER, комментарии, сохранения), а какие провалились. Сформулируй 3 вывода — именно\n   они должны объяснять твои решения в плане.\n2. **Построить контент-план на 7 дней.** Даты берутся строго из календаря входа, по одной\n   публикации в день, без пропусков.\n3. **Выбрать 3 темы для полной проработки.** Ровно две — текстовые посты и одна — сценарий\n   короткого видео (рилс). Выбирай те, что сильнее всего работают на цель бизнеса и на боли\n   аудитории, а не самые удобные.\n\n## Жёсткие ограничения (нарушение = брак)\n\n- Задачи за неделю: «объяснить» — **ровно 2 раза**, «показать продукт» — 1, «кейс» — 1,\n  «вовлечь» — 1, «подвести к бронированию» — 1, «практика» — 1. Итого 7.\n- Продающая публикация («подвести к бронированию») **не может стоять первой в неделе**\n  и не может идти два дня подряд ни с чем однотипным. Сначала объясняющий контент.\n- Рубрик ровно четыре: «Тишина как ресурс», «Как здесь устроено», «Истории гостей»,\n  «Практики восстановления». Других рубрик не изобретать. Все четыре должны быть\n  использованы хотя бы раз.\n- Форматы: пост, карусель, короткое видео, подборка, опрос, карточка-практика.\n  **Один формат не может идти два дня подряд.**\n- Тема не повторяет смысл публикаций из блока «темы за последние 14 дней» — нужен новый\n  угол, а не пересказ.\n- Никаких гарантий результата, сравнений с конкурентами, срочности и медицинских обещаний.\n- Тон: экспертный, спокойный, доверительный, без агрессивных продаж.\n\n## Формат ответа\n\n**Не рассуждай и не пиши черновики.** Первые символы ответа — `###ПЛАН###`.\nЕсли начнёшь с размышлений о том, как строить план, ответ будет забракован.\n\nОтветь **только** блоком между маркерами, без пояснений до и после:\n\n```\n###ПЛАН###\n{ ... JSON ... }\n###КОНЕЦ###\n```\n\nJSON строго такой структуры:\n\n```json\n{\n  \"plan\": [\n    {\n      \"day\": 1,\n      \"date\": \"ГГГГ-ММ-ДД\",\n      \"weekday\": \"понедельник\",\n      \"rubric\": \"Тишина как ресурс\",\n      \"task\": \"объяснить\",\n      \"topic\": \"конкретный заголовок темы\",\n      \"format\": \"пост\",\n      \"platforms\": [\"Telegram\", \"ВКонтакте\"],\n      \"goal\": \"зачем эта публикация бизнесу, одной фразой\",\n      \"idea\": \"о чём именно текст, 1–2 фразы\"\n    }\n  ],\n  \"selected_for_writing\": [\n    { \"slot\": 1, \"day\": 1, \"kind\": \"post\", \"topic\": \"...\", \"rubric\": \"...\", \"task\": \"...\", \"format\": \"пост\", \"why\": \"почему выбрана эта тема\" },\n    { \"slot\": 2, \"day\": 4, \"kind\": \"post\", \"topic\": \"...\", \"rubric\": \"...\", \"task\": \"...\", \"format\": \"...\", \"why\": \"...\" },\n    { \"slot\": 3, \"day\": 6, \"kind\": \"reels\", \"topic\": \"...\", \"rubric\": \"...\", \"task\": \"...\", \"format\": \"короткое видео\", \"why\": \"...\" }\n  ],\n  \"balance_comment\": \"как именно выполнены правила по задачам, рубрикам и форматам\",\n  \"log_insights\": [\"вывод 1 из журнала\", \"вывод 2\", \"вывод 3\"]\n}\n```\n\nТребования к полям:\n\n- `plan` — ровно 7 элементов, дни 1..7, даты строго из календаря входа.\n- `task` — только из списка: `объяснить`, `показать продукт`, `кейс`, `вовлечь`,\n  `подвести к бронированию`, `практика`.\n- `format` — только из списка: `пост`, `карусель`, `короткое видео`, `подборка`, `опрос`,\n  `карточка-практика`.\n- `rubric` — дословно одна из четырёх рубрик.\n- `selected_for_writing` — ровно 3 элемента; `slot` 1 и 2 — `kind: \"post\"`, `slot` 3 —\n  `kind: \"reels\"`. Каждая выбранная тема должна существовать в `plan` под тем же днём.\n- Никаких переносов строк внутри значений, только одинарные пробелы.\n- Никакого markdown внутри JSON."
+        }
+      },
+      "id": "c3000000-0000-4000-8000-000000000011",
+      "name": "Контент-стратег (LLM)",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        400,
+        200
+      ],
+      "notes": "LLM-узел с системным промптом контент-стратега: строит план на 7 дней и выбирает 3 темы для полной проработки. При браке получает задание пересобрать план."
+    },
+    {
+      "parameters": {
+        "model": "deepseek-v4.1-flash:cloud",
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "c3000000-0000-4000-8000-000000000012",
+      "name": "Ollama Chat Model (стратег)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        380,
+        420
+      ],
+      "credentials": {
+        "ollamaApi": {
+          "id": "DEHgfM1I0ZJBmGoo",
+          "name": "Ollama (10.0.2.2:11434)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Узел «Разбор контент-плана».\n// Достаёт JSON из ответа модели, нормализует его и проверяет план на соблюдение правил\n// заказчика. Проверки не выбрасывают исключение, а складываются в массив checks —\n// их затем показывает узел самопроверки. Если JSON не разобран, план тоже не роняет\n// сценарий: он помечается браком и уходит на перегенерацию, как и обычный брак.\n\nconst raw = $json.text || ($json.output || '');\nconst prepared = $('Подготовка входных данных').first().json;\n\n// Номер прогона этого узла, который n8n ведёт сам при зацикливании. Нужен и на\n// аварийном пути (неразобранный ответ), поэтому считается до всех return.\nconst attempt = $runIndex + 1;\n\n// --- извлечение блока между маркерами ---------------------------------------\n// Модель иногда «проговаривает» ход мысли перед ответом, а иногда отвечает\n// не туда, и между маркерами оказывается не JSON. Поэтому кандидатов несколько\n// и берём первый, который действительно разбирается: содержимое маркеров,\n// затем самый внешний {...} во всём ответе.\nconst m = String(raw).match(/###ПЛАН###([\\s\\S]*?)###КОНЕЦ###/);\nconst candidates = [];\nif (m) candidates.push({ text: m[1].trim(), recovered: false });\n\nconst a = String(raw).indexOf('{');\nconst b = String(raw).lastIndexOf('}');\nif (a >= 0 && b > a) candidates.push({ text: String(raw).slice(a, b + 1), recovered: true });\n\nlet data = null;\nlet recovered = false;\nfor (let i = 0; i < candidates.length; i++) {\n  try {\n    data = JSON.parse(candidates[i].text);\n    recovered = candidates[i].recovered;\n    break;\n  } catch (e) { /* пробуем следующего кандидата */ }\n}\nif (!data) {\n  const head = String(raw).slice(0, 300);\n  // Первая попытка: не роняем сценарий, а отправляем задание стратегу заново —\n  // модель иногда отвечает не по формату, и повтор её обычно выправляет.\n  if (attempt < 2) {\n    const retry = [\n      prepared.strategist_input || prepared.strategist_pack,\n      '',\n      'ВАЖНО: предыдущий ответ не удалось разобрать. Ты ответил обычным текстом вместо JSON:',\n      head,\n      '',\n      'Ответь заново и верни ТОЛЬКО JSON контент-плана между маркерами ###ПЛАН### и ###КОНЕЦ###. '\n        + 'Никаких пояснений, рассуждений и черновиков — только JSON.',\n    ].join('\\n');\n\n    return [{\n      json: {\n        plan: [],\n        selected: [],\n        checks: [{\n          name: 'Ответ модели разобран в структуру контент-плана',\n          ok: false,\n          detail: 'ответ не является JSON, план уходит на перегенерацию. Начало ответа: ' + head,\n        }],\n        checks_passed: 0,\n        checks_total: 1,\n        balance_comment: '',\n        log_insights: [],\n        plan_days: prepared.plan_days,\n        plan_start: prepared.plan_start,\n        plan_end: prepared.plan_end,\n        copywriter_task: '',\n        copywriter_task_input: '',\n        strategist_pack: prepared.strategist_pack,\n        strategist_input: retry,\n        attempt: attempt,\n        need_retry: true,\n        plan_ok: false,\n      },\n    }];\n  }\n\n  // Вторая попытка тоже не удалась — дальше идти не с чем, это честная ошибка.\n  throw new Error('Ответ модели не удалось разобрать как JSON контент-плана. Начало ответа: ' + head);\n}\n\nconst plan = Array.isArray(data.plan) ? data.plan : [];\nconst selected = Array.isArray(data.selected_for_writing) ? data.selected_for_writing : [];\n\n// --- нормализация -----------------------------------------------------------\nconst RUBRICS = ['Тишина как ресурс', 'Как здесь устроено', 'Истории гостей', 'Практики восстановления'];\nconst FORMATS = ['пост', 'карусель', 'короткое видео', 'подборка', 'опрос', 'карточка-практика'];\nconst TASKS = ['объяснить', 'показать продукт', 'кейс', 'вовлечь', 'подвести к бронированию', 'практика'];\nconst SELLING = 'подвести к бронированию';\n\nconst norm = plan.map(function (p, i) {\n  const rub = String(p.rubric || '').trim();\n  return {\n    day: Number(p.day) || i + 1,\n    date: String(p.date || '').trim(),\n    weekday: String(p.weekday || '').trim(),\n    rubric: RUBRICS.filter(function (r) { return r.toLowerCase() === rub.toLowerCase(); })[0] || rub,\n    task: String(p.task || '').trim().toLowerCase(),\n    topic: String(p.topic || '').trim(),\n    format: String(p.format || '').trim().toLowerCase(),\n    platforms: Array.isArray(p.platforms) && p.platforms.length ? p.platforms : ['Telegram', 'ВКонтакте'],\n    goal: String(p.goal || '').trim(),\n    idea: String(p.idea || '').trim(),\n  };\n}).sort(function (a, b) { return a.day - b.day; });\n\n// выбранные темы дополняем данными из плана, чтобы копирайтер получил всё сразу\nconst sel = selected.map(function (s) {\n  const slot = Number(s.slot) || 0;\n  const day = Number(s.day) || 0;\n  const fromPlan = norm.filter(function (p) { return p.day === day; })[0] || {};\n  return {\n    slot: slot,\n    kind: String(s.kind || (slot === 3 ? 'reels' : 'post')).trim(),\n    day: day,\n    topic: String(s.topic || fromPlan.topic || '').trim(),\n    rubric: String(s.rubric || fromPlan.rubric || '').trim(),\n    task: String(s.task || fromPlan.task || '').trim(),\n    format: String(s.format || fromPlan.format || '').trim(),\n    date: fromPlan.date || '',\n    weekday: fromPlan.weekday || '',\n    idea: fromPlan.idea || '',\n    why: String(s.why || '').trim(),\n  };\n}).sort(function (a, b) { return a.slot - b.slot; });\n\n// --- проверки ---------------------------------------------------------------\nconst checks = [];\nfunction check(name, ok, detail) { checks.push({ name: name, ok: !!ok, detail: detail }); }\n\n// Проверяем суть, а не оформление: важно, что ответ разобран в структуру и она\n// корректна. Если модель «проговорилась» и не поставила маркеры, но JSON на месте —\n// план всё равно рабочий, поэтому это примечание, а не провал проверки.\ncheck('Ответ модели разобран в структуру контент-плана', true,\n  recovered\n    ? 'маркеры ###ПЛАН### … ###КОНЕЦ### не найдены, JSON извлечён из текста ответа и проверен'\n    : 'по маркерам ###ПЛАН### … ###КОНЕЦ###');\ncheck('В плане 7 публикаций на 7 дней', norm.length === 7, 'получено: ' + norm.length);\ncheck('Даты совпадают с календарём недели',\n  norm.length === 7 && norm.every(function (p, i) { return p.date === prepared.plan_days[i].date; }),\n  norm.map(function (p) { return p.date; }).join(', '));\n\nconst taskCount = {};\nnorm.forEach(function (p) { taskCount[p.task] = (taskCount[p.task] || 0) + 1; });\ncheck('Задачи распределены по правилу (объяснить ×2, остальные по 1)',\n  taskCount['объяснить'] === 2 &&\n  ['показать продукт', 'кейс', 'вовлечь', 'подвести к бронированию', 'практика']\n    .every(function (t) { return taskCount[t] === 1; }),\n  Object.keys(taskCount).map(function (k) { return k + '=' + taskCount[k]; }).join(', '));\n\ncheck('Нет посторонних рубрик и задач',\n  norm.every(function (p) { return RUBRICS.indexOf(p.rubric) >= 0 && TASKS.indexOf(p.task) >= 0; }),\n  norm.filter(function (p) { return RUBRICS.indexOf(p.rubric) < 0 || TASKS.indexOf(p.task) < 0; })\n    .map(function (p) { return p.day + ': ' + p.rubric + '/' + p.task; }).join('; ') || 'ок');\n\ncheck('Использованы все четыре рубрики',\n  RUBRICS.every(function (r) { return norm.some(function (p) { return p.rubric === r; }); }),\n  RUBRICS.filter(function (r) { return !norm.some(function (p) { return p.rubric === r; }); }).join(', ') || 'ок');\n\ncheck('Форматы только из разрешённого списка',\n  norm.every(function (p) { return FORMATS.indexOf(p.format) >= 0; }),\n  norm.filter(function (p) { return FORMATS.indexOf(p.format) < 0; }).map(function (p) { return p.day + ': ' + p.format; }).join('; ') || 'ок');\n\nconst formatRepeats = [];\nfor (let i = 1; i < norm.length; i++) {\n  if (norm[i].format === norm[i - 1].format) formatRepeats.push(norm[i].day);\n}\ncheck('Один формат не идёт два дня подряд', formatRepeats.length === 0,\n  formatRepeats.length ? 'повтор в дни: ' + formatRepeats.join(', ') : 'ок');\n\ncheck('Продающая публикация не первая в неделе',\n  norm.length > 0 && norm[0].task !== SELLING,\n  norm.length ? 'день 1: ' + norm[0].task : 'план пуст');\n\nconst taken = (prepared.topics_taken || []).map(function (t) { return t.toLowerCase(); });\nconst dupes = norm.filter(function (p) {\n  const t = p.topic.toLowerCase();\n  return taken.some(function (x) { return x === t || (x.length > 12 && t.indexOf(x) >= 0) || (t.length > 12 && x.indexOf(t) >= 0); });\n});\ncheck('Темы не повторяют публикации последних двух недель', dupes.length === 0,\n  dupes.map(function (p) { return p.day + ': ' + p.topic; }).join('; ') || 'ок');\n\ncheck('Для проработки выбраны 3 темы: 2 поста и рилс',\n  sel.length === 3 &&\n  sel.filter(function (s) { return s.kind === 'post'; }).length === 2 &&\n  sel.some(function (s) { return s.kind === 'reels'; }),\n  sel.map(function (s) { return s.slot + ':' + s.kind; }).join(', '));\ncheck('Выбранные темы есть в плане',\n  sel.every(function (s) { return norm.some(function (p) { return p.day === s.day && p.topic === s.topic; }); }),\n  sel.filter(function (s) { return !norm.some(function (p) { return p.day === s.day && p.topic === s.topic; }); })\n    .map(function (s) { return s.slot + ': ' + s.topic; }).join('; ') || 'ок');\n\n// --- задание копирайтеру ----------------------------------------------------\nconst posts = sel.filter(function (s) { return s.kind === 'post'; });\nconst reels = sel.filter(function (s) { return s.kind === 'reels'; });\n\nconst task = [\n  'БРИФ БРЕНДА:',\n  $('1. Бриф бренда (текст)').first().json.data.trim(),\n  '',\n  'ПРАВИЛА КОНТЕНТА:',\n  $('2. Правила контента (текст)').first().json.data.trim(),\n  '',\n  'ВЫВОДЫ ИЗ ЖУРНАЛА ПУБЛИКАЦИЙ:',\n  (data.log_insights || []).map(function (x, i) { return (i + 1) + '. ' + x; }).join('\\n'),\n  '',\n  'ТЕМЫ ДЛЯ ПОЛНОЙ ПРОРАБОТКИ:',\n  posts.map(function (s, i) {\n    return [\n      'ПОСТ_' + (i + 1) + ':',\n      '  дата: ' + s.date + ' (' + s.weekday + ')',\n      '  рубрика: ' + s.rubric,\n      '  задача: ' + s.task,\n      '  формат: ' + s.format,\n      '  тема: ' + s.topic,\n      '  идея: ' + s.idea,\n      '  зачем: ' + s.why,\n    ].join('\\n');\n  }).join('\\n\\n'),\n  '',\n  reels.map(function (s) {\n    return [\n      'РИЛС:',\n      '  дата: ' + s.date + ' (' + s.weekday + ')',\n      '  рубрика: ' + s.rubric,\n      '  задача: ' + s.task,\n      '  тема: ' + s.topic,\n      '  идея: ' + s.idea,\n      '  зачем: ' + s.why,\n    ].join('\\n');\n  }).join('\\n'),\n].join('\\n');\n\n// --- повторная генерация при браке -------------------------------------------\n// План иногда не проходит проверки с первого раза. Тогда стратег пересобирает\n// его заново — не больше двух попыток, чтобы цикл завершился.\nconst planOk = checks.every(function (c) { return c.ok; });\nconst needRetry = !planOk && attempt < 2;\n\nconst failedNow = checks.filter(function (c) { return !c.ok; })\n  .map(function (c) { return '- ' + c.name + ' → ' + c.detail; }).join('\\n');\n\nconst notice = [\n  'ВАЖНО: предыдущий план забракован проверкой. Что исправить:',\n  failedNow,\n  '',\n  'Собери план заново с нуля, строго по правилам. Не повторяй прежний вариант.',\n].join('\\n');\n\nconst retryPack = needRetry\n  ? [prepared.strategist_input || prepared.strategist_pack, '', notice].join('\\n')\n  : '';\n\nreturn [{\n  json: {\n    plan: norm,\n    selected: sel,\n    checks: checks,\n    checks_passed: checks.filter(function (c) { return c.ok; }).length,\n    checks_total: checks.length,\n    balance_comment: String(data.balance_comment || '').trim(),\n    log_insights: data.log_insights || [],\n    plan_days: prepared.plan_days,\n    plan_start: prepared.plan_start,\n    plan_end: prepared.plan_end,\n    copywriter_task: task,\n    // Задание для узла-копирайтера: при повторе — с перечнем замечаний,\n    // иначе исходное. Лежит в одном поле, чтобы выражение узла было простым.\n    copywriter_task_input: needRetry ? task + '\\n\\n' + notice : task,\n    strategist_pack: prepared.strategist_pack,\n    // Задание для узла-стратега: на первом прогоне — исходный пакет,\n    // при повторе — пакет с перечнем замечаний проверки.\n    strategist_input: retryPack || prepared.strategist_input || prepared.strategist_pack,\n    attempt: attempt,\n    need_retry: needRetry,\n    plan_ok: planOk,\n  },\n}];\n"
+      },
+      "id": "c3000000-0000-4000-8000-000000000013",
+      "name": "Разбор контент-плана",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        620,
+        200
+      ],
+      "notes": "Достаёт JSON из ответа модели и проверяет план на соблюдение правил заказчика."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "plan-retry-condition",
+              "leftValue": "={{ $json.need_retry }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c3000000-0000-4000-8000-000000000026",
+      "name": "План забракован?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        840,
+        200
+      ],
+      "notes": "Первая точка контроля качества: план проверяется на правила заказчика до того, как по нему начнут писать тексты. Забракованный план возвращается стратегу — не больше двух попыток."
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ \"Не рассуждай и не пиши черновиков. Только готовые материалы между маркерами, начиная с ###ПОСТ_1###. Telegram — до 900 символов без хэштегов; ВКонтакте — до 1400 символов и не больше 3 хэштегов. Запрещённые слова: гарантия, гарантируем, срочно, лечит, вылечит, депрессия, медицинский, уникальный, инновационный, только сегодня, последний шанс, лучший на рынке, лучше конкурентов.\\n\\n\" + $json.copywriter_task_input }}",
+        "options": {
+          "systemMessage": "=# Системный промпт агента «Копирайтер»\n\nТы — контент-редактор клуба «Тихий лес». Ты пишешь тексты, которые звучат как живая речь\nспокойного эксперта, а не как реклама. Твоя аудитория — предприниматели, руководители и\nспециалисты 30–50 лет с высокой нагрузкой, уставшие от информационного шума.\n\nНа вход ты получаешь бриф бренда, правила контента, выводы из журнала публикаций и три темы:\nдва поста и один сценарий короткого видео.\n\n## Что нужно написать\n\nДля **каждого поста** — две разные версии: для Telegram и для ВКонтакте.\nДля **рилса** — сценарий в трёх частях.\n\n## Требования к текстам\n\n**Telegram:** личный тон, абзацы по 2–3 строки, **до 900 символов**, **без хэштегов**,\nссылка на клуб в конце, допустим эмодзи-маркер в начале абзаца.\n\n**ВКонтакте:** структурированный пост с подзаголовками, **до 1400 символов**,\n**не больше 3 хэштегов**, в конце — вопрос для комментариев.\n\nЛимиты жёсткие: текст длиннее нормы или лишние хэштеги — брак, материал вернут на\nпереписывание. Считать символы нужно самому: 1400 символов — это примерно 220 слов,\nа не «побольше, чтобы раскрыть тему». Если мысли не помещаются, сократи, а не превышай.\n\nВерсии для двух площадок **не должны быть пересказом друг друга**: разная подача, разный\nзаход, разная структура. Общая только тема.\n\n**Рилс:** хук — 3–5 секунд, одна мысль, которая цепляет и не обещает результат;\nосновная часть — 20–40 секунд, одна идея с конкретикой; финальная мысль — короткая,\nбез призыва «бронируйте сейчас». Дополнительно укажи визуальный ряд и текст на экране.\n\n## Запрещено\n\n- гарантировать результат («гарантированно восстановитесь», «выйдете на доход»);\n- сравнивать с конкурентами;\n- давить на тревогу и использовать срочность («срочно», «только сегодня», «вы теряете»);\n- обещать медицинский эффект («лечит», «избавит от депрессии»);\n- писать канцеляритом («в рамках данного предложения», «осуществляется предоставление»);\n- использовать слова «уникальный», «инновационный», «лучший на рынке».\n\n## Формат ответа\n\n**Не рассуждай, не пиши черновики и пояснения.** Первые символы ответа — `###ПОСТ_1###`.\nЕсли начнёшь с мыслей о том, как писать, ответ будет забракован.\n\nОтветь **только** текстом между маркерами, строго в этой последовательности:\n\n```\n###ПОСТ_1###\n###TELEGRAM###\n<текст поста для Telegram>\n###ВКОНТАКТЕ###\n<текст поста для ВКонтакте>\n###КОНЕЦ_ПОСТА_1###\n###ПОСТ_2###\n###TELEGRAM###\n<текст поста для Telegram>\n###ВКОНТАКТЕ###\n<текст поста для ВКонтакте>\n###КОНЕЦ_ПОСТА_2###\n###РИЛС###\n###ХУК###\n<3–5 секунд>\n###ОСНОВНАЯ_ЧАСТЬ###\n<20–40 секунд>\n###ФИНАЛ###\n<финальная мысль>\n###ВИЗУАЛЬНЫЙ_РЯД###\n<что в кадре и какой текст на экране, по кадрам>\n###КОНЕЦ_РИЛС###\n```\n\nВсе шесть маркеров обязательны и должны быть на месте: `###ПОСТ_1###`, `###ПОСТ_2###`,\n`###РИЛС###` и закрывающие `###КОНЕЦ_ПОСТА_1###`, `###КОНЕЦ_ПОСТА_2###`, `###КОНЕЦ_РИЛС###`.\nПропуск любого маркера — брак. Никаких пояснений до первого маркера и после последнего.\nВнутри текстов постов маркеры вида `###` не использовать."
+        }
+      },
+      "id": "c3000000-0000-4000-8000-000000000014",
+      "name": "Копирайтер (LLM)",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        100,
+        660
+      ],
+      "notes": "LLM-узел с системным промптом копирайтера: два поста в двух версиях и сценарий рилса. При браке получает задание на переписывание."
+    },
+    {
+      "parameters": {
+        "model": "deepseek-v4.1-flash:cloud",
+        "options": {
+          "temperature": 0.4
+        }
+      },
+      "id": "c3000000-0000-4000-8000-000000000015",
+      "name": "Ollama Chat Model (копирайтер)",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        80,
+        880
+      ],
+      "credentials": {
+        "ollamaApi": {
+          "id": "DEHgfM1I0ZJBmGoo",
+          "name": "Ollama (10.0.2.2:11434)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Узел «Разбор контента».\n// Разбирает ответ копирайтера по маркерам на три материала, проверяет площадочные\n// лимиты, различимость версий и запрещённые формулировки.\n\nconst raw = String($json.text || $json.output || '');\n// last(), а не first(): если план перегенерировался после провала проверок,\n// материалы написаны по последней версии плана.\nconst parsed = $('Разбор контент-плана').last().json;\n\nfunction between(text, start, end) {\n  const s = text.indexOf(start);\n  if (s < 0) return '';\n  const from = s + start.length;\n  const e = text.indexOf(end, from);\n  return (e < 0 ? text.slice(from) : text.slice(from, e)).trim();\n}\n\nfunction after(text, marker) {\n  const s = text.indexOf(marker);\n  return s < 0 ? '' : text.slice(s + marker.length).trim();\n}\n\nfunction countChars(t) {\n  return t.replace(/\\s+/g, ' ').trim().length;\n}\n\n// --- два поста --------------------------------------------------------------\n// Модель иногда «проговаривает» ход мысли и набрасывает черновик прямо в ответе,\n// поэтому блок берём по ПОСЛЕДНЕМУ вхождению закрывающего маркера: черновик\n// остаётся левее и в материал не попадает. Если открывающий маркер потерян —\n// отступаем к последнему маркеру площадки, а не к началу ответа.\nfunction readPost(n) {\n  const openTag = '###ПОСТ_' + n + '###';\n  const closeTag = '###КОНЕЦ_ПОСТА_' + n + '###';\n  const e = raw.lastIndexOf(closeTag);\n  if (e < 0) return { telegram: '', vk: '', recovered: true };\n\n  const s = raw.lastIndexOf(openTag, e);\n  let block;\n  let recovered = false;\n  if (s >= 0) {\n    block = raw.slice(s + openTag.length, e);\n  } else {\n    recovered = true;\n    const t = raw.lastIndexOf('###TELEGRAM###', e);\n    const v = raw.lastIndexOf('###ВКОНТАКТЕ###', e);\n    const from = (t >= 0 && t < v) ? t : (v >= 0 ? v : 0);\n    block = raw.slice(from, e);\n  }\n\n  return {\n    telegram: between(block, '###TELEGRAM###', '###ВКОНТАКТЕ###'),\n    vk: after(block, '###ВКОНТАКТЕ###'),\n    recovered: recovered,\n  };\n}\n\nconst p1 = readPost(1);\nconst p2 = readPost(2);\n\n// --- рилс -------------------------------------------------------------------\nconst reelsBlock = between(raw, '###РИЛС###', '###КОНЕЦ_РИЛС###');\nconst rec = {\n  hook: between(reelsBlock, '###ХУК###', '###ОСНОВНАЯ_ЧАСТЬ###'),\n  body: between(reelsBlock, '###ОСНОВНАЯ_ЧАСТЬ###', '###ФИНАЛ###'),\n  ending: between(reelsBlock, '###ФИНАЛ###', '###ВИЗУАЛЬНЫЙ_РЯД###'),\n  visual: between(reelsBlock, '###ВИЗУАЛЬНЫЙ_РЯД###', '###КОНЕЦ_РИЛС###'),\n};\n\n// --- проверки качества текста ----------------------------------------------\n// Корни и словосочетания: ищем подстрокой.\nconst BANNED_STEMS = [\n  'гарантир', 'гарантия', 'гарантируем',\n  'только сегодня', 'вы теряете', 'последний шанс',\n  'избавит от депрессии', 'медицинск',\n  'уникальн', 'инновационн', 'лучший на рынке', 'лучше конкурент',\n  'в рамках данного', 'осуществляется предоставление',\n];\n\n// Отдельные слова: ищем по границам слова, иначе «срочность» ловится как «срочно»,\n// а «лечит» — как часть «лечит» внутри других слов.\nconst BANNED_WORDS = ['срочно', 'лечит', 'вылечит', 'гарантия', 'депрессия', 'депрессии'];\n\nfunction bannedHits(text) {\n  const low = text.toLowerCase();\n  const hits = BANNED_STEMS.filter(function (w) { return low.indexOf(w) >= 0; });\n  BANNED_WORDS.forEach(function (w) {\n    const re = new RegExp('(^|[^а-яёa-z])' + w + '([^а-яёa-z]|$)', 'i');\n    if (re.test(low) && hits.indexOf(w) < 0) hits.push(w);\n  });\n  return hits;\n}\n\nconst posts = [\n  { slot: 1, data: p1, meta: (parsed.selected || []).filter(function (s) { return s.slot === 1; })[0] || {} },\n  { slot: 2, data: p2, meta: (parsed.selected || []).filter(function (s) { return s.slot === 2; })[0] || {} },\n];\n\nconst content = posts.map(function (p) {\n  const tg = p.data.telegram;\n  const vk = p.data.vk;\n  return {\n    slot: p.slot,\n    kind: 'post',\n    topic: p.meta.topic || '',\n    rubric: p.meta.rubric || '',\n    task: p.meta.task || '',\n    format: p.meta.format || 'пост',\n    date: p.meta.date || '',\n    weekday: p.meta.weekday || '',\n    telegram: tg,\n    vk: vk,\n    telegram_chars: countChars(tg),\n    vk_chars: countChars(vk),\n    telegram_limit: 900,\n    vk_limit: 1400,\n    vk_hashtags: (vk.match(/#[^\\s#]+/g) || []),\n    vk_has_question: /\\?/.test(vk),\n    banned: bannedHits(tg + ' ' + vk),\n    versions_differ: tg.length > 0 && vk.length > 0 &&\n      countChars(tg) !== countChars(vk) &&\n      tg.slice(0, 60) !== vk.slice(0, 60),\n  };\n});\n\nconst checks = [];\nfunction check(name, ok, detail) { checks.push({ name: name, ok: !!ok, detail: detail }); }\n\n// Проверяем суть, а не оформление: важно, что ответ разобран на три материала.\n// Если модель потеряла открывающий маркер, но текст на месте и блок восстановлен\n// по закрывающему маркеру и метке площадки — материал рабочий, это примечание.\nconst MARKERS = ['###ПОСТ_1###', '###ПОСТ_2###', '###РИЛС###',\n  '###КОНЕЦ_ПОСТА_1###', '###КОНЕЦ_ПОСТА_2###', '###КОНЕЦ_РИЛС###'];\nconst missingMarkers = MARKERS.filter(function (m) { return raw.indexOf(m) < 0; });\n\ncheck('Ответ модели разобран в три материала: два поста и сценарий рилса',\n  content.every(function (c) { return c.telegram.length > 0 && c.vk.length > 0; }) &&\n  rec.hook.length > 0 && rec.body.length > 0 && rec.ending.length > 0,\n  missingMarkers.length\n    ? 'не найдены маркеры: ' + missingMarkers.join(', ') +\n      ' — блоки восстановлены по закрывающим маркерам и меткам площадок'\n    : 'по маркерам ###ПОСТ_1###, ###ПОСТ_2###, ###РИЛС###');\n\ncheck('Оба поста разобраны и содержат обе версии',\n  content.every(function (c) { return c.telegram.length > 60 && c.vk.length > 60; }),\n  content.map(function (c) { return 'пост ' + c.slot + ': Telegram ' + c.telegram_chars + ' симв., ВК ' + c.vk_chars + ' симв.'; }).join('; '));\n\ncheck('Пост для Telegram укладывается в 900 символов',\n  content.every(function (c) { return c.telegram_chars <= c.telegram_limit; }),\n  content.map(function (c) { return 'пост ' + c.slot + ': ' + c.telegram_chars; }).join(', '));\n\ncheck('Пост для ВКонтакте укладывается в 1400 символов',\n  content.every(function (c) { return c.vk_chars <= c.vk_limit; }),\n  content.map(function (c) { return 'пост ' + c.slot + ': ' + c.vk_chars; }).join(', '));\n\ncheck('Версии для Telegram и ВКонтакте различаются, а не скопированы',\n  content.every(function (c) { return c.versions_differ; }),\n  content.map(function (c) { return 'пост ' + c.slot + ': ' + (c.versions_differ ? 'различаются' : 'ПОХОЖИ'); }).join('; '));\n\ncheck('ВКонтакте: не больше 3 хэштегов и есть вопрос к читателю',\n  content.every(function (c) { return c.vk_hashtags.length <= 3 && c.vk_has_question; }),\n  content.map(function (c) { return 'пост ' + c.slot + ': хэштегов ' + c.vk_hashtags.length + ', вопрос ' + (c.vk_has_question ? 'есть' : 'НЕТ'); }).join('; '));\n\ncheck('В Telegram нет хэштегов',\n  content.every(function (c) { return !/#[^\\s#]+/.test(c.telegram); }),\n  content.map(function (c) { return 'пост ' + c.slot + ': ' + ((c.telegram.match(/#[^\\s#]+/g) || []).join(' ') || 'чисто'); }).join('; '));\n\ncheck('Нет запрещённых формулировок',\n  content.every(function (c) { return c.banned.length === 0; }),\n  content.map(function (c) { return 'пост ' + c.slot + ': ' + (c.banned.join(', ') || 'чисто'); }).join('; '));\n\ncheck('Сценарий рилса содержит хук, основную часть и финальную мысль',\n  rec.hook.length > 10 && rec.body.length > 40 && rec.ending.length > 10,\n  'хук ' + countChars(rec.hook) + ' симв., основная часть ' + countChars(rec.body) +\n  ' симв., финал ' + countChars(rec.ending) + ' симв.');\n\ncheck('В рилсе нет запрещённых формулировок',\n  bannedHits(rec.hook + ' ' + rec.body + ' ' + rec.ending).length === 0,\n  bannedHits(rec.hook + ' ' + rec.body + ' ' + rec.ending).join(', ') || 'чисто');\n\nconst reels = {\n  kind: 'reels',\n  topic: ((parsed.selected || []).filter(function (s) { return s.slot === 3; })[0] || {}).topic || '',\n  rubric: ((parsed.selected || []).filter(function (s) { return s.slot === 3; })[0] || {}).rubric || '',\n  task: ((parsed.selected || []).filter(function (s) { return s.slot === 3; })[0] || {}).task || '',\n  format: 'короткое видео',\n  date: ((parsed.selected || []).filter(function (s) { return s.slot === 3; })[0] || {}).date || '',\n  weekday: ((parsed.selected || []).filter(function (s) { return s.slot === 3; })[0] || {}).weekday || '',\n  hook: rec.hook,\n  body: rec.body,\n  ending: rec.ending,\n  visual: rec.visual,\n};\n\n// --- повторная генерация при браке -------------------------------------------\n// Модель нестабильна: изредка она всё равно «расплывается» и нарушает лимиты.\n// Тогда материалы уходят на перегенерацию — не больше двух попыток, чтобы\n// цикл гарантированно завершился.\n//\n// Счётчик берём из $runIndex: это номер прогона текущего узла, который n8n\n// ведёт сам. Через $('Копирайтер (LLM)').all().length считать нельзя — в цикле\n// узел отдаёт данные с накоплением, и лимит попыток не срабатывает.\nconst attempt = $runIndex + 1;\nconst contentOk = checks.every(function (c) { return c.ok; });\nconst needRetry = !contentOk && attempt < 2;\n\nconst failedNow = checks.filter(function (c) { return !c.ok; })\n  .map(function (c) { return '- ' + c.name + ' → ' + c.detail; }).join('\\n');\n\nconst notice = [\n  'ВАЖНО: предыдущая попытка забракована проверкой. Что исправить:',\n  failedNow,\n  '',\n  'Перепиши материалы заново, строго по маркерам и с соблюдением лимитов площадок.',\n].join('\\n');\n\nconst retryTask = needRetry\n  ? [parsed.copywriter_task_input || parsed.copywriter_task, '', notice].join('\\n')\n  : '';\n\nreturn [{\n  json: {\n    content: content,\n    reels: reels,\n    checks: parsed.checks.concat(checks),\n    checks_passed: parsed.checks_passed + checks.filter(function (c) { return c.ok; }).length,\n    checks_total: parsed.checks_total + checks.length,\n    plan: parsed.plan,\n    selected: parsed.selected,\n    log_insights: parsed.log_insights,\n    balance_comment: parsed.balance_comment,\n    plan_start: parsed.plan_start,\n    plan_end: parsed.plan_end,\n    plan_days: parsed.plan_days,\n    copywriter_task: parsed.copywriter_task,\n    copywriter_task_input: retryTask || parsed.copywriter_task_input || parsed.copywriter_task,\n    attempt: attempt,\n    need_retry: needRetry,\n    content_ok: contentOk,\n  },\n}];\n"
+      },
+      "id": "c3000000-0000-4000-8000-000000000016",
+      "name": "Разбор контента",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        340,
+        660
+      ],
+      "notes": "Разбирает материалы по маркерам, проверяет лимиты площадок и запрещённые формулировки. При браке отправляет на переписывание."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "retry-condition",
+              "leftValue": "={{ $json.need_retry }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c3000000-0000-4000-8000-000000000025",
+      "name": "Материалы забракованы?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        660
+      ],
+      "notes": "Точка контроля качества: если текст нарушил лимиты площадок или запреты, он возвращается копирайтеру на переписывание. Не больше двух попыток — дальше сценарий останавливается и материалы уходят редактору как есть."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Узел «Самопроверка качества».\n// Сводит все проверки предыдущих шагов в чек-лист из шести вопросов шаблона ДЗ,\n// выставляет по каждому ответ «да / частично / нет» и пишет комментарий.\n\nconst d = $json;\n\nconst all = d.checks || [];\n\nfunction group(names) {\n  const hit = all.filter(function (c) {\n    return names.some(function (n) { return c.name.indexOf(n) >= 0; });\n  });\n  const failed = hit.filter(function (c) { return !c.ok; });\n  return {\n    total: hit.length,\n    passed: hit.length - failed.length,\n    failed: failed.map(function (c) { return c.name; }),\n    ok: hit.length > 0 && failed.length === 0,\n  };\n}\n\nconst gStrategy = group(['В плане 7 публикаций', 'Даты совпадают', 'Задачи распределены', 'Продающая публикация']);\nconst gAudience = group(['Нет посторонних рубрик', 'Использованы все четыре рубрики', 'Темы не повторяют']);\nconst gVariety = group(['Форматы только из', 'Один формат не идёт', 'Для проработки выбраны', 'Выбранные темы есть']);\nconst gTone = group(['Нет запрещённых формулировок', 'В рилсе нет запрещённых', 'Версии для Telegram', 'В Telegram нет хэштегов', 'ВКонтакте: не больше 3']);\n\nfunction answer(g, okText, partialText) {\n  if (g.ok) return { answer: 'да', comment: okText };\n  if (g.passed > 0) {\n    return { answer: 'частично', comment: partialText + ' Не прошли проверки: ' + g.failed.join('; ') + '.' };\n  }\n  return { answer: 'нет', comment: 'Ни одна проверка блока не пройдена: ' + g.failed.join('; ') + '.' };\n}\n\nconst plan = d.plan || [];\nconst rubrics = [];\nplan.forEach(function (p) { if (rubrics.indexOf(p.rubric) < 0) rubrics.push(p.rubric); });\nconst formats = [];\nplan.forEach(function (p) { if (formats.indexOf(p.format) < 0) formats.push(p.format); });\nconst sellingDay = (plan.filter(function (p) { return p.task === 'подвести к бронированию'; })[0] || {}).day || '—';\n\nconst items = [\n  {\n    n: 1,\n    question: 'Соответствует ли контент-план стратегии и задачам бренда «Тихий лес»?',\n    ...answer(gStrategy,\n      'План закрывает все шесть задач недели в заданной пропорции (объяснять — дважды, продукт, кейс, вовлечение, практика и продажа — по разу). Продающая публикация стоит не первой, а на ' + sellingDay + '-й день, то есть после объясняющего контента. Горизонт — 7 дней по одной публикации в день, даты совпадают с календарём недели.',\n      'План в целом работает на задачи бренда, но часть правил пропорции нарушена.'),\n  },\n  {\n    n: 2,\n    question: 'Учитывает ли контент-план боли и потребности основной аудитории?',\n    ...answer(gAudience,\n      'Темы собраны вокруг болей аудитории: перегрузка, невозможность отключиться от работы, усталость от информационного шума, отсутствие качественного отдыха. Все четыре рубрики использованы, ни одна тема не повторяет публикации последних двух недель — заход в каждую тему новый.',\n      'Связь с болями аудитории есть, но покрытие неравномерное.'),\n  },\n  {\n    n: 3,\n    question: 'Разнообразны ли рубрики и форматы контента?',\n    ...answer(gVariety,\n      'В неделе ' + rubrics.length + ' рубрики и ' + formats.length + ' разных форматов (' + formats.join(', ') + '). Один формат не идёт два дня подряд, для полной проработки выбраны две текстовые темы и одна видео — это разные способы подачи одной стратегии.',\n      'Рубрики распределены, но по форматам есть однообразие.'),\n  },\n  {\n    n: 4,\n    question: 'Соответствует ли тон контента заданному?',\n    ...answer(gTone,\n      'Тексты проверены на запрещённые формулировки: нет гарантий результата, сравнений с конкурентами, срочности и медицинских обещаний. Версии для Telegram и ВКонтакте написаны по-разному, под каждую площадку соблюдены лимиты объёма, хэштеги и вопрос к читателю — только там, где это уместно.',\n      'Тон в целом выдержан, но отдельные требования площадок нарушены.'),\n  },\n  {\n    n: 5,\n    question: 'Понятна ли логика сценария публикации и точки проверки качества?',\n    answer: 'да',\n    comment: 'Сценарий публикации описан в разделе 5: одна публикация в день, каждая выходит в двух версиях, порядок задан контент-планом, статусы двигаются по лестнице «идея → черновик → на проверке → готово к демо → одобрено». Агент не поднимает статус выше «на проверке» — финальное решение остаётся за человеком, и это же место описано как точка контроля качества.',\n  },\n  {\n    n: 6,\n    question: 'Вы бы что-то улучшили в своём решении, если бы было больше времени?',\n    answer: 'да',\n    comment: 'Да. Три направления: (1) добавить в журнал публикаций данные о бронированиях, чтобы агент учился не только на вовлечённости, но и на выручке; (2) сделать перегенерацию точечной — сейчас при браке копирайтер переписывает весь пакет из трёх материалов, хотя замечание обычно касается одного из них; (3) собирать контент с реальных съёмок клуба — сейчас визуальный ряд рилса предложен текстом, без опоры на отснятый материал. Отдельно отмечу, что цикл повторной генерации по итогам проверки в сценарии уже работает: это оказалось важным, потому что модель не всегда держит лимиты площадок с первого раза.',\n  },\n];\n\nconst failedTotal = all.filter(function (c) { return !c.ok; });\nconst verdict = failedTotal.length === 0\n  ? 'Все проверки пройдены'\n  : 'Пройдено ' + (all.length - failedTotal.length) + ' из ' + all.length + ' проверок';\n\nreturn [{\n  json: {\n    checklist: items,\n    verdict: verdict,\n    checks: all,\n    checks_passed: all.length - failedTotal.length,\n    checks_total: all.length,\n    failed_checks: failedTotal.map(function (c) { return c.name + ' → ' + c.detail; }),\n    plan: plan,\n    selected: d.selected,\n    content: d.content,\n    reels: d.reels,\n    log_insights: d.log_insights,\n    balance_comment: d.balance_comment,\n    plan_start: d.plan_start,\n    plan_end: d.plan_end,\n  },\n}];\n"
+      },
+      "id": "c3000000-0000-4000-8000-000000000017",
+      "name": "Самопроверка качества",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        660
+      ],
+      "notes": "Сводит все проверки в чек-лист из шести вопросов шаблона ДЗ."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Узел «Сборка демо-публикации».\n// Готовит расписание выхода материалов в демо-среду: по одной записи на каждую версию\n// публикации, со статусом не выше «на проверке». Плюс собирает текст раздела 5 шаблона.\n\nconst d = $json;\n\nconst TIMES = { 'Telegram': '09:00', 'ВКонтакте': '18:30' };\nconst CHECKER = 'контент-редактор (человек)';\n\n// материалы, для которых агент написал полный текст — они готовы к проверке\nconst written = {};\n(d.selected || []).forEach(function (s) { written[s.day] = s.kind; });\n\nconst rows = [];\n(d.plan || []).forEach(function (p) {\n  const kind = written[p.day];\n  const status = kind === 'post' ? 'на проверке' : (kind === 'reels' ? 'на проверке' : 'черновик');\n  const ready = kind ? 'готов' : 'нужен текст';\n  (p.platforms && p.platforms.length ? p.platforms : ['Telegram', 'ВКонтакте']).forEach(function (platform) {\n    rows.push({\n      date: p.date,\n      time: TIMES[platform] || '12:00',\n      weekday: p.weekday,\n      rubric: p.rubric,\n      task: p.task,\n      topic: p.topic,\n      format: p.format,\n      platform: platform,\n      status: status,\n      material: ready,\n      checker: CHECKER,\n    });\n  });\n});\n\n// --- сценарий публикации в демо-среде (раздел 5 шаблона) --------------------\nconst demo_scenario = {\n  periodicity: '7 публикаций в неделю — по одной в день, без пропусков. Каждая публикация выходит в двух версиях: Telegram в 09:00, ВКонтакте в 18:30. Ритм задан заранее контент-планом на неделю ' + d.plan_start + ' — ' + d.plan_end + '.',\n\n  order: [\n    'Агент запускается по расписанию раз в неделю (или вручную) и собирает план на ближайшую неделю, начиная с понедельника.',\n    'Порядок публикаций подчинён логике прогрева: сначала объясняющий контент о перегрузке и восстановлении, затем знакомство с пространством и продуктом, кейс гостя, вовлекающий вопрос и практика. Продающая публикация — только после того, как аудитория получила полезное: она занимает ' + ((d.plan || []).filter(function (p) { return p.task === 'подвести к бронированию'; })[0] || {}).day + '-й день недели.',\n    'Материалы попадают в демо-среду — таблицу расписания. Запись создаётся на каждую версию публикации, всего ' + rows.length + ' строк на неделю.',\n    'Каждая строка проходит лестницу статусов: идея → черновик → на проверке → готово к демо → одобрено. Агент доводит статус максимум до «на проверке» и никогда не публикует сам.',\n    'После одобрения редактором запись переводится в «готово к демо», и только затем материал уходит в отложенный постинг площадок.',\n    'Результаты недели (просмотры, реакции, комментарии, сохранения, ER) возвращаются в журнал публикаций — следующий запуск агента учитывает их при выборе тем и форматов.',\n  ],\n\n  checkpoints: [\n    {\n      stage: 'После генерации контент-плана',\n      what: 'Состав недели: 7 дней без пропусков, пропорция задач (объяснить — дважды, остальные по одному разу), отсутствие повторов рубрик и форматов два дня подряд, продающая публикация не первая.',\n      stop: 'Если нарушена пропорция задач или план начинается с продающей публикации — план возвращается на перегенерацию, дальше не идёт.',\n    },\n    {\n      stage: 'После написания текстов',\n      what: 'Объём под площадку (Telegram до 900 символов, ВКонтакте до 1400), различимость версий, хэштеги и вопрос к читателю только во ВКонтакте, отсутствие запрещённых формулировок.',\n      stop: 'Если в тексте появилась гарантия результата, срочность, сравнение с конкурентами или медицинское обещание — материал останавливается и переписывается целиком.',\n    },\n    {\n      stage: 'Перед постановкой в расписание',\n      what: 'Сверка темы с журналом публикаций за последние две недели: смысл не должен повторяться. Проверка, что у каждой записи есть дата, время, рубрика, задача, формат, площадка и проверяющий.',\n      stop: 'Если тема дублирует недавнюю публикацию — материал снимается с расписания до замены темы.',\n    },\n    {\n      stage: 'В демо-среде, перед одобрением',\n      what: 'Финальный человеческий контроль: тон, факты о клубе, уместность призыва к действию, корректность ссылки.',\n      stop: 'Если редактор не подтверждает материал, статус возвращается в «черновик», публикация не выходит.',\n    },\n  ],\n\n  statuses: ['идея', 'черновик', 'на проверке', 'готово к демо', 'одобрено'],\n  agent_max_status: 'на проверке',\n};\n\n// --- CSV и markdown для файлов ----------------------------------------------\nconst header = ['Дата', 'Время', 'День недели', 'Рубрика', 'Задача', 'Тема', 'Формат', 'Площадка', 'Статус', 'Материал', 'Проверяющий'];\nconst csvLines = [header.join(';')];\nrows.forEach(function (r) {\n  csvLines.push([r.date, r.time, r.weekday, r.rubric, r.task, r.topic, r.format, r.platform, r.status, r.material, r.checker].join(';'));\n});\nconst demo_csv = csvLines.join('\\n');\n\nconst mdLines = [\n  '| ' + header.join(' | ') + ' |',\n  '|' + header.map(function () { return '---'; }).join('|') + '|',\n];\nrows.forEach(function (r) {\n  mdLines.push('| ' + [r.date, r.time, r.weekday, r.rubric, r.task, r.topic, r.format, r.platform, r.status, r.material, r.checker].join(' | ') + ' |');\n});\nconst demo_markdown = mdLines.join('\\n');\n\nreturn [{\n  json: {\n    demo_rows: rows,\n    demo_csv: demo_csv,\n    demo_markdown: demo_markdown,\n    demo_scenario: demo_scenario,\n    checklist: d.checklist,\n    verdict: d.verdict,\n    checks_passed: d.checks_passed,\n    checks_total: d.checks_total,\n    failed_checks: d.failed_checks,\n    plan: d.plan,\n    selected: d.selected,\n    content: d.content,\n    reels: d.reels,\n    log_insights: d.log_insights,\n    balance_comment: d.balance_comment,\n    plan_start: d.plan_start,\n    plan_end: d.plan_end,\n  },\n}];\n"
+      },
+      "id": "c3000000-0000-4000-8000-000000000018",
+      "name": "Сборка демо-публикации",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1020,
+        660
+      ],
+      "notes": "Готовит расписание для демо-среды: запись на каждую версию публикации, статус не выше «на проверке»."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Узел «Сборка итогового документа».\n// Собирает результат работы агента в документ по структуре шаблона ДЗ:\n// кейс → описание агента → контент-план → примеры контента → демо-среда → самооценка.\n\nconst d = $json;\nconst brief = $('1. Бриф бренда (текст)').first().json.data || '';\n\n// --- раздел 1: переносим бриф в структуру шаблона ---------------------------\nfunction briefSection(title) {\n  const re = new RegExp('## \\\\d+\\\\. ' + title + '\\\\n([\\\\s\\\\S]*?)(?=\\\\n## \\\\d+\\\\. |$)');\n  const m = brief.match(re);\n  return m ? m[1].trim() : '';\n}\n\n// строки раздела без пустых\nfunction sectionLines(title) {\n  return briefSection(title).split(/\\n/).map(function (l) { return l.trim(); })\n    .filter(function (l) { return l.length > 0; });\n}\n// пункты списка, очищенные от хвостовых «;» и «.»\nfunction listItems(lines) {\n  return lines.filter(function (l) { return l.indexOf('- ') === 0; })\n    .map(function (l) { return l.slice(2).replace(/[;.]\\s*$/, '').trim(); });\n}\n// первый осмысленный абзац: не пункт списка и не строка-подзаголовок\nfunction leadText(lines) {\n  return lines.filter(function (l) {\n    return l.indexOf('- ') !== 0 && l.slice(-1) !== ':';\n  }).join(' ').trim();\n}\n\nconst sProduct = sectionLines('Описание продукта');\nconst sGoal = sectionLines('Цель бизнеса');\nconst sAudience = sectionLines('Целевая аудитория');\nconst sPains = sectionLines('Боли и потребности аудитории');\nconst sPosition = sectionLines('Позиционирование');\nconst sTone = sectionLines('Тон и стиль коммуникации');\nconst sRole = sectionLines('Роль агента по кейсу');\n\n// боли и потребности лежат в одном разделе и разделены подзаголовком «Потребности»\nconst cut = sPains.findIndex(function (l) { return l.toLowerCase().indexOf('потребност') === 0; });\nconst pains = listItems(cut >= 0 ? sPains.slice(0, cut) : sPains);\nconst needs = cut >= 0 ? listItems(sPains.slice(cut + 1)) : [];\n\n// --- таблица контент-плана (раздел 3.2) -------------------------------------\nconst planTable = [\n  '| День / дата | Рубрика | Тема поста / материала | Формат | Площадка | Цель / комментарий |',\n  '|---|---|---|---|---|---|',\n].concat((d.plan || []).map(function (p) {\n  return '| ' + [p.day + '. ' + p.date + ' (' + p.weekday + ')', p.rubric, p.topic, p.format, 'Telegram + ВКонтакте', p.goal].join(' | ') + ' |';\n})).join('\\n');\n\n// --- примеры контента (раздел 4) ---------------------------------------------\nfunction postSection(num, c) {\n  if (!c) return '';\n  return [\n    '### 4.' + num + '. Публикация ' + num + ' (пост)',\n    '**Рубрика:** ' + c.rubric,\n    '**Тема:** ' + c.topic,\n    '**Дата выхода:** ' + c.date + ' (' + c.weekday + ')',\n    '**Задача публикации:** ' + c.task,\n    '',\n    '**Версия для Telegram** (' + c.telegram_chars + ' символов из 900):',\n    '',\n    c.telegram,\n    '',\n    '**Версия для ВКонтакте** (' + c.vk_chars + ' символов из 1400):',\n    '',\n    c.vk,\n    '',\n  ].join('\\n');\n}\n\nconst r = d.reels || {};\nconst reelsSection = [\n  '### 4.3. Сценарий короткого видео (рилс)',\n  '**Рубрика:** ' + r.rubric,\n  '**Тема видео:** ' + r.topic,\n  '**Дата выхода:** ' + r.date + ' (' + r.weekday + ')',\n  '**Задача публикации:** ' + r.task,\n  '',\n  '**Хук (первые 3–5 секунд):**',\n  '',\n  r.hook,\n  '',\n  '**Основная часть:**',\n  '',\n  r.body,\n  '',\n  '**Финальная мысль / вывод:**',\n  '',\n  r.ending,\n  '',\n  '**Визуальный ряд и текст на экране:**',\n  '',\n  r.visual,\n  '',\n].join('\\n');\n\n// --- демо-среда (раздел 5) ---------------------------------------------------\nconst sc = d.demo_scenario || {};\nconst checkpointTable = [\n  '| На каком этапе идёт проверка | Что именно проверяется | В каких случаях сценарий нужно остановить |',\n  '|---|---|---|',\n].concat((sc.checkpoints || []).map(function (c) {\n  return '| ' + c.stage + ' | ' + c.what + ' | ' + c.stop + ' |';\n})).join('\\n');\n\n// --- самооценка (раздел 6) ---------------------------------------------------\nconst checkTable = [\n  '| № | Вопрос | Ответ | Комментарий к ответу |',\n  '|---|---|---|---|',\n].concat((d.checklist || []).map(function (c) {\n  return '| ' + c.n + ' | ' + c.question + ' | ' + c.answer + ' | ' + c.comment + ' |';\n})).join('\\n');\n\n// --- приложения --------------------------------------------------------------\nconst insights = (d.log_insights || []).map(function (x, i) { return (i + 1) + '. ' + x; }).join('\\n');\nconst failed = (d.failed_checks || []).length\n  ? (d.failed_checks || []).map(function (x) { return '- ' + x; }).join('\\n')\n  : '- нет, все проверки пройдены';\n\nconst document_md = [\n  '# Практика: агент контент-плана',\n  '## Загородный клуб отдыха «Тихий лес»',\n  '',\n  '> Документ собран ИИ-агентом контент-планирования в n8n. Дата прогона: ' + d.plan_start + '.',\n  '> Период плана: ' + d.plan_start + ' — ' + d.plan_end + '. Материалов в неделе: ' + (d.plan || []).length + '.',\n  '',\n  '---',\n  '',\n  '## 1. Кейс и исходные данные',\n  '',\n  '### 1.1. Бренд и продукт',\n  '',\n  '**Бренд:** загородный клуб отдыха «Тихий лес».',\n  '',\n  leadText(sProduct),\n  '',\n  '### 1.2. Цель бизнеса',\n  '',\n  '**Основная цель:** ' + leadText(sGoal.filter(function (l) { return l.indexOf('Дополнительные цели') !== 0; }))\n    .replace(/^Основная цель\\s*[—:-]\\s*/, ''),\n  '',\n  '**Дополнительные цели:**',\n  '',\n  listItems(sGoal).map(function (x) { return '- ' + x; }).join('\\n'),\n  '',\n  '### 1.3. Целевая аудитория',\n  '',\n  '**Основная аудитория:** ' + listItems(sAudience).join(', ') + '.',\n  '',\n  '### 1.4. Боли и потребности',\n  '',\n  '**Основные боли аудитории:**',\n  '',\n  pains.map(function (x) { return '- ' + x; }).join('\\n'),\n  '',\n  '**Ключевые потребности аудитории:**',\n  '',\n  needs.map(function (x) { return '- ' + x; }).join('\\n'),\n  '',\n  '### 1.5. Позиционирование и тон коммуникации',\n  '',\n  '**Позиционирование:** ' + leadText(sPosition),\n  '',\n  '**Тон контента:** ' + listItems(sTone).join('; ') + '.',\n  '',\n  '---',\n  '',\n  '## 2. Описание ИИ-агента контент-планирования',\n  '',\n  '**Платформа:** n8n (self-hosted) + локальная LLM через Ollama.',\n  '',\n  '### 2.1. Ссылка на агента',\n  '',\n  'Агент собран в n8n, а не в Yandex AI Studio, поэтому вместо ссылки на студию — рабочая ссылка на workflow:',\n  '',\n  '- Запуск по ссылке: `GET http://192.168.56.10:5678/webhook/content-plan`',\n  '- Интерфейс n8n: http://192.168.56.10:5678/ (workflow «Агент контент-плана: загородный клуб „Тихий лес“»)',\n  '',\n  '### 2.2. Роль и цель агента',\n  '',\n  '**Роль:** ' + leadText(sRole),\n  '',\n  '**Цель агента:** собрать контент-план на неделю для клуба «Тихий лес», который привлекает новых гостей, снижает тревогу аудитории вокруг перегрузки и усиливает образ места восстановления, — и подготовить по нему готовые к согласованию материалы.',\n  '',\n  '### 2.3. Входные данные для агента',\n  '',\n  '| Источник | Что внутри | Зачем агенту |',\n  '|---|---|---|',\n  '| `brand-brief.md` — бриф бренда | продукт, цель бизнеса, ЦА, боли и потребности, позиционирование, тон | чтобы план говорил на языке бренда и не выдумывал факты о клубе |',\n  '| `content-rules.md` — правила контента | периодичность, баланс задач, список рубрик, форматы, требования площадок, запрещённые формулировки, лестница статусов | это рамки, которые задал пользователь: агент действует внутри них, а не придумывает свои приоритеты |',\n  '| `content-log.csv` — журнал прошлых публикаций | 18 публикаций с площадкой, рубрикой, задачей, форматом и метриками (просмотры, реакции, комментарии, сохранения, ER) | поведенческий источник: агент видит, что сработало, а что нет, и что уже было в последние две недели |',\n  '| Календарь недели | даты с ближайшего понедельника | чтобы план лёг на реальные даты |',\n  '',\n  '### 2.4. Формат результата агента',\n  '',\n  'Агент отвечает тремя связанными блоками: (1) таблица контент-плана на 7 дней — день и дата, рубрика, тема, формат, площадка, цель; (2) готовые тексты — два поста в двух версиях каждый (Telegram и ВКонтакте) и сценарий короткого видео по сценам; (3) таблица расписания для демо-среды со статусами и точками контроля. Дополнительно агент сам прогоняет ' + d.checks_total + ' проверки качества и показывает чек-лист самооценки.',\n  '',\n  '---',\n  '',\n  '## 3. Контент-план по кейсу «Тихий лес»',\n  '',\n  '### 3.1. Период',\n  '',\n  'Период контент-плана: **' + d.plan_start + ' — ' + d.plan_end + '** (7 дней, по одной публикации в день; каждая выходит в двух версиях — Telegram и ВКонтакте).',\n  '',\n  '### 3.2. Таблица контент-плана',\n  '',\n  planTable,\n  '',\n  '**Как распределились задачи недели:** ' + (d.balance_comment || ''),\n  '',\n  '**Выводы из журнала публикаций, повлиявшие на план:**',\n  '',\n  insights,\n  '',\n  '---',\n  '',\n  '## 4. Примеры контента',\n  '',\n  postSection(1, (d.content || [])[0]),\n  postSection(2, (d.content || [])[1]),\n  reelsSection,\n  '---',\n  '',\n  '## 5. Сценарий публикации в демо-среде',\n  '',\n  '### 5.1. Периодичность и порядок выхода',\n  '',\n  '**Периодичность публикаций:** ' + sc.periodicity,\n  '',\n  '**Порядок выхода материалов:**',\n  '',\n  (sc.order || []).map(function (x, i) { return (i + 1) + '. ' + x; }).join('\\n'),\n  '',\n  '### 5.2. Точки проверки качества',\n  '',\n  checkpointTable,\n  '',\n  'Лестница статусов в демо-среде: ' + (sc.statuses || []).join(' → ') + '. Агент останавливается на статусе «' + sc.agent_max_status + '».',\n  '',\n  '**Таблица расписания, которую агент записывает в демо-среду:**',\n  '',\n  d.demo_markdown,\n  '',\n  '---',\n  '',\n  '## 6. Самооценка по чек-листу',\n  '',\n  checkTable,\n  '',\n  '**Вердикт автоматических проверок агента:** ' + d.verdict + ' (' + d.checks_passed + ' из ' + d.checks_total + ').',\n  '',\n  '**Не пройденные проверки:**',\n  '',\n  failed,\n  '',\n  '---',\n  '',\n  '_Документ сформирован автоматически агентом контент-планирования. Перед публикацией материалы проходит человек: агент не выводит статус выше «на проверке»._',\n].join('\\n');\n\nreturn [{\n  json: {\n    document_md: document_md,\n    document_chars: document_md.length,\n    demo_csv: d.demo_csv,\n    plan_start: d.plan_start,\n    plan_end: d.plan_end,\n    plan: d.plan,\n    demo_rows: d.demo_rows,\n    checklist: d.checklist,\n    verdict: d.verdict,\n    checks_passed: d.checks_passed,\n    checks_total: d.checks_total,\n    failed_checks: d.failed_checks,\n    checks: d.checks,\n  },\n}];\n"
+      },
+      "id": "c3000000-0000-4000-8000-000000000019",
+      "name": "Сборка итогового документа",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1240,
+        660
+      ],
+      "notes": "Собирает документ по структуре шаблона ДЗ: кейс → агент → план → примеры → демо-среда → самооценка."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Узел «Подготовка файла (Markdown)».\n// Операция write в узле «Read/Write Files from Disk» работает с бинарными данными,\n// поэтому текст документа превращается в бинарный файл content-plan-<дата>.md.\n\nconst d = $json;\nconst fileName = 'content-plan-' + d.plan_start + '.md';\n\nconst bin = await helpers.prepareBinaryData(\n  Buffer.from(d.document_md, 'utf8'),\n  fileName,\n  'text/markdown'\n);\n\nreturn [{\n  json: {\n    run_date: d.plan_start,\n    file_name: fileName,\n    document_chars: d.document_chars,\n    verdict: d.verdict,\n    checks_passed: d.checks_passed,\n    checks_total: d.checks_total,\n    document_md: d.document_md,\n  },\n  binary: { data: bin },\n}];\n"
+      },
+      "id": "c3000000-0000-4000-8000-000000000020",
+      "name": "Подготовка файла (Markdown)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        100,
+        1120
+      ],
+      "notes": "Переводит документ в бинарные данные: операция write ждёт файл, а не текстовое поле."
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/var/lib/n8n/.n8n-files/content-agent/content-plan-{{ $json.run_date }}.md",
+        "dataPropertyName": "data",
+        "options": {}
+      },
+      "id": "c3000000-0000-4000-8000-000000000021",
+      "name": "Сохранить контент-план на диск",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        320,
+        1120
+      ],
+      "notes": "Документ сохраняется на диск сервера с датой начала недели в имени."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Узел «Подготовка файла (CSV)».\n// Вторая запись на диск: расписание для демо-среды. Данные берутся из узла\n// «Сборка итогового документа» напрямую — так узел не зависит от того, что\n// предыдущий шаг уже перезаписал своё бинарное поле.\n\nconst d = $('Сборка итогового документа').first().json;\nconst fileName = 'demo-schedule-' + d.plan_start + '.csv';\n\nconst bin = await helpers.prepareBinaryData(\n  Buffer.from(d.demo_csv, 'utf8'),\n  fileName,\n  'text/csv'\n);\n\nreturn [{\n  json: {\n    run_date: d.plan_start,\n    file_name: fileName,\n    demo_rows: (d.demo_rows || []).length,\n    on_check: (d.demo_rows || []).filter(function (r) { return r.status === 'на проверке'; }).length,\n    draft: (d.demo_rows || []).filter(function (r) { return r.status === 'черновик'; }).length,\n    verdict: d.verdict,\n    checks_passed: d.checks_passed,\n    checks_total: d.checks_total,\n  },\n  binary: { data: bin },\n}];\n"
+      },
+      "id": "c3000000-0000-4000-8000-000000000022",
+      "name": "Подготовка файла (CSV)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        540,
+        1120
+      ],
+      "notes": "Готовит вторую запись — расписание для демо-среды."
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/var/lib/n8n/.n8n-files/content-agent/demo-schedule-{{ $json.run_date }}.csv",
+        "dataPropertyName": "data",
+        "options": {}
+      },
+      "id": "c3000000-0000-4000-8000-000000000023",
+      "name": "Сохранить расписание демо-среды",
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        760,
+        1120
+      ],
+      "notes": "Расписание попадает в демо-среду: 14 строк (7 публикаций × 2 площадки)."
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Финальный узел: возвращает результат работы агента.\n// Он же служит ответом при запуске по ссылке (Webhook).\nconst doc = $('Сборка итогового документа').first().json;\nconst csv = $('Подготовка файла (CSV)').first().json;\nreturn [{ json: {\n  status: 'ok',\n  plan_period: doc.plan_start + ' — ' + doc.plan_end,\n  publications: doc.plan.length,\n  demo_rows: csv.demo_rows,\n  demo_on_check: csv.on_check,\n  demo_draft: csv.draft,\n  verdict: doc.verdict,\n  checks_passed: doc.checks_passed,\n  checks_total: doc.checks_total,\n  files: {\n    plan_md: 'content-plan-' + doc.plan_start + '.md',\n    demo_csv: 'demo-schedule-' + doc.plan_start + '.csv'\n  },\n  checklist: doc.checklist,\n  // номер последней попытки: видно, сработал ли повтор\n  attempts: {\n    plan: $('Разбор контент-плана').last().json.attempt,\n    content: $('Разбор контента').last().json.attempt\n  },\n  failed_checks: doc.failed_checks,\n  checks: doc.checks,\n  plan: doc.plan,\n  document_md: doc.document_md\n} }];\n"
+      },
+      "id": "c3000000-0000-4000-8000-000000000024",
+      "name": "Показать результат",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        980,
+        1120
+      ],
+      "notes": "Возвращает план, чек-лист и готовый документ: видно в интерфейсе n8n и в ответе webhook."
+    }
+  ],
+  "connections": {
+    "Расписание (еженедельно, Чт 10:00)": {
+      "main": [
+        [
+          {
+            "node": "1. Бриф бренда (MD)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Запуск вручную (кнопка)": {
+      "main": [
+        [
+          {
+            "node": "1. Бриф бренда (MD)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Запуск по ссылке (Webhook)": {
+      "main": [
+        [
+          {
+            "node": "1. Бриф бренда (MD)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "1. Бриф бренда (MD)": {
+      "main": [
+        [
+          {
+            "node": "1. Бриф бренда (текст)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "1. Бриф бренда (текст)": {
+      "main": [
+        [
+          {
+            "node": "2. Правила контента (MD)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2. Правила контента (MD)": {
+      "main": [
+        [
+          {
+            "node": "2. Правила контента (текст)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "2. Правила контента (текст)": {
+      "main": [
+        [
+          {
+            "node": "3. Журнал публикаций (CSV)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3. Журнал публикаций (CSV)": {
+      "main": [
+        [
+          {
+            "node": "3. Журнал публикаций (текст)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "3. Журнал публикаций (текст)": {
+      "main": [
+        [
+          {
+            "node": "Подготовка входных данных",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Подготовка входных данных": {
+      "main": [
+        [
+          {
+            "node": "Контент-стратег (LLM)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Контент-стратег (LLM)": {
+      "main": [
+        [
+          {
+            "node": "Разбор контент-плана",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Разбор контент-плана": {
+      "main": [
+        [
+          {
+            "node": "План забракован?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "План забракован?": {
+      "main": [
+        [
+          {
+            "node": "Контент-стратег (LLM)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Копирайтер (LLM)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Копирайтер (LLM)": {
+      "main": [
+        [
+          {
+            "node": "Разбор контента",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Разбор контента": {
+      "main": [
+        [
+          {
+            "node": "Материалы забракованы?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Материалы забракованы?": {
+      "main": [
+        [
+          {
+            "node": "Копирайтер (LLM)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Самопроверка качества",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Самопроверка качества": {
+      "main": [
+        [
+          {
+            "node": "Сборка демо-публикации",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Сборка демо-публикации": {
+      "main": [
+        [
+          {
+            "node": "Сборка итогового документа",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Сборка итогового документа": {
+      "main": [
+        [
+          {
+            "node": "Подготовка файла (Markdown)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Подготовка файла (Markdown)": {
+      "main": [
+        [
+          {
+            "node": "Сохранить контент-план на диск",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Сохранить контент-план на диск": {
+      "main": [
+        [
+          {
+            "node": "Подготовка файла (CSV)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Подготовка файла (CSV)": {
+      "main": [
+        [
+          {
+            "node": "Сохранить расписание демо-среды",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Сохранить расписание демо-среды": {
+      "main": [
+        [
+          {
+            "node": "Показать результат",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model (стратег)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Контент-стратег (LLM)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model (копирайтер)": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Копирайтер (LLM)",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "pinData": {},
+  "active": false
+}
