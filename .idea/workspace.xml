@@ -46,24 +46,24 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="true" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/ИИ-агенты/03. ИИ агенты для маркетинга" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/ML/05. Машинное обучение и нейросети/01. Предобработка данных для ML_DL" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Документы\Manual\Нитология\ML\05. Машинное обучение и нейросети" />
       <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами\03. Агент-советник из нескольких агентов\files" />
       <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\02. Автоматизация с ИИ агентами" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\12. Диплом\project" />
       <recent name="D:\Документы\Manual\Нитология\sys_admin\07. Автоматизация и CI_CD\04. Подъем инфраструктуры в облаке\files\Вспомогательные файлы" />
-      <recent name="D:\Документы\Manual\Нитология\sys_admin\11. Информационная безопасность\12. Диплом\1. Подготовка к дипломной работе" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Документы\Manual\Нитология\ML\05. Машинное обучение и нейросети\01. Предобработка данных для ML_DL" />
+      <recent name="D:\Документы\Manual\Нитология\ML\05. Машинное обучение и нейросети\02. EDA анализ данных и визуализация" />
+      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\03. ИИ агенты для маркетинга" />
       <recent name="D:\Документы\Manual\Нитология\ML\04. SQL и работа с базами данных\06. Производительность представления, индексы и анализ запросов" />
       <recent name="D:\Документы\Manual\Нитология\ML\04. SQL и работа с базами данных\05. Сложные запросы CTE и оконные функции" />
-      <recent name="D:\Документы\Manual\Нитология\ML\04. SQL и работа с базами данных\04. Управление данными и схемой DDL_DML" />
-      <recent name="D:\Документы\Manual\Нитология\ML\04. SQL и работа с базами данных\03. Соединения таблиц и подзапросы" />
-      <recent name="D:\Документы\Manual\Нитология\ML\04. SQL и работа с базами данных\02. Углублённая работа с типами данных и агрегация" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -114,7 +114,11 @@
       <workItem from="1790618573455" duration="2770000" />
       <workItem from="1790950129743" duration="1806000" />
       <workItem from="1791221081357" duration="2064000" />
-      <workItem from="1791376467568" duration="2599000" />
+      <workItem from="1791376467568" duration="4499000" />
+      <workItem from="1791725301549" duration="594000" />
+      <workItem from="1791868289122" duration="1892000" />
+      <workItem from="1791982070280" duration="602000" />
+      <workItem from="1792126259676" duration="2901000" />
     </task>
     <servers />
   </component>
@@ -141,20 +145,17 @@
     <state x="-2510" y="257" key="#Deployment/0.0.1920.1040/-5360.0.1920.1040/-3440.0.3440.1400@-3440.0.3440.1400" timestamp="1787863313085" />
     <state x="-4841" y="191" key="#Deployment/0.0.1920.1040/-5360.0.1920.1040/-3440.0.3440.1400@-5360.0.1920.1040" timestamp="1788424666708" />
     <state x="519" y="191" key="#Deployment/0.0.1920.1040/-5360.0.1920.1040/-3440.0.3440.1400@0.0.1920.1040" timestamp="1787944451319" />
-    <state x="-1440" y="198" key="#Deployment/1920.0.1920.1040/0.0.1920.1040/-1920.0.1776.1080@-1920.0.1776.1080" timestamp="1783027006334" />
     <state x="-4858" y="178" key="#SSH_Configurations" timestamp="1788424323341">
       <screen x="-5360" y="0" width="1920" height="1040" />
     </state>
     <state x="-2541" y="240" key="#SSH_Configurations/0.0.1920.1040/-3440.0.3440.1400/-5360.0.1920.1040@-3440.0.3440.1400" timestamp="1787759450760" />
     <state x="-2541" y="240" key="#SSH_Configurations/0.0.1920.1040/-5360.0.1920.1040/-3440.0.3440.1400@-3440.0.3440.1400" timestamp="1787863311027" />
     <state x="-4858" y="178" key="#SSH_Configurations/0.0.1920.1040/-5360.0.1920.1040/-3440.0.3440.1400@-5360.0.1920.1040" timestamp="1788424323341" />
-    <state x="-1456" y="185" key="#SSH_Configurations/1920.0.1920.1040/0.0.1920.1040/-1920.0.1776.1080@-1920.0.1776.1080" timestamp="1783027004762" />
-    <state x="707" y="322" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1790733895395">
-      <screen x="0" y="0" width="1920" height="1040" />
+    <state x="-2173" y="433" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1793031113532">
+      <screen x="-3440" y="0" width="3440" height="1400" />
     </state>
+    <state x="-2173" y="433" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1040/-5360.0.1920.1040/-3440.0.3440.1400@-3440.0.3440.1400" timestamp="1793031113532" />
     <state x="707" y="322" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1920.1040/-5360.0.1920.1040/-3440.0.3440.1400@0.0.1920.1040" timestamp="1790733895395" />
-    <state x="707" y="322" key="#com.intellij.fileTypes.FileTypeChooser/1920.0.1920.1040/0.0.1920.1040/-1920.0.1776.1080@0.0.1920.1040" timestamp="1783020821445" />
-    <state x="707" y="322" key="#com.intellij.fileTypes.FileTypeChooser/1920.0.1920.1040/0.0.1920.1040/-1920.0.1920.1040@0.0.1920.1040" timestamp="1783634250912" />
     <state x="769" y="387" key="webDeployment.PermissionsDialog" timestamp="1787946902594">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
