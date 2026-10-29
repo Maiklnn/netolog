@@ -46,7 +46,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.date" value="true" />
     <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/ML/05. Машинное обучение и нейросети/01. Предобработка данных для ML_DL" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/ML/05. Машинное обучение и нейросети/05. ML-pipeline и эксперименты" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="vue.rearranger.settings.migration" value="true" />
   </component>
@@ -59,11 +59,11 @@
       <recent name="D:\Документы\Manual\Нитология\sys_admin\07. Автоматизация и CI_CD\04. Подъем инфраструктуры в облаке\files\Вспомогательные файлы" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Документы\Manual\Нитология\ML\05. Машинное обучение и нейросети\05. ML-pipeline и эксперименты" />
+      <recent name="D:\Документы\Manual\Нитология\ML\05. Машинное обучение и нейросети\04. Метрики и валидация моделей" />
+      <recent name="D:\Документы\Manual\Нитология\ML\05. Машинное обучение и нейросети\aiml-5 Практика обучения модели" />
+      <recent name="D:\Документы\Manual\Нитология\ML\05. Машинное обучение и нейросети" />
       <recent name="D:\Документы\Manual\Нитология\ML\05. Машинное обучение и нейросети\01. Предобработка данных для ML_DL" />
-      <recent name="D:\Документы\Manual\Нитология\ML\05. Машинное обучение и нейросети\02. EDA анализ данных и визуализация" />
-      <recent name="D:\Документы\Manual\Нитология\ИИ-агенты\03. ИИ агенты для маркетинга" />
-      <recent name="D:\Документы\Manual\Нитология\ML\04. SQL и работа с базами данных\06. Производительность представления, индексы и анализ запросов" />
-      <recent name="D:\Документы\Manual\Нитология\ML\04. SQL и работа с базами данных\05. Сложные запросы CTE и оконные функции" />
     </key>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -118,7 +118,7 @@
       <workItem from="1791725301549" duration="594000" />
       <workItem from="1791868289122" duration="1892000" />
       <workItem from="1791982070280" duration="602000" />
-      <workItem from="1792126259676" duration="2901000" />
+      <workItem from="1792126259676" duration="8814000" />
     </task>
     <servers />
   </component>

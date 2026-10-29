@@ -1,0 +1,53 @@
+{
+  "baseline": {
+    "model": "Baseline (16, Adam)",
+    "params": 513,
+    "train_acc": 0.9846,
+    "val_acc": 0.9912,
+    "best_val_acc": 0.9912,
+    "val_f1": 0.993,
+    "overfit_gap": -0.0066,
+    "final_train_loss": 0.0647,
+    "final_val_loss": 0.0529
+  },
+  "exp1": {
+    "model": "Exp1: 64-32, Adam",
+    "params": 4097,
+    "train_acc": 0.9978,
+    "val_acc": 0.9825,
+    "best_val_acc": 0.9912,
+    "val_f1": 0.9859,
+    "overfit_gap": 0.0153,
+    "final_train_loss": 0.0077,
+    "final_val_loss": 0.0785
+  },
+  "exp2": {
+    "model": "Exp2: BN+Dropout, Adam",
+    "params": 4289,
+    "train_acc": 0.9626,
+    "val_acc": 0.9561,
+    "best_val_acc": 0.9649,
+    "val_f1": 0.965,
+    "overfit_gap": 0.0065,
+    "final_train_loss": 0.0952,
+    "final_val_loss": 0.0843
+  },
+  "exp3": {
+    "model": "Exp3: 64-32, SGD+momentum",
+    "params": 4097,
+    "train_acc": 1.0,
+    "val_acc": 0.9649,
+    "best_val_acc": 0.9737,
+    "val_f1": 0.9718,
+    "overfit_gap": 0.0351,
+    "final_train_loss": 0.0051,
+    "final_val_loss": 0.0907
+  },
+  "best": "Baseline (16, Adam)",
+  "dataset": {
+    "n_samples": 569,
+    "n_features": 30,
+    "train_size": 455,
+    "test_size": 114
+  }
+}

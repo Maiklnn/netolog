@@ -1,0 +1,5 @@
+model,params,train_acc,val_acc,best_val_acc,val_f1,overfit_gap,final_train_loss,final_val_loss
+"Baseline (16, Adam)",513,0.9846,0.9912,0.9912,0.993,-0.0066,0.0647,0.0529
+"Exp1: 64-32, Adam",4097,0.9978,0.9825,0.9912,0.9859,0.0153,0.0077,0.0785
+"Exp2: BN+Dropout, Adam",4289,0.9626,0.9561,0.9649,0.965,0.0065,0.0952,0.0843
+"Exp3: 64-32, SGD+momentum",4097,1.0,0.9649,0.9737,0.9718,0.0351,0.0051,0.0907

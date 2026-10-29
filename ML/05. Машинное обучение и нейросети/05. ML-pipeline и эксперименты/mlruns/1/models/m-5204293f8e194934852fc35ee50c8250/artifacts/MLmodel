@@ -1,0 +1,25 @@
+artifact_path: "file:C:/Users/MIXA/Desktop/AI/\u041D\u0438\u0442\u043E\u043B\u043E\
+  \u0433\u0438\u044F AI \u0430\u0433\u0435\u043D\u0442\u044B/AI/edit_files/aiml-5\
+  \ \u041F\u0440\u0430\u043A\u0442\u0438\u043A\u0430 pipeline/mlruns/1/models/m-5204293f8e194934852fc35ee50c8250/artifacts"
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.14.3
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: pickle
+    sklearn_version: 1.9.1
+    skops_trusted_types: null
+mlflow_version: 3.17.2
+model_id: m-5204293f8e194934852fc35ee50c8250
+model_size_bytes: 4602
+model_uuid: m-5204293f8e194934852fc35ee50c8250
+prompts: null
+run_id: bd542de5479d4f38accdc0443b3019c3
+utc_time_created: '2026-10-28 21:47:34.045456'

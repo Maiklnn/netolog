@@ -1,0 +1,73 @@
+{
+  "dataset": {
+    "rows": 3547,
+    "features": 8,
+    "classes": 8,
+    "test_size": 710
+  },
+  "results": {
+    "DummyClassifier (most_frequent)": {
+      "cv_accuracy": 0.2281,
+      "cv_accuracy_std": 0.0009,
+      "cv_f1_macro": 0.0464,
+      "cv_f1_macro_std": 0.0001,
+      "test_accuracy": 0.2282,
+      "test_f1_macro": 0.0464
+    },
+    "LogisticRegression": {
+      "cv_accuracy": 0.6239,
+      "cv_accuracy_std": 0.0086,
+      "cv_f1_macro": 0.5193,
+      "cv_f1_macro_std": 0.0093,
+      "test_accuracy": 0.6268,
+      "test_f1_macro": 0.5381
+    },
+    "RandomForest": {
+      "cv_accuracy": 0.6376,
+      "cv_accuracy_std": 0.0081,
+      "cv_f1_macro": 0.5733,
+      "cv_f1_macro_std": 0.0168,
+      "test_accuracy": 0.6437,
+      "test_f1_macro": 0.5784
+    },
+    "GradientBoosting": {
+      "cv_accuracy": 0.6422,
+      "cv_accuracy_std": 0.0148,
+      "cv_f1_macro": 0.5848,
+      "cv_f1_macro_std": 0.0196,
+      "test_accuracy": 0.6634,
+      "test_f1_macro": 0.6151
+    }
+  },
+  "final": {
+    "cv_accuracy": 0.6585,
+    "cv_accuracy_std": 0.0183,
+    "cv_f1_macro": 0.616,
+    "cv_f1_macro_std": 0.0222,
+    "test_accuracy": 0.6676,
+    "test_f1_macro": 0.6241
+  },
+  "best_model": "GradientBoosting",
+  "best_params": {
+    "n_estimators": 300,
+    "learning_rate": 0.01199123927779363,
+    "max_depth": 8,
+    "subsample": 0.9461976201261946,
+    "min_samples_leaf": 4
+  },
+  "optuna": {
+    "n_trials": 25,
+    "best_cv_f1_macro": 0.616
+  },
+  "feature_importance": {
+    "money": 0.4666,
+    "week_of_year": 0.1973,
+    "hour_of_day": 0.0603,
+    "day_of_month": 0.0374,
+    "Weekday": 0.0262,
+    "Month_name": 0.026,
+    "is_weekend": 0.0028,
+    "Time_of_Day": 0.0025
+  },
+  "mlflow_runs": 5
+}
