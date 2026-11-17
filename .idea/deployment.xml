@@ -16,13 +16,6 @@
           </mappings>
         </serverdata>
       </paths>
-      <paths name="calls-test">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
       <paths name="daimax-digital.ru">
         <serverdata>
           <mappings>
@@ -185,6 +178,13 @@
         </serverdata>
       </paths>
       <paths name="technologies-services.ru">
+        <serverdata>
+          <mappings>
+            <mapping local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="test-calls">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />

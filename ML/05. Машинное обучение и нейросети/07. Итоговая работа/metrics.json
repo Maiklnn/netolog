@@ -1,0 +1,59 @@
+{
+  "dataset": {
+    "rows": 47835,
+    "classes": 8,
+    "train": 38268,
+    "test": 9567
+  },
+  "best_model": "LinearSVC",
+  "models": {
+    "LogisticRegression": {
+      "accuracy": 0.8544,
+      "precision_macro": 0.8492,
+      "recall_macro": 0.8628,
+      "f1_macro": 0.8554,
+      "precision_weighted": 0.8554,
+      "recall_weighted": 0.8544,
+      "f1_weighted": 0.8545,
+      "fit_seconds": 8.3918,
+      "train_accuracy": 0.9665,
+      "vocabulary_size": 50000.0
+    },
+    "LinearSVC": {
+      "accuracy": 0.8562,
+      "precision_macro": 0.8535,
+      "recall_macro": 0.8609,
+      "f1_macro": 0.8567,
+      "precision_weighted": 0.8568,
+      "recall_weighted": 0.8562,
+      "f1_weighted": 0.8561,
+      "fit_seconds": 2.2845,
+      "train_accuracy": 0.9701,
+      "vocabulary_size": 50000.0
+    },
+    "ComplementNB": {
+      "accuracy": 0.8163,
+      "precision_macro": 0.82,
+      "recall_macro": 0.8025,
+      "f1_macro": 0.8074,
+      "precision_weighted": 0.8177,
+      "recall_weighted": 0.8163,
+      "f1_weighted": 0.8154,
+      "fit_seconds": 1.5709,
+      "train_accuracy": 0.8912,
+      "vocabulary_size": 50000.0
+    },
+    "PyTorch_MLP": {
+      "accuracy": 0.8358,
+      "precision_macro": 0.8428,
+      "recall_macro": 0.8292,
+      "f1_macro": 0.8356,
+      "precision_weighted": 0.8369,
+      "recall_weighted": 0.8358,
+      "f1_weighted": 0.8361,
+      "fit_seconds": 19.862,
+      "train_accuracy": 0.9639,
+      "vocabulary_size": 5000.0
+    }
+  }
+}

@@ -1,0 +1,26 @@
+artifact_path: "file:C:/Users/MIXA/Desktop/AI/\u041D\u0438\u0442\u043E\u043B\u043E\
+  \u0433\u0438\u044F AI \u0430\u0433\u0435\u043D\u0442\u044B/AI/edit_files/aiml-5\
+  \ \u0418\u0442\u043E\u0433\u043E\u0432\u0430\u044F \u0440\u0430\u0431\u043E\u0442\
+  \u0430/mlruns/1/models/m-f1b09c61f6ff4a288e35eb1e3b9e4beb/artifacts"
+flavors:
+  python_function:
+    config:
+      device: null
+    data: data
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.pytorch
+    pickle_module_name: mlflow.pytorch.pickle_module
+    python_version: 3.14.3
+  pytorch:
+    code: null
+    model_data: data
+    pytorch_version: 2.15.0+cpu
+mlflow_version: 3.17.2
+model_id: m-f1b09c61f6ff4a288e35eb1e3b9e4beb
+model_size_bytes: 5264089
+model_uuid: m-f1b09c61f6ff4a288e35eb1e3b9e4beb
+prompts: null
+run_id: c5ae35f759ce47269730630045b1daa5
+utc_time_created: '2026-11-03 18:50:25.776053'

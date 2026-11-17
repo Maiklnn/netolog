@@ -1,0 +1,5 @@
+Модель,accuracy,precision_macro,recall_macro,f1_macro,precision_weighted,recall_weighted,f1_weighted,train_accuracy,fit_seconds
+LinearSVC,0.8562,0.8535,0.8609,0.8567,0.8568,0.8562,0.8561,0.9701,2.2845
+LogisticRegression,0.8544,0.8492,0.8628,0.8554,0.8554,0.8544,0.8545,0.9665,8.3918
+PyTorch_MLP,0.8358,0.8428,0.8292,0.8356,0.8369,0.8358,0.8361,0.9639,19.862
+ComplementNB,0.8163,0.82,0.8025,0.8074,0.8177,0.8163,0.8154,0.8912,1.5709
